@@ -30,8 +30,26 @@ cd GradeStack-server
     FRONTEND_URL=http://localhost:3000
 ```
 
-3. Run the development server:
+3. Push Prisma schema to database:
 
-```bash
-npm run dev
 ```
+    npx prisma db push
+
+```
+
+4. Generate Prisma client:
+
+```
+    npx prisma generate
+
+```
+
+
+5. Run the development server:
+
+```
+    npm run dev
+    
+```
+
+
