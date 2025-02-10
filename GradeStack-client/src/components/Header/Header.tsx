@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Dialog, DialogPanel, PopoverGroup } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import TrueFocus from "./TrueFocus";
 
 const Header: React.FC = () => {
   const navItems = [
@@ -13,7 +14,7 @@ const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   return (
     <>
-      <header className="bg-gray-900/95">
+      <header className="bg-zinc-950">
         <nav
           aria-label="Global"
           className="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-4 flex-wrap"
@@ -31,28 +32,16 @@ const Header: React.FC = () => {
               ))}
             </PopoverGroup>
           </div>
-          <div className="flex justify-center flex-1">
+          <div className="flex justify-center items-center flex-1">
             {/*logo*/}
-            <a aria-label="Laracasts" className="cursor-pointer" href="/">
-              <svg width="40" viewBox="0 0 100 90" fill="none">
-                <rect x="40" width="20" height="30" fill="white"></rect>
-                <rect x="20" y="20" width="20" height="10" fill="white"></rect>
-                <rect
-                  x="10"
-                  y="50"
-                  width="20"
-                  height="20"
-                  fill="#459FFB"
-                ></rect>
-                <rect y="70" width="20" height="20" fill="#459FFB"></rect>
-                <rect x="70" y="50" width="20" height="20" fill="white"></rect>
-                <rect x="40" y="70" width="60" height="20" fill="white"></rect>
-                <rect x="20" y="30" width="20" height="10" fill="white"></rect>
-                <rect x="60" y="20" width="20" height="10" fill="white"></rect>
-                <rect x="60" y="30" width="20" height="10" fill="white"></rect>
-                <rect x="60" y="40" width="20" height="10" fill="white"></rect>
-              </svg>
-            </a>
+            <TrueFocus
+              sentence="Grade Stack"
+              manualMode={false}
+              blurAmount={3}
+              borderColor="blue"
+              animationDuration={2}
+              pauseBetweenAnimations={1}
+            />
           </div>
 
           <div className="flex lg:hidden">
