@@ -1,6 +1,6 @@
 // src/pages/NotFound.tsx
 import React from "react";
-import Header from "../components/Header";
+import Header from "../components/Header/Header";
 const NotFound: React.FC = () => {
   return (
     <>
