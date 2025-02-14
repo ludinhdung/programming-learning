@@ -1,35 +1,14 @@
-import express, { Express } from 'express';
-import dotenv from 'dotenv';
-import morgan from 'morgan';
+import { Prisma, PrismaClient } from '@prisma/client'
+import express from 'express'
 
-// Routes
-import authRoutes from './modules/auth/routes/auth.routes';
-import userRoutes from './modules/user/routes/user.routes';
+const prisma = new PrismaClient()
+const app = express()
 
-// Middleware
-import { errorHandler } from './shared/middleware/error.middleware';
+app.use(express.json())
 
-dotenv.config();
+app.get('/', async (req, res) => {
+  res.json({ message: 'Hello World' })
+})
 
-const app: Express = express();
-const port = process.env.PORT || 3000;
-
-// Middleware
-morgan.token('host', function(req, res) {
-  return req.headers.host;
-});
-app.use(morgan(':method :host :url :status :response-time ms'));
-app.use(express.json());
-
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-
-// Error handling
-app.use(errorHandler);
-
-app.listen(port, () => {
-  console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
-});
-
-
+app.listen(3000, () =>
+  console.log(`🚀 Server ready at: http://localhost:3000`));
