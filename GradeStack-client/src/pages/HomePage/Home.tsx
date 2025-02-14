@@ -1,20 +1,277 @@
 // src/pages/Home.tsx
 import React from "react";
 import Header from "../../components/Header/Header";
-//React-bits components
-import BlurText from "./BlurText";
-import Squares from "./Squares";
-import RotatingText from "./RotatingText";
+import Footer from "../../components/Footer/Footer";
 
+//React-bits components
+import BlurText from "./React-bitsComponents/BlurText";
+import Squares from "./React-bitsComponents/Squares";
+import RotatingText from "./React-bitsComponents/RotatingText";
+import TiltedCard from "./React-bitsComponents/TiltedCard";
+import InfiniteMenu from "./React-bitsComponents/InfiniteMenu";
+
+import CodeEditorImage from "../../assets/CodeEditor.svg";
 const handleAnimationComplete = () => {
   console.log("Animation completed!");
 };
 
+const cardData = [
+  {
+    imageSrc:
+      "https://i.scdn.co/image/ab67616d0000b273d9985092cd88bffd97653b58",
+    altText: "Kendrick Lamar - GNX Album Cover",
+    captionText: "Kendrick Lamar - GNX",
+    overlayText: "Kendrick Lamar - GNX",
+  },
+  {
+    imageSrc:
+      "https://i.scdn.co/image/ab67616d0000b273d9985092cd88bffd97653b58",
+    altText: "Kendrick Lamar - GNX Album Cover",
+    captionText: "Kendrick Lamar - GNX",
+    overlayText: "Kendrick Lamar - GNX",
+  },
+  {
+    imageSrc:
+      "https://i.scdn.co/image/ab67616d0000b273d9985092cd88bffd97653b58",
+    altText: "Kendrick Lamar - GNX Album Cover",
+    captionText: "Kendrick Lamar - GNX",
+    overlayText: "Kendrick Lamar - GNX",
+  },
+  {
+    imageSrc:
+      "https://i.scdn.co/image/ab67616d0000b273d9985092cd88bffd97653b58",
+    altText: "Kendrick Lamar - GNX Album Cover",
+    captionText: "Kendrick Lamar - GNX",
+    overlayText: "Kendrick Lamar - GNX",
+  },
+  {
+    imageSrc:
+      "https://i.scdn.co/image/ab67616d0000b273d9985092cd88bffd97653b58",
+    altText: "Kendrick Lamar - GNX Album Cover",
+    captionText: "Kendrick Lamar - GNX",
+    overlayText: "Kendrick Lamar - GNX",
+  },
+];
+
+const testimonials = [
+  {
+    text: "Laracasts is the best resource for any PHP Developer, and Jeffrey Way is the best teacher! A proud Laracasts subscriber for life.",
+    name: "Gerhard Botha",
+    image: "https://ik.imagekit.io/laracasts/reviews/gerhard.jpg",
+  },
+  {
+    text: "I bought a Laracasts subscription hoping to understand Laravel better. Not only has it done that, but it's made me a better developer in all aspects of PHP.",
+    name: "Matt Brunt",
+    image: "https://ik.imagekit.io/laracasts/reviews/matt-brunt.jpg",
+  },
+  {
+    text: "Laracasts has made me a better developer in not only Laravel/PHP, but in programming in general. With every screencast, I've learned something new. I highly recommend it!",
+    name: "Chris Bogardo",
+    image: "https://ik.imagekit.io/laracasts/reviews/chris.jpg",
+  },
+  {
+    text: "Laracasts is the best resource for any PHP Developer, and Jeffrey Way is the best teacher! A proud Laracasts subscriber for life.",
+    name: "Gerhard Botha",
+    image: "https://ik.imagekit.io/laracasts/reviews/gerhard.jpg",
+  },
+  {
+    text: "I bought a Laracasts subscription hoping to understand Laravel better. Not only has it done that, but it's made me a better developer in all aspects of PHP.",
+    name: "Matt Brunt",
+    image: "https://ik.imagekit.io/laracasts/reviews/matt-brunt.jpg",
+  },
+  {
+    text: "Laracasts has made me a better developer in not only Laravel/PHP, but in programming in general. With every screencast, I've learned something new. I highly recommend it!",
+    name: "Chris Bogardo",
+    image: "https://ik.imagekit.io/laracasts/reviews/chris.jpg",
+  },
+  {
+    text: "Laracasts is the best resource for any PHP Developer, and Jeffrey Way is the best teacher! A proud Laracasts subscriber for life.",
+    name: "Gerhard Botha",
+    image: "https://ik.imagekit.io/laracasts/reviews/gerhard.jpg",
+  },
+  {
+    text: "I bought a Laracasts subscription hoping to understand Laravel better. Not only has it done that, but it's made me a better developer in all aspects of PHP.",
+    name: "Matt Brunt",
+    image: "https://ik.imagekit.io/laracasts/reviews/matt-brunt.jpg",
+  },
+  {
+    text: "Laracasts has made me a better developer in not only Laravel/PHP, but in programming in general. With every screencast, I've learned something new. I highly recommend it!Laracasts has made me a better developer in not only Laravel/PHP, but in programming in general. With every screencast, I've learned something new. I highly recommend it!",
+    name: "Chris Bogardo",
+    image: "https://ik.imagekit.io/laracasts/reviews/chris.jpg",
+  },
+];
+
+const streamOfCourses = [
+  {
+    title: "The Definition Series ",
+    author: "Jeremy McPeak",
+    authorAvatar: "//unavatar.io/x/jwmcpeak",
+    thumbnail:
+      "https://ik.imagekit.io/laracasts/series/thumbnails/png//definition-series.png",
+    href: "/series/the-definition-series",
+  },
+  {
+    title: "The Definition Series",
+    author: "Jeremy McPeak",
+    authorAvatar: "//unavatar.io/x/jwmcpeak",
+    thumbnail:
+      "https://ik.imagekit.io/laracasts/series/thumbnails/png//definition-series.png",
+    href: "/series/the-definition-series",
+  },
+  {
+    title: "The Definition Series",
+    author: "Jeremy McPeak",
+    authorAvatar: "//unavatar.io/x/jwmcpeak",
+    thumbnail:
+      "https://ik.imagekit.io/laracasts/series/thumbnails/png//definition-series.png",
+    href: "/series/the-definition-series",
+  },
+  {
+    title: "The Definition Series",
+    author: "Jeremy McPeak",
+    authorAvatar: "//unavatar.io/x/jwmcpeak",
+    thumbnail:
+      "https://ik.imagekit.io/laracasts/series/thumbnails/png//definition-series.png",
+    href: "/series/the-definition-series",
+  },
+  {
+    title: "The Definition Series",
+    author: "Jeremy McPeak",
+    authorAvatar: "//unavatar.io/x/jwmcpeak",
+    thumbnail:
+      "https://ik.imagekit.io/laracasts/series/thumbnails/png//definition-series.png",
+    href: "/series/the-definition-series",
+  },
+  {
+    title: "The Definition Series",
+    author: "Jeremy McPeak",
+    authorAvatar: "//unavatar.io/x/jwmcpeak",
+    thumbnail:
+      "https://ik.imagekit.io/laracasts/series/thumbnails/png//definition-series.png",
+    href: "/series/the-definition-series",
+  },
+  {
+    title: "The Definition Series",
+    author: "Jeremy McPeak",
+    authorAvatar: "//unavatar.io/x/jwmcpeak",
+    thumbnail:
+      "https://ik.imagekit.io/laracasts/series/thumbnails/png//definition-series.png",
+    href: "/series/the-definition-series",
+  },
+  // Thêm các khóa học khác...
+];
+
+const creatorSeries = [
+  {
+    id: 1,
+    title: "Learn Statamic with Jack",
+    href: "/series/learn-statamic-with-jack",
+    author: "Jack McDade",
+    authorAvatar: "//unavatar.io/github/jackmcdade",
+    authorLink: "/@jackmcdade",
+    thumbnail:
+      "https://ik.imagekit.io/laracasts/series/thumbnails/png//learn-statamic-with-jack.png?tr=w-490",
+    instructorImage:
+      "https://ik.imagekit.io/laracasts/instructors/2951.jpeg?tr=w-670,q-60",
+    description:
+      "You've probably heard of Statamic by now — that rebellious little Laravel-powered content management system that refuses to use databases. Well, it's pretty grown up now, and in this series we're going to learn how Statamic can help you build highly-scalable websites quickly and efficiently.",
+    lessonCount: "22 Lessons",
+    duration: "2h 58m",
+    difficulty: "Intermediate",
+  },
+  {
+    id: 2,
+    title: "Learn Statamic with Jack",
+    href: "/series/learn-statamic-with-jack",
+    author: "Jack McDade",
+    authorAvatar: "//unavatar.io/github/jackmcdade",
+    authorLink: "/@jackmcdade",
+    thumbnail:
+      "https://ik.imagekit.io/laracasts/series/thumbnails/png//learn-statamic-with-jack.png?tr=w-490",
+    instructorImage:
+      "https://ik.imagekit.io/laracasts/instructors/5820.jpeg?tr=w-670,q-60",
+    description:
+      "You've probably heard of Statamic by now — that rebellious little Laravel-powered content management system that refuses to use databases. Well, it's pretty grown up now, and in this series we're going to learn how Statamic can help you build highly-scalable websites quickly and efficiently.",
+    lessonCount: "22 Lessons",
+    duration: "2h 58m",
+    difficulty: "Intermediate",
+  },
+  // Thêm các khóa học khác vào đây
+];
+
+const topics = [
+  {
+    image: "https://laracasts.com/images/topics/icons/billing-logo.svg?v=4",
+    link: "https://google.com/",
+    title: "Billing",
+    description: "This is pretty cool, right?",
+  },
+  {
+    image: "https://laracasts.com/images/topics/icons/debugging-logo.svg?v=4",
+    link: "https://google.com/",
+    title: "Debugging",
+    description: "This is pretty cool, right?",
+  },
+  {
+    image: "https://laracasts.com/images/topics/icons/docker-logo.svg?v=4",
+    link: "https://google.com/",
+    title: "Docker",
+    description: "This is pretty cool, right?",
+  },
+  {
+    image: "https://laracasts.com/images/topics/icons/filament-logo.svg?v=4",
+    link: "https://google.com/",
+    title: "Filament",
+    description: "This is pretty cool, right?",
+  },
+  {
+    image: "https://laracasts.com/images/topics/icons/git-logo.svg?v=4",
+    link: "https://google.com/",
+    title: "Git",
+    description: "This is pretty cool, right?",
+  },
+  {
+    image: "https://laracasts.com/images/topics/icons/cashier-logo.svg?v=4",
+    link: "https://google.com/",
+    title: "Laravel Cashier",
+    description: "This is pretty cool, right?",
+  },
+  {
+    image: "https://laracasts.com/images/topics/icons/laravel-logo.svg?v=4",
+    link: "https://google.com/",
+    title: "Laravel Packages",
+    description: "This is pretty cool, right?",
+  },
+  {
+    image: "https://laracasts.com/images/topics/icons/laravel-reverb.svg?v=4",
+    link: "https://google.com/",
+    title: "Laravel Reverb",
+    description: "This is pretty cool, right?",
+  },
+  {
+    image: "https://laracasts.com/images/topics/icons/mysql-logo.svg?v=4",
+    link: "https://google.com/",
+    title: "MySQL",
+    description: "This is pretty cool, right?",
+  },
+  {
+    image: "https://laracasts.com/images/topics/icons/nova-logo.svg?v=4",
+    link: "https://google.com/",
+    title: "Nova",
+    description: "This is pretty cool, right?",
+  },
+  {
+    image: "https://laracasts.com/images/topics/icons/redis-logo.svg?v=4",
+    link: "https://google.com/",
+    title: "Redis",
+    description: "This is pretty cool, right?",
+  },
+];
 const Home: React.FC = () => {
   return (
     <>
       <Header />
-      <div className="relative w-full min-w-full h-[650px]">
+      <div className="relative w-full min-w-full h-[830px]">
         <Squares
           speed={0.4}
           squareSize={40}
@@ -29,7 +286,7 @@ const Home: React.FC = () => {
             <div>
               <RotatingText
                 texts={["Thinking.", "Coding.", "Components."]}
-                mainClassName="sm:px-2 md:px-3 bg-blue-600 text-black font-extrabold overflow-hidden sm:py-1 md:py-0.5 justify-center rounded-lg"
+                mainClassName="sm:px-2 md:px-3 bg-blue-600 text-light font-extrabold overflow-hidden sm:py-1 md:py-0.5 justify-center rounded-lg"
                 staggerFrom={"last"}
                 initial={{ y: "100%", opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -109,6 +366,374 @@ const Home: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <div className="relative w-full h-[500px] bg-[#0d1118]">
+        {/*Image cards*/}
+        <div className="absolute flex space-x-4 w-full justify-center -translate-y-20 z-10">
+          {cardData.map((card, index) => (
+            <TiltedCard
+              key={index}
+              imageSrc={card.imageSrc}
+              altText={card.altText}
+              captionText={card.captionText}
+              containerHeight="280px"
+              containerWidth="270px"
+              imageHeight="280px"
+              imageWidth="270px"
+              rotateAmplitude={12}
+              scaleOnHover={1.2}
+              showMobileWarning={false}
+              showTooltip={true}
+              displayOverlayContent={true}
+              overlayContent={
+                <p className="tilted-card-demo-text">{card.overlayText}</p>
+              }
+            />
+          ))}
+        </div>
+
+        {/*Testimonial*/}
+        <div className="relative w-full h-[500px] overflow-hidden">
+          <div className="absolute w-fit top-[230px]">
+            <div
+              className="hide-scrollbar flex items-start gap-2 px-4 animate-scroll"
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {[...testimonials, ...testimonials].map((testimonial, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-800 bg-opacity-50 shadow-lg rounded-lg p-6 flex-shrink-0 w-72 max-h-[220px] transition-transform"
+                >
+                  <p className="text-sm font-semibold text-gray-200 line-clamp-6 whitespace-normal">
+                    "{testimonial.text}"
+                  </p>
+                  <div className="flex items-center justify-between mt-4">
+                    <cite className="text-xs font-semibold uppercase text-gray-500">
+                      {testimonial.name}
+                    </cite>
+                    <img
+                      src={testimonial.image}
+                      alt={testimonial.name}
+                      className="w-8 h-8 rounded-full border border-gray-300"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Stream of Courses Container */}
+      <div className="relative bg-[#0d1118] left-0 right-0 top-0 w-full">
+        <div className="px-10 pt-5">
+          <div className="flex text-2xl justify-start uppercase font-extrabold">
+            <span className="text-blue-600 mr-2">//</span>
+            <span className="text-white">A Stream of Courses</span>
+          </div>
+          <div className="flex text-[100px] text-slate-800 justify-end uppercase font-extrabold -mt-20">
+            <p>endless training</p>
+          </div>
+          <div className="-mt-12">
+            <div
+              className="cards grid overflow-auto gap-2 xl:gap-4 w-auto justify-start grid-flow-col auto-cols-[380px] pr-24 scrolling-container hide-scrollbar"
+              style={{
+                maskImage:
+                  "linear-gradient(to right, black calc(100% - 10rem), transparent)",
+              }}
+            >
+              {streamOfCourses.map((course, index) => (
+                <div
+                  key={index}
+                  className="group flex h-[min-content] aspect-[1/.7] lg:h-auto lg:aspect-auto lg:max-w-none series-card"
+                >
+                  <a
+                    href={course.href}
+                    className="panel relative transition-colors duration-300 px-4 lg:px-5 py-4 flex-1 overflow-hidden text-center aspect-square bg-slate-800 rounded-lg hover:bg-blue-800"
+                  >
+                    <header className="flex flex-col items-center justify-center text-center h-[9.38rem]">
+                      <h2 className="text-white mb-3 inline-flex items-center text-balance font-semibold leading-tight text-2xl">
+                        {course.title}
+                      </h2>
+                      <div className="flex text-gray-400 text-sm items-center">
+                        <img
+                          src={course.authorAvatar}
+                          alt={`${course.author}'s avatar`}
+                          className="w-[22px] h-[22px] rounded-full mr-2"
+                        />
+                        <span className="font-bold">with {course.author}</span>
+                      </div>
+                    </header>
+                    <img
+                      loading="lazy"
+                      className="bottom-0 left-0 right-0 w-full translate-y-[55%] scale-[200%] group-hover:scale-[205%] transition-transform duration-300"
+                      src={course.thumbnail}
+                      alt={`${course.title} thumbnail`}
+                      style={{ width: "15.3rem" }}
+                    />
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Forged By Creators Container */}
+      <div className=" relative bg-[#0d1118] h-[800px] bottom-0 left-0 right-0 top-0 w-full pt-32">
+        <div className="px-10">
+          <div className="flex text-2xl justify-start uppercase font-extrabold">
+            <span className="text-blue-600 mr-2">//</span>
+            <span className="text-white">Forged By Creators</span>
+          </div>
+          <div className="flex text-[100px] text-slate-800 justify-end uppercase font-extrabold -mt-20">
+            <p>The Blueprints</p>
+          </div>
+
+          <div className="-mt-12">
+            <div
+              className="cards grid overflow-auto gap-4 xl:gap-6 w-full auto-cols-[1100px] grid-flow-col scrolling-container hide-scrollbar"
+              style={{
+                maskImage:
+                  "linear-gradient(to right, black calc(100% - 10rem), transparent)",
+              }}
+            >
+              {creatorSeries.map((course) => (
+                <div
+                  key={course.id}
+                  className="panel relative transition-colors duration-300 hoverable p-8 h-full bg-slate-800 rounded-lg"
+                  style={{ minHeight: "450px" }}
+                >
+                  <div className="h-full grid grid-flow-col grid-cols-12 gap-12">
+                    <div className="body relative flex items-center gap-16 col-span-full">
+                      <div className="relative max-w-[15.6rem] flex-shrink-0">
+                        <a href={course.href}>
+                          <figure className="w-full text-center">
+                            <img
+                              src={course.instructorImage}
+                              alt={`Photo of ${course.author}`}
+                              className="rounded-lg w-full"
+                            />
+                            <figcaption className="mt-3 text-gray-400">
+                              Presented By {course.author}
+                            </figcaption>
+                          </figure>
+                        </a>
+                      </div>
+
+                      {/* Rest of the content remains same */}
+                      <div className="flex h-full w-full flex-col">
+                        <div className="mb-6">
+                          <div className="flex items-center text-xs font-semibold uppercase tracking-wider mb-2">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              className="icon icon-tabler icons-tabler-outline icon-tabler-rosette-discount-check mr-1"
+                            >
+                              <path
+                                stroke="none"
+                                d="M0 0h24v24H0z"
+                                fill="none"
+                              />
+                              <path d="M5 7.2a2.2 2.2 0 0 1 2.2 -2.2h1a2.2 2.2 0 0 0 1.55 -.64l.7 -.7a2.2 2.2 0 0 1 3.12 0l.7 .7c.412 .41 .97 .64 1.55 .64h1a2.2 2.2 0 0 1 2.2 2.2v1c0 .58 .23 1.138 .64 1.55l.7 .7a2.2 2.2 0 0 1 0 3.12l-.7 .7a2.2 2.2 0 0 0 -.64 1.55v1a2.2 2.2 0 0 1 -2.2 2.2h-1a2.2 2.2 0 0 0 -1.55 .64l-.7 .7a2.2 2.2 0 0 1 -3.12 0l-.7 -.7a2.2 2.2 0 0 0 -1.55 -.64h-1a2.2 2.2 0 0 1 -2.2 -2.2v-1a2.2 2.2 0 0 0 -.64 -1.55l-.7 -.7a2.2 2.2 0 0 1 0 -3.12l.7 -.7a2.2 2.2 0 0 0 .64 -1.55v-1" />
+                              <path d="M9 12l2 2l4 -4" />
+                            </svg>
+                            <span className="text-white">Creator</span>
+                            <span className="text-blue-500 ml-1">Series</span>
+                          </div>
+
+                          <h3 className="text-2xl font-semibold text-white mb-4">
+                            <a
+                              href={course.href}
+                              className="hover:text-blue-400 transition-colors"
+                            >
+                              {course.title}
+                            </a>
+                          </h3>
+
+                          <p className="text-gray-100 leading-relaxed mb-8 line-clamp-6">
+                            {course.description}
+                          </p>
+                          <div className="flex space-x-8 pt-16">
+                            <a
+                              href="$"
+                              className="flex items-center w-fit bg-blue-600 px-3.5 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                className="mr-2 icon icon-tabler icons-tabler-filled icon-tabler-player-play"
+                              >
+                                <path
+                                  stroke="none"
+                                  d="M0 0h24v24H0z"
+                                  fill="none"
+                                />
+                                <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" />
+                              </svg>
+                              Play Series
+                            </a>
+                            <a
+                              href="$"
+                              className="flex items-center w-fit bg-gray-700 bg-opacity-70 px-3.5 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                className="mr-2 icon icon-tabler icons-tabler-filled icon-tabler-home"
+                              >
+                                <path
+                                  stroke="none"
+                                  d="M0 0h24v24H0z"
+                                  fill="none"
+                                />
+                                <path d="M12.707 2.293l9 9c.63 .63 .184 1.707 -.707 1.707h-1v6a3 3 0 0 1 -3 3h-1v-7a3 3 0 0 0 -2.824 -2.995l-.176 -.005h-2a3 3 0 0 0 -3 3v7h-1a3 3 0 0 1 -3 -3v-6h-1c-.89 0 -1.337 -1.077 -.707 -1.707l9 -9a1 1 0 0 1 1.414 0m.293 11.707a1 1 0 0 1 1 1v7h-4v-7a1 1 0 0 1 .883 -.993l.117 -.007z" />
+                              </svg>
+                              Add to Watchlist
+                            </a>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between mt-auto">
+                          <div className="flex space-x-8 text-sm text-gray-400">
+                            <div className="flex items-center">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                className="icon icon-tabler icons-tabler-outline icon-tabler-file mr-2"
+                              >
+                                <path
+                                  stroke="none"
+                                  d="M0 0h24v24H0z"
+                                  fill="none"
+                                />
+                                <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                                <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+                              </svg>
+                              {course.lessonCount}
+                            </div>
+                            <div className="flex items-center">
+                              <svg
+                                className="w-4 h-4 mr-2"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                              {course.duration}
+                            </div>
+                            <div className="flex items-center">
+                              <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-500/20 text-blue-400">
+                                {course.difficulty}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center">
+                            <img
+                              src={course.authorAvatar}
+                              alt={course.author}
+                              className="w-6 h-6 rounded-full mr-2"
+                            />
+                            <a
+                              href={course.authorLink}
+                              className="text-blue-400 hover:underline"
+                            >
+                              {course.author}
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="relative bg-[#0d1118] w-full">
+        <div className="px-32">
+          <div className="flex text-4xl justify-center items-center uppercase font-extrabold pt-8">
+            <span className="text-blue-600 font-black mr-3 -mt-1">//</span>
+            <span className="text-white">
+              Watch. Learn. Test Your Knowledge.
+            </span>
+          </div>
+
+          <div className="text-center px-10 pb-8">
+            <img
+              loading="lazy"
+              className="w-full mt-8"
+              src={CodeEditorImage}
+              alt="Example of interactive GradeStack code exams."
+            ></img>
+            <div className="grid lg:grid-cols-4 gap-4 mt-3">
+              <div className="bg-slate-800 rounded-sm font-bold text-gray-300 text-lg py-6">
+                Interactive Challenges
+              </div>
+              <div className="bg-slate-800 rounded-sm font-bold text-gray-300 text-lg py-6">
+                Tailored to Lesson Content
+              </div>
+              <div className="bg-slate-800 rounded-sm font-bold text-gray-300 text-lg py-6">
+                Code Evaluation
+              </div>
+              <div className="bg-slate-800 rounded-sm font-bold text-gray-300 text-lg py-6">
+                Immediate Feedback
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Pick a Topic Container */}
+      <div className="relative bg-[#0d1118] w-full">
+        <div className="px-10">
+          <div className="flex text-2xl pt-24 justify-start uppercase font-extrabold">
+            <span className="text-blue-600 mr-2">//</span>
+            <span className="text-white">Pick a Topic</span>
+          </div>
+          <div className="flex text-[100px] text-slate-800 justify-end uppercase font-extrabold -mt-20">
+            <p>any topic</p>
+          </div>
+        </div>
+        <div className="-mt-12 left-0 right-0 bottom-0">
+          <div style={{ height: "800px", position: "relative" }}>
+            <InfiniteMenu items={topics} />
+          </div>
+        </div>
+      </div>
+
+      <Footer />
     </>
   );
 };
