@@ -4,11 +4,11 @@ import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 
 //React-bits components
-import BlurText from "./React-bitsComponents/BlurText";
-import Squares from "./React-bitsComponents/Squares";
-import RotatingText from "./React-bitsComponents/RotatingText";
-import TiltedCard from "./React-bitsComponents/TiltedCard";
-import InfiniteMenu from "./React-bitsComponents/InfiniteMenu";
+import BlurText from "../../components/React-bitsComponents/BlurText";
+import Squares from "../../components/React-bitsComponents/Squares";
+import RotatingText from "../../components/React-bitsComponents/RotatingText";
+import TiltedCard from "../../components/React-bitsComponents/TiltedCard";
+import InfiniteMenu from "../../components/React-bitsComponents/InfiniteMenu";
 
 import CodeEditorImage from "../../assets/CodeEditor.svg";
 const handleAnimationComplete = () => {
@@ -285,7 +285,7 @@ const Home: React.FC = () => {
             <p className="text-3xl font-extrabold justify-start">Creative</p>
             <div>
               <RotatingText
-                texts={["Thinking.", "Coding.", "Components."]}
+                texts={["Thinking.", "Coding.", "Knowledge."]}
                 mainClassName="sm:px-2 md:px-3 bg-blue-600 text-light font-extrabold overflow-hidden sm:py-1 md:py-0.5 justify-center rounded-lg"
                 staggerFrom={"last"}
                 initial={{ y: "100%", opacity: 0 }}
