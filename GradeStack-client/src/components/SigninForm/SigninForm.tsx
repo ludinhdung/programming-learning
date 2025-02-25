@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import "../../styles/FormStyles.css";
+import { authService } from '../../services/api';
+import { message } from 'antd';
 
 type SigninFormProps = {
   onSwitchForm: () => void;
@@ -7,6 +9,33 @@ type SigninFormProps = {
 };
 
 const SigninForm: React.FC<SigninFormProps> = ({onSwitchForm, onForgotPassword}) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      const email = formData.get('email') as string;
+      const password = formData.get('password') as string;
+
+      const response = await authService.login(email, password);
+      
+      // Store token
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+
+      message.success('Successfully logged in!');
+      // Redirect or update app state here
+      window.location.href = '/'; // or use React Router navigation
+    } catch (error: any) {
+      message.error(error.response?.data?.message || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <div className="flex bg-[#0a1321] min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -17,7 +46,7 @@ const SigninForm: React.FC<SigninFormProps> = ({onSwitchForm, onForgotPassword})
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form action="#" method="POST" className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
                 htmlFor="email"
@@ -69,9 +98,10 @@ const SigninForm: React.FC<SigninFormProps> = ({onSwitchForm, onForgotPassword})
             <div>
               <button
                 type="submit"
-                className="flex w-full justify-center rounded-md bg-blue-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                disabled={loading}
+                className="flex w-full justify-center rounded-md bg-blue-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
               >
-                Log in
+                {loading ? 'Logging in...' : 'Log in'}
               </button>
             </div>
           </form>
