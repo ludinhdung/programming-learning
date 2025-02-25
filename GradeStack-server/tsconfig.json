@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
-    "sourceMap": true,
-    "outDir": "dist",
+    "target": "es5",
+    "module": "commonjs",
+    "outDir": "./build",
+    "rootDir": "./src",
     "strict": true,
-    "lib": ["esnext"],
     "esModuleInterop": true
   }
 }

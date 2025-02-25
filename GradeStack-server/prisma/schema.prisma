@@ -33,10 +33,10 @@ model User {
   PaymentHistory PaymentHistory[]
   CourseProgress CourseProgress[]
   Certificate    Certificate[]
+  CourseRating CourseRating[]
 
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
-  CourseRating CourseRating[]
 }
 
 model Certificate {
@@ -135,8 +135,8 @@ model Course {
   enrollments Enrollment[]
   modules     Module[]
 
-  courseProgress CourseProgress[] // Learners' progress in the course
-  courseRatings  CourseRating[] // Ratings given by learners after course completion
+  courseProgress CourseProgress[]
+  courseRatings  CourseRating[]
 
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
