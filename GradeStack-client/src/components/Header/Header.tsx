@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { Dialog, DialogPanel, PopoverGroup } from "@headlessui/react";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import React, { useState, useEffect } from "react";
+import { Dialog, DialogPanel, PopoverGroup, Listbox, Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { Bars3Icon, XMarkIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { Modal } from "antd";
 
 // Components
@@ -13,6 +13,12 @@ import TrueFocus from "./TrueFocus";
 
 type FormType = "signin" | "signup" | "forgot";
 
+interface User {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 const Header: React.FC = () => {
   const navItems = [
     { name: "Topics", href: "#" },
@@ -24,6 +30,15 @@ const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentForm, setCurrentForm] = useState<FormType>("signin");
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    // Check for user data in localStorage on component mount
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      setUser(JSON.parse(userStr));
+    }
+  }, []);
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -31,6 +46,15 @@ const Header: React.FC = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setCurrentForm("signin"); // Reset về signin khi đóng modal
+  };
+
+  const handleLogout = () => {
+    // Clear user data and token from localStorage
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    setUser(null);
+    // Redirect to home page
+    window.location.href = '/';
   };
 
   const renderForm = () => {
@@ -50,6 +74,73 @@ const Header: React.FC = () => {
         );
     }
   };
+
+  const profileMenu = [
+    { name: 'My Home', href: '/#' },
+    { name: 'Settings', href: '/settings' },
+    { name: 'Logout', onClick: handleLogout }
+  ];
+
+  // Replace the welcome message and logout button with this profile menu
+  const renderProfileMenu = () => (
+    <Menu>
+      <MenuButton className="flex items-center gap-2 rounded-md py-1.5 px-3 text-sm/6 font-semibold text-white focus:outline-none data-[hover]:bg-zinc-800 data-[open]:bg-zinc-800">
+        <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white text-lg">
+          {user?.firstName?.[0]?.toUpperCase()}
+        </div>
+        <ChevronDownIcon className="size-4 fill-white/60" />
+      </MenuButton>
+
+      <MenuItems
+        transition
+        anchor="bottom end"
+        className="w-52 origin-top-right rounded-xl border border-white/5 bg-zinc-900 p-1 text-sm/6 text-white transition duration-100 ease-out [--anchor-gap:var(--spacing-1)] focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0 z-[60]"
+      >
+        {profileMenu.map((item) => (
+          <MenuItem key={item.name}>
+            {item.onClick ? (
+              <button 
+                onClick={item.onClick}
+                className="group flex w-full items-center gap-2 rounded-lg py-1.5 px-3 data-[focus]:bg-white/10"
+              >
+                {item.name}
+              </button>
+            ) : (
+              <a 
+                href={item.href}
+                className="group flex w-full items-center gap-2 rounded-lg py-1.5 px-3 data-[focus]:bg-white/10"
+              >
+                {item.name}
+              </a>
+            )}
+          </MenuItem>
+        ))}
+      </MenuItems>
+    </Menu>
+  );
+
+  // Update the user profile section in the desktop navigation
+  const userProfileSection = user ? (
+    <div className="flex items-center gap-4">
+      {renderProfileMenu()}
+    </div>
+  ) : (
+    <>
+      <button
+        onClick={showModal}
+        className="text-sm/6 font-semibold text-gray-300"
+      >
+        Sign in
+      </button>
+      <button
+        onClick={showModal}
+        className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+      >
+        Get Started For Free
+      </button>
+    </>
+  );
+
   return (
     <>
       <header className="bg-zinc-950 fixed top-0 left-0 right-0 w-full z-50">
@@ -83,6 +174,13 @@ const Header: React.FC = () => {
             </a>
           </div>
 
+          {/* Right Navigation */}
+          <div className="flex-1 hidden md:flex justify-end items-center gap-4">
+            <div className="flex items-center gap-4">
+              {userProfileSection}
+            </div>
+          </div>
+
           {/* Mobile Menu Button */}
           <div className="md:hidden">
             <button
@@ -92,40 +190,6 @@ const Header: React.FC = () => {
             >
               <span className="sr-only">Open main menu</span>
               <Bars3Icon className="h-6 w-6" aria-hidden="true" />
-            </button>
-          </div>
-
-          {/* Right Actions - Hidden on mobile */}
-          <div className="hidden md:flex md:flex-1 md:justify-end items-center space-x-4">
-            <button className="flex items-center justify-center rounded-md bg-gray-700 p-2 text-white hover:bg-gray-600">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
-                <path d="M21 21l-6 -6" />
-              </svg>
-            </button>
-            <a
-              href="#"
-              className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500"
-            >
-              Get Started For Free
-            </a>
-            <button
-              onClick={showModal}
-              className="text-sm/6 font-semibold text-gray-300"
-            >
-              Sign in <span aria-hidden="true">&rarr;</span>
             </button>
           </div>
         </nav>
@@ -153,7 +217,7 @@ const Header: React.FC = () => {
               </button>
             </div>
             <div className="mt-6 flow-root">
-              <div className="-my-6 divide-y divide-gray-500/10">
+              <div className="-my-6 divide-y divide-gray-500/25">
                 <div className="space-y-2 py-6">
                   {navItems.map((item) => (
                     <a
@@ -166,33 +230,34 @@ const Header: React.FC = () => {
                   ))}
                 </div>
                 <div className="py-6 space-y-4">
-                  <button className="flex w-full items-center justify-center rounded-md bg-gray-700 p-2 text-white hover:bg-gray-600">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
-                      <path d="M21 21l-6 -6" />
-                    </svg>
-                  </button>
-                  <a
-                    href="#"
-                    className="block w-full rounded-md bg-indigo-600 px-3 py-2.5 text-center text-sm font-semibold text-white hover:bg-indigo-500"
-                  >
-                    Get Started For Free
-                  </a>
-                  <a
-                    href="#"
-                    className="block text-center rounded-lg px-3 py-2.5 text-base font-semibold text-gray-300 hover:bg-gray-800"
-                  >
-                    Sign in
-                  </a>
+                  {user ? (
+                    <>
+                      <span className="block text-center text-gray-300">
+                        Welcome, {user.firstName} {user.lastName}
+                      </span>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full rounded-md bg-red-600 px-3 py-2.5 text-center text-sm font-semibold text-white hover:bg-red-500"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={showModal}
+                        className="block w-full rounded-md bg-indigo-600 px-3 py-2.5 text-center text-sm font-semibold text-white hover:bg-indigo-500"
+                      >
+                        Get Started For Free
+                      </button>
+                      <button
+                        onClick={showModal}
+                        className="block text-center rounded-lg px-3 py-2.5 text-base font-semibold text-gray-300 hover:bg-gray-800"
+                      >
+                        Sign in
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
