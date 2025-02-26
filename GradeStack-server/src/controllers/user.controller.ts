@@ -17,7 +17,6 @@ export const getAllUsers = async (
                 firstName: true,
                 lastName: true,
                 role: true,
-                isVerified: true,
                 createdAt: true,
             },
         });
@@ -42,7 +41,6 @@ export const getUserById = async (
                 firstName: true,
                 lastName: true,
                 role: true,
-                isVerified: true,
                 createdAt: true,
             },
         });
