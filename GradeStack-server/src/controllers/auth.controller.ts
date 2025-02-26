@@ -48,7 +48,6 @@ export const register = async (
                 firstName: true,
                 lastName: true,
                 role: true,
-                isVerified: true,
                 createdAt: true,
             },
         });
