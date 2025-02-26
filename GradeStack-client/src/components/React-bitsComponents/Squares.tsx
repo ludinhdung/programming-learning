@@ -59,7 +59,7 @@ const Squares: React.FC<SquaresProps> = ({
           const squareX = x - (gridOffset.current.x % squareSize);
           const squareY = y - (gridOffset.current.y % squareSize);
 
-          ctx.fillStyle = "black"; // Màu nền là đen
+          ctx.fillStyle = "#191970"; // Màu nền là đen
           ctx.fillRect(squareX, squareY, squareSize, squareSize);
 
           ctx.strokeStyle = borderColor;
