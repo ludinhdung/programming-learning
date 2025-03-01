@@ -13,6 +13,14 @@ permissions:
   contents: read
 
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check variable
+        run: |
+          echo "App Image: ${{ APPLICATION_IMAGE }}"
+          echo "Docker Username: ${{ secrets.DOCKER_USERNAME }}"
   build:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
