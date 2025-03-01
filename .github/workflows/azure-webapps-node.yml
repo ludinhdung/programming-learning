@@ -1,0 +1,41 @@
+name: Deploy to Azure App Service Staging
+
+on:
+  push:
+    branches: [ "stage" ]
+
+env:
+  DOCKER_HUB_USERNAME: "ludinhdung"
+  APPLICATION_IMAGE: "ludinhdung/programming-learning:latest"
+  AZURE_WEBAPP_NAME: "programmibg-learning"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build & Push Image
+        run: |
+          docker build -t $APPLICATION_IMAGE .
+          docker push $APPLICATION_IMAGE
+          
+  deploy:
+    name: Deploy to Azure App Service
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy Application
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          images: ${{ env.APPLICATION_IMAGE }}
