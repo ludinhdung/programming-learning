@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Check variable
         run: |
-          echo "App Image: ${{ APPLICATION_IMAGE }}"
+          echo "App Image: ${{ env.APPLICATION_IMAGE }}"
           echo "Docker Username: ${{ secrets.DOCKER_USERNAME }}"
   build:
     name: Build & Push Docker Image
