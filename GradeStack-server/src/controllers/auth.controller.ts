@@ -47,7 +47,7 @@ export const register = async (
                 email: true,
                 firstName: true,
                 lastName: true,
-                role: true,
+                Role: true,
                 createdAt: true,
             },
         });

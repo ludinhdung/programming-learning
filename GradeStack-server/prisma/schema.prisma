@@ -15,350 +15,44 @@ enum Role {
 }
 
 model User {
-  id         String  @id @default(uuid())
+  id         String  @id @default(cuid())
   email      String  @unique
-  password   String
   firstName  String
   lastName   String
-  // isVerified Boolean @default(false)
-  isBlocked  Boolean @default(false)
-
-  role Role @default(USER)
-
-  Instructor Instructor?
-
-  Enrollment        Enrollment[]
-  Submission        Submission[]
-  UserNote          UserNote[]
-  BookMark          BookMark[]
-  PaymentHistory    PaymentHistory[]
-  CourseProgress    CourseProgress[]
-  CourseCertificate CourseCertificate[]
-  CourseRating      CourseRating[]
+  password   String
+  isVerified Boolean
+  isBlocked  Boolean
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
 
-model CourseCertificate {
-  id        String @id @default(uuid())
-  title     String
-  thumbnail String
-  url       String
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model CourseProgress {
-  id        String  @id @default(uuid())
-  progress  Int     @default(0) // A percentage to track progress
-  completed Boolean @default(false) // Whether the course is completed
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  courseId String
-  course   Course @relation(fields: [courseId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model PaymentHistory {
-  id            String        @id @default(uuid())
-  amount        Float
-  status        PaymentStatus
-  paymentMethod String?
-  transactionId String?
-
-  user   User   @relation(fields: [userId], references: [id])
-  userId String
-
-  course   Course? @relation(fields: [courseId], references: [id])
-  courseId String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-enum PaymentStatus {
-  PENDING
-  SUCCESS
-  FAILED
+  Role         Role
+  Instructor   Instructor? @relation(fields: [instructorId], references: [id])
+  instructorId String?
 }
 
 model Instructor {
-  id             String  @id @default(uuid())
-  bio            String?
-  certifications String? //image url
-  thumbnail      String?
+  id           String @id @default(cuid())
+  organization String
+  thumbnail    String
+  bio          String
 
-  userId         String           @unique
-  user           User             @relation(fields: [userId], references: [id])
-  Course         Course[]
-  InstructorNote InstructorNote[]
-  Workshop       Workshop[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Topic {
-  id          String @id @default(uuid())
-  title       String
-  description String
-
-  course Course[]
-  workshopId String?
-  Workshop   Workshop? @relation(fields: [workshopId], references: [id])
-
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  Course Course[]
+  User   User[]
 }
 
 model Course {
-  id          String  @id @default(uuid())
+  id          String   @id @default(cuid())
   title       String
   description String
   thumbnail   String
-  duration    Int
   price       Float
-  isPublished Boolean @default(false)
-
-  instructorId String?
-  instructor   Instructor? @relation(fields: [instructorId], references: [id])
-
-  topics      Topic[]
-  enrollments Enrollment[]
-  modules     Module[]
-
-  courseProgress CourseProgress[]
-  courseRatings  CourseRating[]
-
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  PaymentHistory PaymentHistory[]
-}
-
-model Module {
-  id          String @id @default(uuid())
-  title       String
-  description String
-
-  contents Content[]
-
-  Course   Course? @relation(fields: [courseId], references: [id])
-  courseId String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-enum ContentType {
-  VIDEO
-  CODE
-}
-
-model Content {
-  id          String @id @default(uuid())
-  title       String
-  description String
-  duration    Int
-
-  type ContentType
-
-  moduleId String
-  module   Module @relation(fields: [moduleId], references: [id])
-
-  video   Video?  @relation(fields: [videoId], references: [id])
-  videoId String? @unique
-
-  code   Code?   @relation(fields: [codeId], references: [id])
-  codeId String? @unique
-
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  BookMark  BookMark[]
-}
-
-model Video {
-  id          String @id @default(uuid())
-  description String
-  duration    Int
-  url         String
-
-  Resource Resource[]
-  Content  Content?
-
-  InstructionNote InstructorNote[]
-  UserNote        UserNote[]
+  isPublished Boolean
+  resources   String[] // array of urls
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  instructorNoteId String?
-  userNoteId       String?
-}
-
-model Resource {
-  id  String @id @default(uuid())
-  url String
-
-  videoId String
-  video   Video  @relation(fields: [videoId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model InstructorNote {
-  id          String @id @default(uuid())
-  description String
-
-  atSecond Int
-
-  instructorId String
   instructor   Instructor @relation(fields: [instructorId], references: [id])
-
-  videoId String?
-  Video   Video?  @relation(fields: [videoId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model UserNote {
-  id   String @id @default(uuid())
-  note String
-
-  atSecond Int
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  videoId String?
-  Video   Video?  @relation(fields: [videoId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-enum Language {
-  JAVASCRIPT
-  PYTHON
-  C
-}
-
-model Code {
-  id          String @id @default(uuid())
-  description String
-  hint        String
-  starterCode String
-  solution    String
-
-  language    Language
-  output      Output[]
-  submissions Submission[]
-
-  Content Content?
-
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  languageId String?
-}
-
-model Submission {
-  id   String @id @default(uuid())
-  code String
-
-  language Language
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  codeId String?
-  Code   Code?   @relation(fields: [codeId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Output {
-  id     String @id @default(uuid())
-  output String
-
-  codeId String
-  code   Code   @relation(fields: [codeId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model BookMark {
-  id String @id @default(uuid())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  contentId String
-  content   Content @relation(fields: [contentId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Enrollment {
-  id String @id @default(uuid())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  courseId String
-  course   Course @relation(fields: [courseId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Workshop {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  thumbnail   String
-  published   Boolean  @default(false)
-  startDate   DateTime
-
-  instructorId String?
-  instructor   Instructor? @relation(fields: [instructorId], references: [id])
-
-  topics Topic[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-enum Rating {
-  ONE
-  TWO
-  THREE
-  FOUR
-  FIVE
-}
-
-model CourseRating {
-  id       String  @id @default(uuid())
-  rating   Rating
-  review   String?
-  courseId String
-  course   Course  @relation(fields: [courseId], references: [id])
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  instructorId String
 }

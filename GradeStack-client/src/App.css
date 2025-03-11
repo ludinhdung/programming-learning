@@ -3,7 +3,6 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-}
 
 .logo {
   height: 6em;
@@ -39,4 +38,32 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Add these styles */
+.ant-input-password-custom {
+  background-color: rgb(51 65 85) !important;
+}
+
+.ant-input-password-custom .ant-input-password-icon {
+  color: #94a3b8 !important;
+}
+
+.ant-input-password-custom .ant-input-password-icon:hover {
+  color: #3b82f6 !important;
+}
+
+.ant-input-password-custom .ant-input {
+  background-color: rgb(51 65 85) !important;
+  color: white !important;
+}
+
+.ant-input-password-custom:hover .ant-input {
+  background-color: rgb(51 65 85) !important;
+  color: white !important;
+}
+
+.ant-input-password-custom .ant-input:focus {
+  background-color: rgb(51 65 85) !important;
+  color: white !important;
 }
