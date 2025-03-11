@@ -20,39 +20,379 @@ model User {
   firstName  String
   lastName   String
   password   String
-  isVerified Boolean
-  isBlocked  Boolean
+  isVerified Boolean @default(false)
+  isBlocked  Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Role         Role
-  Instructor   Instructor? @relation(fields: [instructorId], references: [id])
-  instructorId String?
+  Role               Role
+  Instructor         Instructor?
+  Submission         Submission[]
+  Rating             Rating[]
+  Certificate        Certificate[]
+  Enrollment         Enrollment[]
+  TransactionHistory TransactionHistory[]
+  Note               Note[]
+  Attendance         Attendance[]
+  Wallet             Wallet?
+  WithdrawalRequest  WithdrawalRequest[]
+  Comment            Comment[]
 }
 
 model Instructor {
-  id           String @id @default(cuid())
+  id           String  @id @default(cuid())
   organization String
   thumbnail    String
   bio          String
+  isLead       Boolean @default(false)
 
-  Course Course[]
-  User   User[]
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+
+  Course            Course[]
+  Workshop          Workshop[]
+  WithdrawalRequest WithdrawalRequest[]
 }
 
 model Course {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  thumbnail   String
-  price       Float
-  isPublished Boolean
-  resources   String[] // array of urls
+  id           String   @id @default(cuid())
+  title        String
+  description  String
+  thumbnail    String
+  price        Float
+  duration     Int
+  isPublished  Boolean  @default(false)
+  isBookmarked Boolean  @default(false)
+  isCompleted  Boolean  @default(false)
+  resources    String[] // array of urls
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   instructor   Instructor @relation(fields: [instructorId], references: [id])
   instructorId String
+
+  Section            Section[]
+  Rating             Rating[]
+  Certificate        Certificate[]
+  Enrollment         Enrollment[]
+  Topic              Topic?               @relation(fields: [topicId], references: [id])
+  topicId            String?
+  LearningPath       LearningPath?        @relation(fields: [learningPathId], references: [id])
+  learningPathId     String?
+  TransactionHistory TransactionHistory[]
+}
+
+model Section {
+  id    String @id @default(cuid())
+  title String
+
+  course   Course @relation(fields: [courseId], references: [id])
+  courseId String
+
+  Lecture Lecture[]
+}
+
+enum LectureType {
+  VIDEO
+  TEXT
+  CODE
+  QUIZ
+}
+
+model Lecture {
+  id          String  @id @default(cuid())
+  title       String
+  description String
+  isCompleted Boolean @default(false)
+
+  lectureType LectureType
+
+  section   Section @relation(fields: [sectionId], references: [id])
+  sectionId String
+
+  Video   Video?
+  Code    Code?
+  Quiz    Quiz?
+  Comment Comment[]
+}
+
+model Video {
+  id  String @id @default(cuid())
+  url String
+
+  lecture   Lecture @relation(fields: [lectureId], references: [id])
+  lectureId String  @unique
+  Note      Note[]
+}
+
+enum Language {
+  PYTHON
+  JAVASCRIPT
+  CPP
+}
+
+model Code {
+  id       String   @id @default(cuid())
+  codeBase String
+  lang     Language
+
+  testCase TestCase[]
+
+  lecture    Lecture      @relation(fields: [lectureId], references: [id])
+  lectureId  String       @unique
+  Submission Submission[]
+}
+
+model TestCase {
+  id     String @id @default(cuid())
+  input  String
+  output String
+
+  code   Code   @relation(fields: [codeId], references: [id])
+  codeId String
+}
+
+model Submission {
+  id       String   @id @default(cuid())
+  solution String
+  language Language
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  isCorrect Boolean @default(false)
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  code   Code   @relation(fields: [codeId], references: [id])
+  codeId String
+}
+
+model Quiz {
+  id String @id @default(cuid())
+
+  lecture   Lecture @relation(fields: [lectureId], references: [id])
+  lectureId String  @unique
+
+  questions Question[]
+}
+
+model Question {
+  id      String   @id @default(cuid())
+  content String
+  options String[]
+  answer  String
+
+  quiz   Quiz   @relation(fields: [quizId], references: [id])
+  quizId String
+}
+
+// model Comment {
+//   id      String @id @default(cuid())
+//   content String
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   lecture   Lecture @relation(fields: [lectureId], references: [id])
+//   lectureId String
+
+//   user   User   @relation(fields: [userId], references: [id])
+//   userId String
+// }
+
+model Rating {
+  id     String @id @default(cuid())
+  rating Int
+  review String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course   Course @relation(fields: [courseId], references: [id])
+  courseId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model Certificate {
+  id        String   @id @default(cuid())
+  title     String
+  thumbnail String
+  issuedAt  DateTime
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  course   Course @relation(fields: [courseId], references: [id])
+  courseId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Enrollment {
+  id String @id @default(cuid())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  course   Course @relation(fields: [courseId], references: [id])
+  courseId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Topic {
+  id          String @id @default(cuid())
+  title       String
+  thumbnail   String
+  description String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Course Course[]
+}
+
+model LearningPath {
+  id           String   @id @default(cuid())
+  title        String
+  description  String
+  thumbnail    String
+  prerequisite String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Course Course[]
+}
+
+model TransactionHistory {
+  id          String   @id @default(cuid())
+  amount      Float
+  currency    String
+  status      String
+  paymentType String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course   Course @relation(fields: [courseId], references: [id])
+  courseId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model Note {
+  id      String @id @default(cuid())
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  video   Video  @relation(fields: [videoId], references: [id])
+  videoId String
+}
+
+model Workshop {
+  id            String   @id @default(cuid())
+  title         String
+  description   String
+  dailySchedule String[]
+
+  thumbnail   String
+  isPublished Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  startTimestamp DateTime
+  endTimestamp   DateTime
+
+  instructor   Instructor   @relation(fields: [instructorId], references: [id])
+  instructorId String
+  Attendance   Attendance[]
+}
+
+model Attendance {
+  id String @id @default(cuid())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  workshop   Workshop @relation(fields: [workshopId], references: [id])
+  workshopId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Wallet {
+  id       String @id @default(cuid())
+  balance  Float  @default(0.0)
+  currency String @default("VND")
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+
+  WithdrawalRequest WithdrawalRequest[]
+  Transaction       Transaction[]
+}
+
+model WithdrawalRequest {
+  id        String   @id @default(cuid())
+  amount    Float
+  currency  String
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  instructor   Instructor @relation(fields: [instructorId], references: [id])
+  instructorId String
+
+  admin   User   @relation(fields: [adminId], references: [id])
+  adminId String
+
+  wallet   Wallet @relation(fields: [walletId], references: [id])
+  walletId String
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  amount    Float
+  currency  String
+  type      String // DEPOSIT, WITHDRAWAL, TRANSFER
+  status    String   @default("COMPLETED") // PENDING, COMPLETED, FAILED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  wallet   Wallet @relation(fields: [walletId], references: [id])
+  walletId String
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lecture   Lecture @relation(fields: [lectureId], references: [id])
+  lectureId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  parent   Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  parentId String?
+
+  replies Comment[] @relation("CommentReplies")
 }
