@@ -143,7 +143,7 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header className="bg-zinc-950 fixed top-0 left-0 right-0 w-full z-50">
+      <header className="bg-zinc-950 shadow-xl fixed top-0 left-0 right-0 w-full z-50">
         <nav className="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-4">
           {/* Left Navigation - Hidden on mobile */}
           <div className="flex-1 hidden md:flex justify-start">
