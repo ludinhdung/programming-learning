@@ -1,19 +1,35 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-const userClient = prisma.user;
 
 export class UserService {
+  // Get all users
+  async getAllUsers() {  
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        // role: true,
+        isVerified: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+    return users;
+  }
+
   // Get user by ID
-  async getById(id: string) {
-    const user = await userClient.findUnique({
+  async getUserById(id: string) {
+    const user = await prisma.user.findUnique({
       where: { id },
       select: {
         id: true,
         email: true,
         firstName: true,
         lastName: true,
-        Role: true,
+        // role: true,
         isVerified: true,
         createdAt: true,
         updatedAt: true
@@ -27,4 +43,22 @@ export class UserService {
     return user;
   }
 
+  // Create a new user
+  async createUser(data: Prisma.UserCreateInput) {
+    const user = await prisma.user.create({
+      data,
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        isVerified: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+    
+    return user;
+  }
 }
