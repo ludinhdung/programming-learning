@@ -33,24 +33,5 @@ export const UserController = {
             });
         }
     },
-    create: async (req: Request, res: Response) => {
-        try {
-            const user = await userService.createUser({
-                email: "phuduong200@gmail.com",
-                password: "123123",
-                firstName: "Phu",
-                lastName: "Duong"
-            });
-            res.json({
-                success: true,
-                data: user
-            });
-        } catch (error: any) {
-            res.status(error.statusCode || 500).json({
-                success: false,
-                message: error.message
-            });
-        }
-    }
 };
 
