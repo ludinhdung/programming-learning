@@ -11,7 +11,7 @@ export class UserService {
         email: true,
         firstName: true,
         lastName: true,
-        // role: true,
+        Role: true,
         isVerified: true,
         createdAt: true,
         updatedAt: true
@@ -29,7 +29,7 @@ export class UserService {
         email: true,
         firstName: true,
         lastName: true,
-        // role: true,
+        Role: true,
         isVerified: true,
         createdAt: true,
         updatedAt: true
@@ -43,22 +43,6 @@ export class UserService {
     return user;
   }
 
-  // Create a new user
-  async createUser(data: Prisma.UserCreateInput) {
-    const user = await prisma.user.create({
-      data,
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        isVerified: true,
-        createdAt: true,
-        updatedAt: true
-      }
-    });
-    
-    return user;
-  }
+
+
 }
