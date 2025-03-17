@@ -1,37 +1,50 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { UserService } from '../services/user.service';
 
-const userService = new UserService();
+export class UserController {
+    private userService: UserService;
 
-export const UserController = {
-    getAllUser: async (req: Request, res: Response) => {
+    constructor() {
+        this.userService = new UserService();
+    }
+
+    async getAllUsers(req: Request, res: Response, next: NextFunction) {
         try {
-            const users = await userService.getAllUsers();
+            const users = await this.userService.getAllUsers();
             res.json({
                 success: true,
                 data: users
             });
-        } catch (error: any) {
-            res.status(error.statusCode || 500).json({
-                success: false,
-                message: error.message
-            });
+        } catch (error) {
+            next(error);
         }
-    },
-    getById: async (req: Request, res: Response) => {
+    }
+
+    async getUserById(req: Request, res: Response, next: NextFunction) {
         try {
-            const { id } = req.params;
-            const user = await userService.getUserById(id);
+            const user = await this.userService.getUserById(req.params.id);
             res.json({
                 success: true,
                 data: user
             });
-        } catch (error: any) {
-            res.status(error.statusCode || 500).json({
-                success: false,
-                message: error.message
-            });
+        } catch (error) {
+            next(error);
         }
-    },
-};
+    }
+
+    async changeUserStatus(req: Request, res: Response, next: NextFunction) {
+        try {
+            const user = await this.userService.changeUserStatus(
+                req.params.id,
+                req.body
+            );
+            res.json({
+                success: true,
+                data: user
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+}
 

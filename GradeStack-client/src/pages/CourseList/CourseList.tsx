@@ -1,195 +1,238 @@
 import { useState } from 'react';
-import { Input, Card, Tag, Button, Radio, Select } from 'antd';
-import { SearchOutlined, BookOutlined, SortAscendingOutlined } from '@ant-design/icons';
+import { Input, Checkbox, Pagination } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 import Header from '../../components/Header/Header';
+import { useNavigate } from 'react-router-dom';
 
 interface Course {
   id: string;
   title: string;
   description: string;
-  instructor: string;
+  instructor: {
+    name: string;
+    avatar: string;
+  };
+  thumbnailUrl: string;
+  category: string;
   duration: string;
   level: 'Beginner' | 'Intermediate' | 'Advanced';
-  category: string;
 }
 
 const CourseList = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('newest');
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const [selectedInstructors, setSelectedInstructors] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 9;
+
+  const topics = [
+    { id: 'javascript', name: 'JavaScript', count: 25 },
+    { id: 'php', name: 'PHP', count: 32 },
+    { id: 'laravel', name: 'Laravel', count: 45 },
+    { id: 'vue', name: 'Vue', count: 18 },
+    { id: 'react', name: 'React', count: 20 },
+    { id: 'testing', name: 'Testing', count: 15 },
+  ];
+
+  const instructors = [
+    { id: 'jeffrey-way', name: 'Jeffrey Way', count: 42 },
+    { id: 'jeremy-mcpeak', name: 'Jeremy McPeak', count: 28 },
+    { id: 'simon-wardley', name: 'Simon Wardley', count: 15 },
+    { id: 'luke-downing', name: 'Luke Downing', count: 23 },
+  ];
+
+  const handleTopicChange = (topicId: string) => {
+    setSelectedTopics(prev => 
+      prev.includes(topicId) 
+        ? prev.filter(id => id !== topicId)
+        : [...prev, topicId]
+    );
+  };
+
+  const handleInstructorChange = (instructorId: string) => {
+    setSelectedInstructors(prev => 
+      prev.includes(instructorId) 
+        ? prev.filter(id => id !== instructorId)
+        : [...prev, instructorId]
+    );
+  };
 
   const courses: Course[] = [
     {
       id: '1',
-      title: 'Functional JavaScript First Steps',
-      description: 'A friendly, practical introduction to functional programming fundamentals in JavaScript.',
-      instructor: 'Anjana Vakil',
+      title: "Jeffrey's Larabits",
+      description: 'Quick tips and tricks about Laravel and web development',
+      instructor: {
+        name: 'Jeffrey Way',
+        avatar: 'https://ik.imagekit.io/laracasts/instructors/1770.jpeg?w=260&q=50'
+      },
+      thumbnailUrl: 'https://ik.imagekit.io/laracasts/series/thumbnails/svg/larabits.svg',
+      category: 'Laravel',
       duration: '3h 27m',
-      level: 'Beginner',
-      category: 'JavaScript'
+      level: 'Intermediate'
     },
     {
       id: '2',
-      title: 'My Dev Setup Is Better Than Yours',
-      description: 'Maximize your productivity with the best developer setup. Hand-craft an environment with bash scripts.',
-      instructor: 'ThePrimeagen',
-      duration: '3h 28m',
-      level: 'Intermediate',
-      category: 'Development Tools'
+      title: "JavaScript Essentials",
+      description: 'Master the fundamentals of JavaScript programming',
+      instructor: {
+        name: 'Jeremy McPeak',
+        avatar: 'https://ik.imagekit.io/laracasts/instructors/27.jpeg?w=260&q=50'
+      },
+      thumbnailUrl: 'https://ik.imagekit.io/laracasts/series/thumbnails/svg/javascript-essentials.svg',
+      category: 'JavaScript',
+      duration: '4h 15m',
+      level: 'Beginner'
     },
     {
       id: '3',
-      title: 'Advanced React Patterns',
-      description: 'Master advanced React patterns including render props, HOCs, compound components, and more.',
-      instructor: 'Kent C. Dodds',
-      duration: '4h 15m',
-      level: 'Advanced',
-      category: 'React'
+      title: "Vue 3 Mastery",
+      description: 'Comprehensive guide to Vue 3 and its ecosystem',
+      instructor: {
+        name: 'Luke Downing',
+        avatar: 'https://ik.imagekit.io/laracasts/instructors/35.jpeg?w=260&q=50'
+      },
+      thumbnailUrl: 'https://ik.imagekit.io/laracasts/series/thumbnails/svg/vue-3.svg',
+      category: 'Vue',
+      duration: '5h 30m',
+      level: 'Advanced'
     },
-    {
-      id: '4',
-      title: 'Building Modern APIs with Node.js',
-      description: 'Learn to build scalable and secure REST APIs using Node.js, Express, and modern best practices.',
-      instructor: 'Max Schwarzmüller',
-      duration: '5h 45m',
-      level: 'Intermediate',
-      category: 'Node.js'
-    },
+    // Add 6 more course objects with similar structure but different content
   ];
 
-  const getLevelColor = (level: string) => {
-    switch (level) {
-      case 'Beginner':
-        return 'green';
-      case 'Intermediate':
-        return 'blue';
-      case 'Advanced':
-        return 'red';
-      default:
-        return 'default';
-    }
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const displayedCourses = courses.slice(startIndex, endIndex);
+
+  const navigate = useNavigate();
+
+  const handleCourseClick = (courseId: string) => {
+    navigate(`/courses/${courseId}`);
   };
 
   return (
-    <div className="min-h-screen bg-[#0d1118]">
+    <div className="min-h-screen bg-[#0a1321]">
       <Header />
       
-      {/* Header Section */}
-      <div className="px-10 pt-8">
-        <div className="flex text-2xl justify-start uppercase font-extrabold">
-          <span className="text-blue-600 mr-2">//</span>
-          <span className="text-white">Frontend & Fullstack Engineering Courses</span>
-        </div>
-        <div className="flex text-[80px] text-slate-800 justify-end uppercase font-extrabold -mt-16">
-          <p>endless training</p>
-        </div>
-
-        <div className="relative z-10 -mt-8 mb-6">
-          <p className="text-gray-400 mb-6">
-            Not sure where to start?{' '}
-            <a href="#" className="text-blue-500 hover:text-blue-400 transition-colors">
-              Check out our Learning Paths!
-            </a>
-          </p>
-          
-          {/* Search and Filters */}
-          <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4 items-start md:items-center">
+      <div className="flex">
+        {/* Left Sidebar - update className for checkboxes */}
+        <div className="w-64 min-h-[calc(100vh-64px)] bg-[#14202e] p-6 fixed left-0 overflow-y-auto">
+          {/* Search Input */}
+          <div className="mb-8">
             <Input
               size="large"
-              placeholder="Search for a course, language, framework, or teacher..."
+              placeholder="Search..."
               prefix={<SearchOutlined className="text-gray-500" />}
-              className="max-w-xl rounded-lg bg-slate-800 border-slate-700 text-white"
+              className="rounded-none bg-[#1c2936] border-none text-white hover:bg-[#243447] focus:bg-[#243447] transition-colors"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            
-            <div className="flex space-x-4 items-center">
-              <Radio.Group 
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="bg-slate-800 p-1 rounded-lg"
-              >
-                <Radio.Button value="all" className="text-gray-300 border-none bg-transparent hover:text-blue-400">
-                  All
-                </Radio.Button>
-                <Radio.Button value="bookmarked" className="text-gray-300 border-none bg-transparent hover:text-blue-400">
-                  Bookmarked
-                </Radio.Button>
-                <Radio.Button value="watched" className="text-gray-300 border-none bg-transparent hover:text-blue-400">
-                  Watched
-                </Radio.Button>
-              </Radio.Group>
+          </div>
 
-              <Select
-                defaultValue="newest"
-                onChange={(value) => setSortBy(value)}
-                className="w-40 bg-slate-800 text-white"
-                dropdownStyle={{ backgroundColor: '#1e293b' }}
-                suffixIcon={<SortAscendingOutlined className="text-gray-400" />}
-              >
-                <Select.Option value="newest">Newest First</Select.Option>
-                <Select.Option value="oldest">Oldest First</Select.Option>
-                <Select.Option value="title">Title A-Z</Select.Option>
-                <Select.Option value="duration">Duration</Select.Option>
-              </Select>
+          {/* Topics Filter - update Checkbox styles */}
+          <div className="mb-8">
+            <h3 className="text-gray-400 text-sm font-semibold uppercase mb-4">Topics</h3>
+            <div className="space-y-2">
+              {topics.map((topic) => (
+                <div key={topic.id} className="flex items-center justify-between">
+                  <Checkbox
+                    checked={selectedTopics.includes(topic.id)}
+                    onChange={() => handleTopicChange(topic.id)}
+                    className="text-gray-400 hover:text-white [&>.ant-checkbox-inner]:rounded-none [&>.ant-checkbox-inner]:border-gray-500"
+                  >
+                    <span className="text-sm">{topic.name}</span>
+                  </Checkbox>
+                  <span className="text-gray-500 text-sm">{topic.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Instructors Filter - update Checkbox styles */}
+          <div>
+            <h3 className="text-gray-400 text-sm font-semibold uppercase mb-4">Instructors</h3>
+            <div className="space-y-2">
+              {instructors.map((instructor) => (
+                <div key={instructor.id} className="flex items-center justify-between">
+                  <Checkbox
+                    checked={selectedInstructors.includes(instructor.id)}
+                    onChange={() => handleInstructorChange(instructor.id)}
+                    className="text-gray-400 hover:text-white [&>.ant-checkbox-inner]:rounded-none [&>.ant-checkbox-inner]:border-gray-500"
+                  >
+                    <span className="text-sm">{instructor.name}</span>
+                  </Checkbox>
+                  <span className="text-gray-500 text-sm">{instructor.count}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Course Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-12">
-          {courses.map((course) => (
-            <Card
-              key={course.id}
-              hoverable
-              className="bg-slate-800 border-none rounded-lg overflow-hidden hover:bg-slate-700 transition-all duration-300"
-              cover={
-                <div className="h-36 bg-gradient-to-r from-blue-600 to-blue-400 flex items-center justify-center">
-                  <BookOutlined className="text-5xl text-white opacity-50" />
-                </div>
-              }
-            >
-              <div className="space-y-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold text-white mb-1 line-clamp-1">
+        {/* Main Content - update card styles and add pagination */}
+        <div className="ml-64 flex-1 p-8">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-white">All Series</h2>
+            <p className="text-gray-400">Showing {startIndex + 1}-{Math.min(endIndex, courses.length)} of {courses.length} results</p>
+          </div>
+
+          {/* Course Grid - update card styles */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {displayedCourses.map((course) => (
+              <div 
+                key={course.id} 
+                className="group cursor-pointer" 
+                onClick={() => handleCourseClick(course.id)}
+              >
+                <div className="bg-[#14202e] rounded-none overflow-hidden transition-all duration-300 group-hover:transform group-hover:-translate-y-1">
+                  {/* Thumbnail */}
+                  <div className="relative aspect-video bg-gradient-to-br from-blue-600 to-blue-400">
+                    <img 
+                      src={course.thumbnailUrl} 
+                      alt={course.title}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <img 
+                        src={course.instructor.avatar}
+                        alt={course.instructor.name}
+                        className="w-8 h-8 rounded-full"
+                      />
+                      <span className="text-gray-400 text-sm">
+                        with {course.instructor.name}
+                      </span>
+                    </div>
+
+                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
                       {course.title}
-                    </h2>
-                    <p className="text-sm text-gray-400">
-                      with {course.instructor}
+                    </h3>
+                    
+                    <p className="text-gray-400 text-sm line-clamp-2">
+                      {course.description}
                     </p>
                   </div>
-                  <Tag color={getLevelColor(course.level)} className="ml-2 text-xs">
-                    {course.level}
-                  </Tag>
-                </div>
-
-                <p className="text-gray-300 text-sm line-clamp-2">
-                  {course.description}
-                </p>
-
-                <div className="flex items-center justify-between pt-2">
-                  <div className="flex items-center space-x-2">
-                    <Tag className="bg-blue-500/20 text-blue-400 border-none text-xs">
-                      {course.category}
-                    </Tag>
-                    <span className="text-gray-400 text-xs">{course.duration}</span>
-                  </div>
-                  <Button
-                    type="primary"
-                    size="small"
-                    className="bg-blue-600 hover:bg-blue-500 border-none text-white"
-                  >
-                    Start
-                  </Button>
                 </div>
               </div>
-            </Card>
-          ))}
+            ))}
+          </div>
+
+          {/* Pagination */}
+          <div className="mt-8 flex justify-center">
+            <Pagination
+              current={currentPage}
+              total={courses.length}
+              pageSize={pageSize}
+              onChange={(page) => setCurrentPage(page)}
+              className="[&_.ant-pagination-item]:rounded-none [&_.ant-pagination-prev>button]:rounded-none [&_.ant-pagination-next>button]:rounded-none"
+            />
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default CourseList; 
+export default CourseList;

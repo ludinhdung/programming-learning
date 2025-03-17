@@ -4,7 +4,7 @@ import { MantineProvider } from "@mantine/core";
 import "@mantine/core/styles.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/HomePage/Home";
-
+import CourseList from "./pages/CourseList/CourseList";
 
 import NotFound from "./pages/NotFound";
 // Learner
@@ -13,13 +13,17 @@ import CourseStudy from "./pages/CourseStudyPage/CourseStudy";
 import InstructorManagement from "./pages/InstructorManagementPage/InstructorManagement";
 import Overview from "./components/InstructorManagementComponents/Contents/Overview";
 import Course from "./components/InstructorManagementComponents/Contents/Course";
+import Checkout from "./pages/Checkout/Checkout";
+
 const App: React.FC = () => {
   return (
     <MantineProvider>
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="*" element={<NotFound />} />{" "}
+          <Route path="/courses" element={<CourseList />} />
+          <Route path="/checkout/:courseId" element={<Checkout />} />
+          <Route path="*" element={<NotFound />} />
           <Route path="/course-study" element={<CourseStudy />} />
           <Route
             path="/instructor-management"

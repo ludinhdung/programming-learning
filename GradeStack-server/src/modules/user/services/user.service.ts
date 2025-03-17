@@ -1,26 +1,25 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
+import { AppError } from '../../../shared/middleware/error.middleware';
 
 const prisma = new PrismaClient();
 
 export class UserService {
-  // Get all users
-  async getAllUsers() {  
+  async getAllUsers() {
     const users = await prisma.user.findMany({
       select: {
         id: true,
         email: true,
         firstName: true,
         lastName: true,
-        Role: true,
+        role: true,
         isVerified: true,
-        createdAt: true,
-        updatedAt: true
+        isBlocked: true,
+        createdAt: true
       }
     });
     return users;
   }
 
-  // Get user by ID
   async getUserById(id: string) {
     const user = await prisma.user.findUnique({
       where: { id },
@@ -29,20 +28,42 @@ export class UserService {
         email: true,
         firstName: true,
         lastName: true,
-        Role: true,
+        role: true,
         isVerified: true,
-        createdAt: true,
-        updatedAt: true
+        isBlocked: true,
+        createdAt: true
       }
     });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new AppError('User not found', 404);
     }
 
     return user;
   }
 
+  async changeUserStatus(id: string, status: { isBlocked?: boolean; isVerified?: boolean }) {
+    const user = await prisma.user.findUnique({ where: { id } });
 
+    if (!user) {
+      throw new AppError('User not found', 404);
+    }
 
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: status,
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        isVerified: true,
+        isBlocked: true,
+        createdAt: true
+      }
+    });
+
+    return updatedUser;
+  }
 }

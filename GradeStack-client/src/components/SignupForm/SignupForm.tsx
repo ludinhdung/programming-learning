@@ -22,8 +22,17 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchForm }) => {
         lastName: values.lastName,
       });
 
-      message.success('Registration successful! Please log in.');
-      onSwitchForm(); // Switch to login form
+      if (response.success) {
+        // Optionally store token and user data if you want auto-login after registration
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        
+        message.success('Registration successful!');
+        window.location.href = '/'; // Redirect to home if auto-login
+        // OR
+        // message.success('Registration successful! Please log in.');
+        // onSwitchForm(); // Switch to login form if not auto-login
+      }
     } catch (error: any) {
       message.error(error.response?.data?.message || 'Registration failed');
     } finally {
