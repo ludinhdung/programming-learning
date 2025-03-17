@@ -22,13 +22,12 @@ const SigninForm: React.FC<SigninFormProps> = ({onSwitchForm, onForgotPassword})
 
       const response = await authService.login(email, password);
       
-      // Store token
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
+      // Store token and user data from the correct response structure
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
 
       message.success('Successfully logged in!');
-      // Redirect or update app state here
-      window.location.href = '/'; // or use React Router navigation
+      window.location.href = '/';
     } catch (error: any) {
       message.error(error.response?.data?.message || 'Login failed');
     } finally {
