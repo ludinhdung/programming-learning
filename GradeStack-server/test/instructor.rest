@@ -1,0 +1,171 @@
+@baseUrl = http://localhost:4000/api
+@token = YOUR_JWT_TOKEN_HERE
+
+### Create Instructor (Admin only)
+POST {{baseUrl}}/instructors/
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "userData": {
+        "email": "abcdfg@example.com",
+        "password": "phudk123",
+        "firstName": "Phu",
+        "lastName": "Duong"
+    },
+    "instructorData": {
+        "organization": "Example University",
+        "bio": "Experienced instructor with 10 years of teaching experience",
+        "avatar": "https://mdbcdn.b-cdn.net/img/new/avatars/2.webp",
+        "socials": [
+            "https://linkedin.com/in/johndoe",
+            "https://twitter.com/johndoe"
+        
+        ]
+    }
+}
+
+### Get All Instructors
+GET {{baseUrl}}/instructors
+Content-Type: application/json
+
+### Get Instructor by ID
+GET {{baseUrl}}/instructors/ff6a31d4-5012-4399-98e3-601f715305f2
+Content-Type: application/json
+
+### Update Instructor Profile
+PUT {{baseUrl}}/instructors/ff6a31d4-5012-4399-98e3-601f715305f2/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "bio": "Updated bio with new information about my teaching experience",
+    "organization": "New University",
+    "socials": [
+        "https://linkedin.com/in/johndoe",
+        "https://johndoe.com"
+    ]
+}
+
+### Update Instructor Avatar
+PUT {{baseUrl}}/instructors/instructor-id-here/avatar
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "avatarUrl": "https://example.com/new-avatar.jpg"
+}
+
+### Create Course (Instructor only)
+POST {{baseUrl}}/instructors/8293286e-1282-4bb8-8eb4-d3639ba0b07c/courses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "Introduction to Programming",
+    "description": "A beginner-friendly course to learn programming fundamentals",
+    "price": 100000,
+    "duration": 12
+}
+
+### Create Workshop (Instructor only)
+POST {{baseUrl}}/instructors/8293286e-1282-4bb8-8eb4-d3639ba0b07c/workshops
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "Advanced JavaScript Workshop",
+    "description": "An intensive workshop covering advanced JavaScript topics",
+    "scheduledAt": "2025-06-15T10:00:00Z",
+    "duration": 4
+}
+
+### Create Topic (Instructor only)
+POST {{baseUrl}}/instructors/ff6a31d4-5012-4399-98e3-601f715305f2/topics
+# Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "name": "Introduction to Php",
+    "description": "Learn the basics of Php programming language",
+    "thumbnail": "https://example.com/thumbnail.jpg"
+}
+
+### Get Topic (For all users)
+POST {{baseUrl}}/instructors/ff6a31d4-5012-4399-98e3-601f715305f2/topics
+# Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "name": "Introduction to Java",
+    "description": "Learn the basics of Java programming language",
+    "thumbnail": "https://example.com/thumbnail.jpg"
+}
+
+### Create a course with full structure
+POST {{baseUrl}}/instructors/ff6a31d4-5012-4399-98e3-601f715305f2/courses
+Content-Type: application/json
+
+{
+    "title": "Advanced Java Programming",
+    "description": "Master Java with advanced concepts, design patterns, and real-world applications",
+    "price": 99.99,
+    "duration": 1800,
+    "isPublished": false,
+    "topicIds": ["6d12310a-c6a1-4b63-ab23-1425ab9ca897"],
+    "modules": [
+        {
+            "title": "Java Fundamentals",
+            "description": "Learn the core concepts of Java",
+            "order": 1,
+            "lessons": [
+                {
+                    "title": "Introduction to Java",
+                    "description": "Overview of Java and its benefits",
+                    "lessonType": "VIDEO",
+                    "duration": 15,
+                    "isPreview": true,
+                    "videoData": {
+                        "url": "https://example.com/videos/intro-Java.mp4",
+                        "duration": 900
+                    }
+                },
+                {
+                    "title": "Java Types and Interfaces",
+                    "description": "Understanding Java's type system",
+                    "lessonType": "VIDEO",
+                    "duration": 20,
+                    "videoData": {
+                        "url": "https://example.com/videos/Java-types.mp4",
+                        "duration": 1200
+                    }
+                },
+                {
+                    "title": "Type Challenge",
+                    "description": "Test your knowledge of Java types",
+                    "lessonType": "CODING",
+                    "duration": 30,
+                    "codingData": {
+                        "language": "JAVA",
+                        "problem": "Create an interface for a User object with strongly typed properties",
+                        "hint": "Remember to use correct Java syntax for optional properties",
+                        "solution": "interface User {\n  id: string;\n  name: string;\n  email: string;\n  age?: number;\n  roles: string[];\n}",
+                        "codeSnippet": "interface User {\n  // Your code here\n}"
+                    }
+                }
+            ]
+        } 
+    ]
+}
+
+### Create a simple course without modules
+POST http://localhost:3000/api/instructors/12345/courses
+Content-Type: application/json
+
+{
+    "title": "Introduction to Web Development",
+    "description": "Learn the basics of HTML, CSS, and JavaScript",
+    "price": 49.99,
+    "isPublished": true
+}
+
