@@ -27,7 +27,7 @@ const NavItem: React.FC<NavItemProps> = ({
     <li>
       <NavLink
         to={href}
-        end
+        end={text !== "Course"}
         className={({ isActive }) => `
           flex items-center px-4 lg:px-6 xl:px-8 py-3 text-gray-200 
           hover:bg-indigo-600 rounded-lg
@@ -87,7 +87,7 @@ const Sidebar = () => {
       <div className="p-4 border-b border-zinc-700">
         <div className="flex items-center space-x-3">
           <img
-            src="https://scontent.fdad3-4.fna.fbcdn.net/v/t39.30808-6/449388699_2104096819991775_7469780370398069440_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=iM5ATPx-jCQQ7kNvgFCE6DY&_nc_oc=AdgxA8rEmLnqdYBA6peQuPq2J2UanBvtTG8DZ0PPV-70wvVp0_3UBNXK3NIl5cUDbBc&_nc_zt=23&_nc_ht=scontent.fdad3-4.fna&_nc_gid=AaMzoSkQDsr70Qd6th-s9Lw&oh=00_AYAbh_9m_K4zzvvkL3HWKIbEkAtrWhaY385DQnM0im3-mA&oe=67C60E18"
+            src="https://scontent.fhan5-3.fna.fbcdn.net/v/t39.30808-6/449388699_2104096819991775_7469780370398069440_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=EWbkPzkg7V0Q7kNvgGraLcP&_nc_oc=Adinrs0kN3es660Ugjd3tV_6HJzmsgmybGldXv7mU2yU2z5HaEzrP0VewuM3NBrO3MiQWJ3fOvwm0GOqT4BfyA_U&_nc_zt=23&_nc_ht=scontent.fhan5-3.fna&_nc_gid=if9aZi9I-W1QpHYOpb5pSQ&oh=00_AYEKqJfcV9-f2-pPnFbfjIj03np3teTf277MoAX5dey-uw&oe=67DAEDD8"
             alt="Channel Avatar"
             className="w-16 h-16 rounded-full"
           />
