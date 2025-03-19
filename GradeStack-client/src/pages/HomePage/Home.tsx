@@ -8,7 +8,6 @@ import BlurText from "../../components/React-bitsComponents/BlurText";
 import Squares from "../../components/React-bitsComponents/Squares";
 import RotatingText from "../../components/React-bitsComponents/RotatingText";
 import TiltedCard from "../../components/React-bitsComponents/TiltedCard";
-import InfiniteMenu from "../../components/React-bitsComponents/InfiniteMenu";
 
 import CodeEditorImage from "../../assets/CodeEditor.svg";
 const handleAnimationComplete = () => {
@@ -199,74 +198,7 @@ const creatorSeries = [
   // Thêm các khóa học khác vào đây
 ];
 
-const topics = [
-  {
-    image: "https://laracasts.com/images/topics/icons/billing-logo.svg?v=4",
-    link: "https://google.com/",
-    title: "Billing",
-    description: "This is pretty cool, right?",
-  },
-  {
-    image: "https://laracasts.com/images/topics/icons/debugging-logo.svg?v=4",
-    link: "https://google.com/",
-    title: "Debugging",
-    description: "This is pretty cool, right?",
-  },
-  {
-    image: "https://laracasts.com/images/topics/icons/docker-logo.svg?v=4",
-    link: "https://google.com/",
-    title: "Docker",
-    description: "This is pretty cool, right?",
-  },
-  {
-    image: "https://laracasts.com/images/topics/icons/filament-logo.svg?v=4",
-    link: "https://google.com/",
-    title: "Filament",
-    description: "This is pretty cool, right?",
-  },
-  {
-    image: "https://laracasts.com/images/topics/icons/git-logo.svg?v=4",
-    link: "https://google.com/",
-    title: "Git",
-    description: "This is pretty cool, right?",
-  },
-  {
-    image: "https://laracasts.com/images/topics/icons/cashier-logo.svg?v=4",
-    link: "https://google.com/",
-    title: "Laravel Cashier",
-    description: "This is pretty cool, right?",
-  },
-  {
-    image: "https://laracasts.com/images/topics/icons/laravel-logo.svg?v=4",
-    link: "https://google.com/",
-    title: "Laravel Packages",
-    description: "This is pretty cool, right?",
-  },
-  {
-    image: "https://laracasts.com/images/topics/icons/laravel-reverb.svg?v=4",
-    link: "https://google.com/",
-    title: "Laravel Reverb",
-    description: "This is pretty cool, right?",
-  },
-  {
-    image: "https://laracasts.com/images/topics/icons/mysql-logo.svg?v=4",
-    link: "https://google.com/",
-    title: "MySQL",
-    description: "This is pretty cool, right?",
-  },
-  {
-    image: "https://laracasts.com/images/topics/icons/nova-logo.svg?v=4",
-    link: "https://google.com/",
-    title: "Nova",
-    description: "This is pretty cool, right?",
-  },
-  {
-    image: "https://laracasts.com/images/topics/icons/redis-logo.svg?v=4",
-    link: "https://google.com/",
-    title: "Redis",
-    description: "This is pretty cool, right?",
-  },
-];
+
 const Home: React.FC = () => {
   return (
     <>
@@ -724,11 +656,6 @@ const Home: React.FC = () => {
           </div>
           <div className="flex text-[100px] text-slate-800 justify-end uppercase font-extrabold -mt-20">
             <p>any topic</p>
-          </div>
-        </div>
-        <div className="-mt-12 left-0 right-0 bottom-0">
-          <div style={{ height: "800px", position: "relative" }}>
-            <InfiniteMenu items={topics} />
           </div>
         </div>
       </div>
