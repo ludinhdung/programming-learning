@@ -1,67 +1,55 @@
-type Course = {
-  id: string;
-  title: string;
-  topic: string;
-  description: string;
-  author: string;
-  authorImage: string;
-  chapters: Chapter[];
-  thumbnailUrl: string;
-};
+import React from "react";
+import { Course, Comment, User } from "./CourseStudyBoard";
 
-type Chapter = {
-  chapterNumber: number;
-  chapterTitle: string;
-  content: (Episol | Exam)[];
+interface CourseDescriptionProps {
+  course: Course;
+  comments: Comment[];
+  users: User[];
+}
+const formatDuration = (durationInMinutes: number) => {
+  const hour = Math.floor(durationInMinutes / 60);
+  const minutes = durationInMinutes % 60;
+  return `${hour}h ${minutes}m`;
 };
-
-type Episol = {
-  type: "video";
-  episodeNumber: number;
-  title: string;
-  runTime: string;
-  published: string;
-  description: string;
-};
-
-type Exam = {
-  type: "exam";
-  examTitle: string;
-  totalQuestions: number;
-  passingScore: number;
-};
-const CourseDescription: React.FC<{ course: Course }> = ({ course }) => {
+const CourseDescription: React.FC<CourseDescriptionProps> = ({
+  course,
+  comments,
+  users,
+}) => {
   return (
     <div>
       <div className="flex flex-col items-center space-y-6 bg-[#0e1721] rounded-md border border-blue-400/15 py-6">
         <p className="text-gray-300 text-center text-3xl font-extrabold pt-2">
-          {course.chapters[0].chapterTitle}
+          {course.title}
         </p>
         <div>
           <dl className="flex mx-auto space-x-6 divide-x divide-gray-400/80">
             <div>
-              <dt className="text-xs text-gray-300/80">Episode</dt>
+              <dt className="text-xs text-gray-300/80">Modules</dt>
               <dd className="text-base font-semibold text-gray-300">
-                {course.chapters[0].content[0].episodeNumber}
+                {course.modules.length}
               </dd>
             </div>
             <div className="pl-6">
               <dt className="text-xs text-gray-300/80">Published</dt>
               <dd className="text-base font-semibold text-gray-300">
-                {course.chapters[0].content[0].published}
+                {course.createdAt.toLocaleDateString()}
               </dd>
             </div>
             <div className="pl-6">
-              <dt className="text-xs text-gray-300/80">Run Time</dt>
+              <dt className="text-xs text-gray-300/80">Duration</dt>
               <dd className="text-base font-semibold text-gray-300">
-                {course.chapters[0].content[0].runTime}
+                {formatDuration(course.duration)}
               </dd>
             </div>
             <div className="pl-6">
               <dt className="text-xs text-gray-300/80">Topic</dt>
-              <dd className="text-base font-semibold text-gray-300">
-                {course.topic}
-              </dd>
+              {course.CourseTopic &&
+                course.CourseTopic.map((topic) => (
+                  <dd className="text-base font-semibold text-gray-300">
+                    {topic.name}
+                  </dd>
+                ))}
             </div>
           </dl>
         </div>
@@ -155,16 +143,16 @@ const CourseDescription: React.FC<{ course: Course }> = ({ course }) => {
       <div className="px-20 py-6">
         <div className="bg-gray-800/80 py-4 px-8 font-bold text-xl">
           <span className="text-blue-600 mr-2">//</span>
-          <span className="text-blue-400/90">About This Episode</span>
+          <span className="text-blue-400/90">About This Course</span>
           <p className="text-gray-300 font-normal text-lg pt-4">
-            "{course.chapters[0].content[0].description}"
+            "{course.description}"
           </p>
         </div>
 
         <div className="flex items-stretch pt-6">
           <div className="flex-shrink-0 w-40 h-full">
             <img
-              src={course.authorImage}
+              src="https://images.laracasts.com/instructors/24345.jpeg?tr=w-630"
               className="w-full h-full object-cover"
               alt="Author"
             />
@@ -172,9 +160,7 @@ const CourseDescription: React.FC<{ course: Course }> = ({ course }) => {
           <div className="flex flex-col bg-gray-800/80 px-4 py-6 ml-4 w-full">
             <div className="flex justify-between items-center ">
               <div>
-                <p className="text-2xl text-gray-200 font-bold">
-                  {course.author}
-                </p>
+                <p className="text-2xl text-gray-200 font-bold">Author</p>
                 <span className="text-blue-400/90 font-medium">
                   Your Instructor
                 </span>
@@ -222,6 +208,148 @@ const CourseDescription: React.FC<{ course: Course }> = ({ course }) => {
               days building the site and thinking of new ways to teach confusing
               concepts. I live in Orlando, Florida with my wife and two kids.
             </p>
+          </div>
+        </div>
+        <div>
+          <div className="flex justify-end items-center">
+            <span className="text-[100px] uppercase font-extrabold text-slate-800">
+              Discuss
+            </span>
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center gap-1 -mt-14 mb-8">
+              <img
+                src="https://www.gravatar.com/avatar/0d21dcc25204fa226e115bbdfe2aa4af742ec76c2a8093bbfe9722a181327ea9?s=100&d=https%3A%2F%2Flaracasts.nyc3.digitaloceanspaces.com%2Fmembers%2Favatars%2Fdefault%2F24.png"
+                className="w-15 h-15"
+              ></img>
+              <textarea
+                className="flex w-full h-[100px] border border-gray-600 bg-slate-800 text-gray-400 px-2 py-1"
+                placeholder="Write a reply..."
+              ></textarea>
+            </div>
+            <div className="space-y-4">
+              {comments.map((comment) => {
+                const user = users.find((user) => user.id === comment.userId);
+                const fullName = user
+                  ? `${user.firstName} ${user.lastName}`
+                  : "Unknown User";
+                return (
+                  <div className="space-y-3">
+                    <div key={comment.id} className=" bg-gray-800 px-4 py-2">
+                      <div className="flex justify-start gap-4">
+                        <img
+                          className="w-16 h-16"
+                          src={`https://unavatar.io/github/${comment.userId}`}
+                          alt={comment.userId}
+                        ></img>
+                        <div className="flex">
+                          <div className="flex flex-col">
+                            <span className="text-gray-100 font-bold">
+                              {fullName}
+                            </span>
+                            <span className="text-xs font-semibold text-gray-400">
+                              Posted {comment.createdAt.toLocaleDateString()}
+                            </span>
+                            <span className="text-sm font-semibold text-gray-300 mt-2">
+                              {comment.content}
+                            </span>
+                            <button className="flex mt-2 bg-slate-600 text-white font-semibold w-fit py-1 px-4 items-center">Reply</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      {comment.replies.length > 0 && (
+                        <div className="ml-24 space-y-2">
+                          {comment.replies.map((reply) => {
+                            const replyUser = users.find(
+                              (user) => user.id === reply.userId
+                            );
+                            const replyFullName = replyUser
+                              ? `${replyUser.firstName} ${replyUser.lastName}`
+                              : "Unknown User";
+                            return (
+                              <div
+                                key={reply.id}
+                                className="flex justify-start bg-gray-800 px-4 py-2 gap-4"
+                              >
+                                <img
+                                  className="w-12 h-12"
+                                  src={`https://unavatar.io/github/${reply.userId}`}
+                                  alt={reply.userId}
+                                ></img>
+                                <div className="flex">
+                                  <div className="flex flex-col">
+                                    <span className="text-gray-100 font-bold">
+                                      {replyFullName}
+                                    </span>
+                                    <span className="text-xs font-semibold text-gray-400">
+                                      Posted{" "}
+                                      {reply.createdAt.toLocaleDateString()}
+                                    </span>
+                                    <span className="text-sm font-semibold text-gray-300 mt-2">
+                                      {reply.content}
+                                    </span>
+                                  <button className="flex mt-2 bg-slate-600 text-white font-semibold w-fit py-1 px-4 items-center text-sm">
+                                    Reply
+                                  </button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {/* <div className="space-y-4">
+              <div className="flex justify-start bg-gray-800 px-4 py-2 gap-4">
+                <img
+                  className="w-16 h-16"
+                  src="https://unavatar.io/github/sadhakbj"
+                ></img>
+                <div className="flex flex-col">
+                  <span className="text-gray-100 font-bold">User name</span>
+                  <span className="text-xs font-semibold text-gray-400">
+                    Posted 1 year ago
+                  </span>
+                  <span className="text-sm font-semibold text-gray-300 mt-2">
+                    "Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                    Omnis animi quis excepturi, nisi, corrupti magni ab minima
+                    sequi impedit aspernatur quaerat placeat? Quibusdam iure
+                    facilis vero repellendus harum quod dignissimos!"
+                  </span>
+                </div>
+              </div> */}
+            {/*Reply*/}
+            {/* <div className="relative">
+                <div className="absolute left-12 top-0 w-0.5 bg-gray-400 h-10"></div>
+                <div className="absolute left-12 top-10 bg-gray-400 w-10 h-0.5"></div>
+                <div className="ml-24 space-y-2">
+                  <div className="flex justify-start bg-gray-800 px-4 py-2 gap-4">
+                    <img
+                      className="w-12 h-12"
+                      src="https://unavatar.io/github/anotheruser"
+                    ></img>
+                    <div className="flex flex-col">
+                      <span className="text-gray-100 font-bold">
+                        Another User
+                      </span>
+                      <span className="text-xs font-semibold text-gray-400">
+                        Posted 6 months ago
+                      </span>
+                      <span className="text-sm font-semibold text-gray-300 mt-2">
+                        "This is a reply to the original comment."
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div> */}
           </div>
         </div>
       </div>

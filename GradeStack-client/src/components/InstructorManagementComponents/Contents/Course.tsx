@@ -3,7 +3,6 @@ import {
   Stepper,
   Button,
   Group,
-  Select,
   Fieldset,
   TextInput,
 } from "@mantine/core";
