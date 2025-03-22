@@ -2,7 +2,12 @@
 import React from "react";
 import { MantineProvider } from "@mantine/core";
 import "@mantine/core/styles.css";
-import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Outlet,
+} from "react-router-dom";
 import Home from "./pages/HomePage/Home";
 import NotFound from "./pages/NotFound";
 // Learner
@@ -19,9 +24,9 @@ import Profile from "./pages/Profile/Profile";
 // import CreateCourse from "./pages/CreateCourse/CreateCourse";
 // Instructor Dashboard
 import InstructorManagement from "./pages/InstructorDashboard/InstructorDashboard";
-import Overview from "./components/InstructorManagementComponents/Contents/Overview";
-import InstructorCourseList from "./components/InstructorManagementComponents/Contents/Course/CourseList"
-import InstructorCreateCourse from "./components/InstructorManagementComponents/Contents/Course/CreateCourse";
+import Overview from "./components/InstructorManagement/Contents/Overview";
+import InstructorCourseList from "./components/InstructorManagement/Contents/Course/CourseList";
+import InstructorCreateCourse from "./components/InstructorManagement/Contents/Course/CreateCourse";
 const App: React.FC = () => {
   return (
     <MantineProvider>

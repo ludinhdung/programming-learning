@@ -115,7 +115,7 @@ const course: Course = {
   modules: [
     {
       order: 1,
-      title: "TypeScript Fundamentals",
+      title: "TypeScript Fundamentals TypeScript Fundamentals",
       description: "Learn the core concepts of TypeScript",
       lessons: [
         {

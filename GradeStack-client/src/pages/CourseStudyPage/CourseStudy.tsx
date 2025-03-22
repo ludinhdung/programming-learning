@@ -1,5 +1,5 @@
 import React from "react"
-import CourseStudyBoard from "../../components/CourseStudyPageComponents/CourseStudyBoard";
+import CourseStudyBoard from "../../components/CourseStudy/CourseStudyBoard";
 
 const CourseStudy: React.FC = () => { 
    return (
