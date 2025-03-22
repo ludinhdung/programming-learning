@@ -22,7 +22,11 @@ const SideBar: React.FC<SideBarProps> = ({ course, currentLesson, setCurrentLess
   const getMenuItems = (modules: Module[]): MenuProps["items"] => {
     return modules.map((module, moduleIndex) => ({
       key: `module-${moduleIndex}`,
-      label: `${module.order}. ${module.title}`,
+      label: (
+        <div className="pr-4 truncate" title={module.title}>
+          <span>{`${module.order}. ${module.title}`}</span>
+        </div>
+      ),
       children: module.lessons.map((lesson, lessonIndex) => ({
         key: `lesson-${moduleIndex}-${lessonIndex}`,
         icon:
@@ -38,7 +42,16 @@ const SideBar: React.FC<SideBarProps> = ({ course, currentLesson, setCurrentLess
             className="flex flex-col py-2"
             onClick={() => setCurrentLesson(lesson, lessonIndex)}
           >
-            <div className="text-sm ">
+            <div
+              className="text-sm truncate"
+              title={
+                lesson.lessonType === LessonType.VIDEO
+                  ? module.lessons[lessonIndex].title
+                  : lesson.lessonType === LessonType.CODING
+                  ? module.lessons[lessonIndex].title
+                  : module.lessons[lessonIndex].title
+              }
+            >
               {lesson.lessonType === LessonType.VIDEO
                 ? module.lessons[lessonIndex].title
                 : lesson.lessonType === LessonType.CODING
