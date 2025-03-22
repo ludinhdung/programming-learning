@@ -15,11 +15,11 @@ import ReactQill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 //React-Quill
 const toolbarOptions = [
-  ["bold", "italic", "underline", "strike"], // toggled buttons
+  ["bold", "italic", "underline", "strike"],
   ["blockquote", "code-block"],
   ["link"],
 
-  [{ header: 1 }, { header: 2 }], // custom button values
+  [{ header: 1 }, { header: 2 }],
   [{ list: "ordered" }, { list: "bullet" }, { list: "check" }],
 
   [{ header: [1, 2, 3, 4, 5, 6, false] }],
@@ -89,11 +89,7 @@ enum LessonType {
   FINAL_TEST = "FINAL_TEST",
 }
 
-enum SupportedLanguage {
-  PYTHON = "PYTHON",
-  C = "C",
-  JAVA = "JAVA",
-}
+
 
 interface VideoLesson {
   url: string;
@@ -107,7 +103,11 @@ interface CodingExercise {
   solution: string;
   codeSnippet?: string;
 }
-
+enum SupportedLanguage {
+  PYTHON = "PYTHON",
+  C = "C",
+  JAVA = "JAVA",
+}
 interface FinalTestLesson {
   estimatedDuration?: number;
   questions: {
