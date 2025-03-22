@@ -87,11 +87,11 @@ const Sidebar = () => {
       <div className="p-4 border-b border-zinc-700">
         <div className="flex items-center space-x-3">
           <img
-            src="https://scontent.fhan5-3.fna.fbcdn.net/v/t39.30808-6/449388699_2104096819991775_7469780370398069440_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=EWbkPzkg7V0Q7kNvgGraLcP&_nc_oc=Adinrs0kN3es660Ugjd3tV_6HJzmsgmybGldXv7mU2yU2z5HaEzrP0VewuM3NBrO3MiQWJ3fOvwm0GOqT4BfyA_U&_nc_zt=23&_nc_ht=scontent.fhan5-3.fna&_nc_gid=if9aZi9I-W1QpHYOpb5pSQ&oh=00_AYEKqJfcV9-f2-pPnFbfjIj03np3teTf277MoAX5dey-uw&oe=67DAEDD8"
+            src="https://scontent.fhan5-3.fna.fbcdn.net/v/t39.30808-6/485886292_2316536695414452_3735739565780887893_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=ooA0bi5ptPUQ7kNvgGIf4ju&_nc_oc=Adkbbfr5mYFV-xvpy_HbKY8WXrBDatkgJOXgXdL3LLzNaaBRxelzBoNR08h9ZRQCSD-6rhhl2UV2axLqGUYUpr2A&_nc_zt=23&_nc_ht=scontent.fhan5-3.fna&_nc_gid=1vTgyhHIMqyFDtb2yZTVgQ&oh=00_AYGMCZoG8k6iFBHBdgdw5BhQ9YeyI2MWYiOEPrfEFRyOcw&oe=67E4892B"
             alt="Channel Avatar"
             className="w-16 h-16 rounded-full"
           />
-          <div>
+          <div className="flex flex-col col-">
             <div className="text-sm text-gray-400">Instructor</div>
             <div className="font-medium">Ngoc Nhan Huynh</div>
           </div>

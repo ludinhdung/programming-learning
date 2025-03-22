@@ -7,7 +7,7 @@
 .custom-sidebar-menu.ant-menu-dark .ant-menu-submenu-title {
   height: auto !important;
   line-height: 1 !important;
-  padding: 15px 13px !important;
+  padding: 15px 13px 15px 13px !important;
   margin: 4px 0 !important;
 }
 
@@ -17,11 +17,10 @@
   line-height: 1 !important;
   padding: 1px 12px 2px 32px !important; /* Tăng padding-left để indent */
   margin: 1px 0 !important;
-  
 }
 /* Icon alignment */
 .custom-sidebar-menu .ant-menu-item .anticon {
-  margin-right: 10px;
+  margin-right: 8px;
   font-size: 16px;
 }
 
