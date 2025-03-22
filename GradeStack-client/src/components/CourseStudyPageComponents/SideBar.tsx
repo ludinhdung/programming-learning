@@ -1,59 +1,54 @@
 import React from "react";
-import { PlayCircleOutlined, FileOutlined } from "@ant-design/icons";
+import {
+  PlayCircleOutlined,
+  FileOutlined,
+  CodeOutlined,
+} from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Menu } from "antd";
 import "../../styles/SideBarCourse.css";
-type Course = {
-  id: string;
-  title: string;
-  topic: string;
-  description: string;
-  author: string;
-  authorImage: string ;
-  chapters: Chapter[];
-  thumbnailUrl: string;
-};
+import { Course, Module, LessonType, Lesson } from "./CourseStudyBoard";
 
-type Chapter = {
-  chapterNumber: number;
-  chapterTitle: string;
-  content: (Episol | Exam)[];
-};
+interface SideBarProps {
+  course: Course;
+  setCurrentLesson: (lesson: Lesson | null, index: number) => void;
+  currentLesson: Lesson | null;
+  isSidebarVisible: boolean;
+  setIsSidebarVisible: (isSidebarVisible: boolean) => void;
+}
 
-type Episol = {
-  type: "video";
-  episodeNumber: number;
-  title: string;
-  runTime: string;
-  published: string;
-  description: string;
-};
-
-type Exam = {
-  type: "exam";
-  examTitle: string;
-  totalQuestions: number;
-  passingScore: number;
-};
-type MenuItem = Required<MenuProps>["items"][number];
-
-const SideBar: React.FC<{ course: Course }> = ({ course }) => {
-  const getMenuItems = (chapters: Chapter[]): MenuProps["items"] => {
-    return chapters.map((chapter) => ({
-      key: `chapter-${chapter.chapterNumber}`,
-      label: `${chapter.chapterNumber}. ${chapter.chapterTitle}`,
-      children: chapter.content.map((item, index) => ({
-        key: `content-${chapter.chapterNumber}-${index}`,
-        icon: item.type === "video" ? <PlayCircleOutlined /> : <FileOutlined />,
+const SideBar: React.FC<SideBarProps> = ({ course, currentLesson, setCurrentLesson, isSidebarVisible, setIsSidebarVisible }) => {
+  
+  const getMenuItems = (modules: Module[]): MenuProps["items"] => {
+    return modules.map((module, moduleIndex) => ({
+      key: `module-${moduleIndex}`,
+      label: `${module.order}. ${module.title}`,
+      children: module.lessons.map((lesson, lessonIndex) => ({
+        key: `lesson-${moduleIndex}-${lessonIndex}`,
+        icon:
+          lesson.lessonType === LessonType.VIDEO ? (
+            <PlayCircleOutlined />
+          ) : lesson.lessonType === LessonType.CODING ? (
+            <CodeOutlined />
+          ) : (
+            <FileOutlined />
+          ),
         label: (
-          <div className="flex flex-col py-2">
-            <div className="text-sm">
-              {item.type === "video" ? item.title : item.examTitle}
+          <div
+            className="flex flex-col py-2"
+            onClick={() => setCurrentLesson(lesson, lessonIndex)}
+          >
+            <div className="text-sm ">
+              {lesson.lessonType === LessonType.VIDEO
+                ? module.lessons[lessonIndex].title
+                : lesson.lessonType === LessonType.CODING
+                ? module.lessons[lessonIndex].title
+                : module.lessons[lessonIndex].title}
             </div>
             <div className="text-xs text-gray-400 font-semibold flex items-center gap-4">
-              {item.type === "video" ? (
+              {lesson.lessonType === LessonType.VIDEO ? (
                 <>
-                  Episode: {item.episodeNumber}
+                  Lesson: {lessonIndex + 1}
                   <div className="flex items-center gap-1">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -72,11 +67,58 @@ const SideBar: React.FC<{ course: Course }> = ({ course }) => {
                       <path d="M12 12h3.5" />
                       <path d="M12 7v5" />
                     </svg>
-                    {` ${item.runTime}`}
+                    {` ${lesson.duration}m`}
+                  </div>
+                </>
+              ) : lesson.lessonType === LessonType.CODING ? (
+                <>
+                  <div className="flex items-center gap-1">
+                    <span>Duration:</span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="inline-block ml-1"
+                    >
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                      <path d="M12 12h3.5" />
+                      <path d="M12 7v5" />
+                    </svg>
+                    {`${lesson.duration}m`}
                   </div>
                 </>
               ) : (
-                `Questions: ${item.totalQuestions}`
+                <>
+                  Total questions:{" "}
+                  {`${module.lessons[lessonIndex].content.finalTest?.questions.length}`}
+                  <div className="flex items-center gap-1">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="inline-block ml-1"
+                    >
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                      <path d="M12 12h3.5" />
+                      <path d="M12 7v5" />
+                    </svg>
+                    {`${module.lessons[lessonIndex].content.finalTest?.estimatedDuration}m`}
+                  </div>
+                </>
               )}
             </div>
           </div>
@@ -129,7 +171,10 @@ const SideBar: React.FC<{ course: Course }> = ({ course }) => {
               <path d="M21 21l-6 -6" />
             </svg>
           </button>
-          <button className="flex items-center justify-center opacity-90 bg-gray-700 p-2 text-white hover:bg-gray-600">
+          <button
+            onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+            className="flex items-center justify-center opacity-90 bg-gray-700 p-2 text-white hover:bg-gray-600"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -150,11 +195,11 @@ const SideBar: React.FC<{ course: Course }> = ({ course }) => {
         </div>
       </div>
       <div
-        className="flex shrink-0 cursor-pointer items-center overflow-hidden px-0 py-0 mb-[5px] border border-blue-400/15 bg-transparent transition-colors duration-300"
+        className="flex shrink-0 cursor-pointer items-center overflow-hidden px-0 py-0 mb-[5px] border border-blue-400/25 bg-transparent transition-colors duration-300"
         style={{ height: "5.7rem" }}
       >
         <img
-          src={course.thumbnailUrl}
+          src={course.thumbnail}
           alt={`${course.title} thumbnail`}
           className="mr-7 scale-125 ml-[-1.56rem]"
           width="75"
@@ -175,8 +220,8 @@ const SideBar: React.FC<{ course: Course }> = ({ course }) => {
               style={{ height: "0.9rem" }}
             >
               <div
-                className="bg-indigo-600 transition-all duration-500"
-                style={{ width: "18%" }}
+                className="bg-[#0033FF] transition-all duration-500"
+                style={{ width: "30%" }}
               >
                 <div className="bg-white/25 w-[90%] h-1 mx-auto mt-px"></div>
               </div>
@@ -194,7 +239,7 @@ const SideBar: React.FC<{ course: Course }> = ({ course }) => {
             backgroundColor: "transparent",
           }}
           mode="inline"
-          items={getMenuItems(course.chapters)}
+          items={getMenuItems(course.modules)}
           theme="dark"
           className="custom-sidebar-menu"
         />
