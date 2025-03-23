@@ -69,6 +69,7 @@ model Course {
   description String
   price       Decimal @default(0.00)
   duration    Int     @default(0) // Tổng thời gian (phút)
+  thumbnail   String
   isPublished Boolean @default(false)
 
   instructor   Instructor @relation(fields: [instructorId], references: [userId])
