@@ -143,7 +143,7 @@ const course: Course = {
           createdAt: new Date("2025-03-17T16:22:34.544Z"),
           content: {
             video: {
-              url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+              url: "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/CSS%20in%20100%20Seconds.mp4",
               duration: 1200,
             },
             coding: null,

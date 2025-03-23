@@ -7,48 +7,96 @@ import Footer from "../../components/Footer/Footer";
 import BlurText from "../../components/React-bitsComponents/BlurText";
 import Squares from "../../components/React-bitsComponents/Squares";
 import RotatingText from "../../components/React-bitsComponents/RotatingText";
-import TiltedCard from "../../components/React-bitsComponents/TiltedCard";
 
 import CodeEditorImage from "../../assets/CodeEditor.svg";
 const handleAnimationComplete = () => {
   console.log("Animation completed!");
 };
 
-const cardData = [
+const instructorData = [
   {
-    imageSrc:
-      "https://i.scdn.co/image/ab67616d0000b273d9985092cd88bffd97653b58",
-    altText: "Kendrick Lamar - GNX Album Cover",
-    captionText: "Kendrick Lamar - GNX",
-    overlayText: "Kendrick Lamar - GNX",
+    userId: "instructor-1",
+    organization: "GradeStack",
+    avatar: "https://images.laracasts.com/instructors/1770.jpeg?tr=w-400",
+    bio: "Owner at GradeStack",
+    socials: [
+      "https://twitter.com/instructor1",
+      "https://linkedin.com/in/instructor1",
+    ],
+    createdAt: "2023-10-01T12:00:00Z",
+    updatedAt: "2023-10-01T12:00:00Z",
   },
   {
-    imageSrc:
-      "https://i.scdn.co/image/ab67616d0000b273d9985092cd88bffd97653b58",
-    altText: "Kendrick Lamar - GNX Album Cover",
-    captionText: "Kendrick Lamar - GNX",
-    overlayText: "Kendrick Lamar - GNX",
+    userId: "instructor-2",
+    organization: "GradeStack",
+    avatar: "https://images.laracasts.com/instructors/253739.jpeg?tr=w-400",
+    bio: "Instructor at GradeStack",
+    socials: [
+      "https://twitter.com/instructor2",
+      "https://linkedin.com/in/instructor2",
+    ],
+    createdAt: "2023-10-01T12:00:00Z",
+    updatedAt: "2023-10-01T12:00:00Z",
   },
   {
-    imageSrc:
-      "https://i.scdn.co/image/ab67616d0000b273d9985092cd88bffd97653b58",
-    altText: "Kendrick Lamar - GNX Album Cover",
-    captionText: "Kendrick Lamar - GNX",
-    overlayText: "Kendrick Lamar - GNX",
+    userId: "instructor-3",
+    organization: "GradeStack",
+    avatar: "https://images.laracasts.com/instructors/24345.jpeg?tr=w-400",
+    bio: "Instructor at GradeStack",
+    socials: [
+      "https://twitter.com/instructor3",
+      "https://linkedin.com/in/instructor3",
+    ],
+    createdAt: "2023-10-01T12:00:00Z",
+    updatedAt: "2023-10-01T12:00:00Z",
   },
   {
-    imageSrc:
-      "https://i.scdn.co/image/ab67616d0000b273d9985092cd88bffd97653b58",
-    altText: "Kendrick Lamar - GNX Album Cover",
-    captionText: "Kendrick Lamar - GNX",
-    overlayText: "Kendrick Lamar - GNX",
+    userId: "instructor-4",
+    organization: "GradeStack",
+    avatar: "https://images.laracasts.com/instructors/80737.jpeg?tr=w-400",
+    bio: "Instructor at GradeStack",
+    socials: [
+      "https://twitter.com/instructor4",
+      "https://linkedin.com/in/instructor4",
+    ],
+    createdAt: "2023-10-01T12:00:00Z",
+    updatedAt: "2023-10-01T12:00:00Z",
   },
   {
-    imageSrc:
-      "https://i.scdn.co/image/ab67616d0000b273d9985092cd88bffd97653b58",
-    altText: "Kendrick Lamar - GNX Album Cover",
-    captionText: "Kendrick Lamar - GNX",
-    overlayText: "Kendrick Lamar - GNX",
+    userId: "instructor-5",
+    organization: "GradeStack",
+    avatar: "https://images.laracasts.com/instructors/5005.jpeg?tr=w-400",
+    bio: "Software Developer at GradeStack",
+    socials: [
+      "https://twitter.com/instructor5",
+      "https://linkedin.com/in/instructor5",
+    ],
+    createdAt: "2023-10-01T12:00:00Z",
+    updatedAt: "2023-10-01T12:00:00Z",
+  },
+  {
+    userId: "instructor-6",
+    organization: "GradeStack",
+    avatar: "https://images.laracasts.com/instructors/110151.jpeg?tr=w-400",
+    bio: "DevRel at GradeStack",
+    socials: [
+      "https://twitter.com/instructor6",
+      "https://linkedin.com/in/instructor6",
+    ],
+    createdAt: "2023-10-01T12:00:00Z",
+    updatedAt: "2023-10-01T12:00:00Z",
+  },
+  {
+    userId: "instructor-7",
+    organization: "GradeStack",
+    avatar: "https://images.laracasts.com/instructors/3587.jpeg?tr=w-400",
+    bio: "Software Engineer at GradeStack",
+    socials: [
+      "https://twitter.com/instructor7",
+      "https://linkedin.com/in/instructor7",
+    ],
+    createdAt: "2023-10-01T12:00:00Z",
+    updatedAt: "2023-10-01T12:00:00Z",
   },
 ];
 
@@ -198,6 +246,218 @@ const creatorSeries = [
   // Thêm các khóa học khác vào đây
 ];
 
+const topicsMockup = [
+  {
+    id: "1",
+    name: "AlpineJS",
+    thumbnail: "/images/topics/icons/alpine-logo.svg?v=4",
+    description: "9 Series • 140 Videos",
+    link: "https://laracasts.com/topics/alpine-js",
+  },
+  {
+    id: "2",
+    name: "APIs",
+    thumbnail: "/images/topics/icons/api-logo.svg?v=4",
+    description: "1 Series • 24 Videos",
+    link: "https://laracasts.com/topics/api",
+  },
+  {
+    id: "3",
+    name: "Authentication",
+    thumbnail: "/images/topics/icons/authentication-logo.svg?v=4",
+    description: "4 Series • 37 Videos",
+    link: "https://laracasts.com/topics/authentication",
+  },
+  {
+    id: "4",
+    name: "Authorization",
+    thumbnail: "/images/topics/icons/authorization-logo.svg?v=4",
+    description: "1 Series • 17 Videos",
+    link: "https://laracasts.com/topics/authorization",
+  },
+  {
+    id: "5",
+    name: "AWS",
+    thumbnail: "/images/topics/icons/aws-logo.svg?v=4",
+    description: "3 Series • 29 Videos",
+    link: "https://laracasts.com/topics/aws",
+  },
+  {
+    id: "6",
+    name: "Billing",
+    thumbnail: "/images/topics/icons/billing-logo.svg?v=4",
+    description: "2 Series • 41 Videos",
+    link: "https://laracasts.com/topics/billing",
+  },
+  {
+    id: "7",
+    name: "Blade",
+    thumbnail: "/images/topics/icons/blade-logo.svg?v=4",
+    description: "2 Series • 20 Videos",
+    link: "https://laracasts.com/topics/blade",
+  },
+  {
+    id: "8",
+    name: "Clean Code",
+    thumbnail: "/images/topics/icons/clean-code-logo.svg?v=4",
+    description: "11 Series • 95 Videos",
+    link: "https://laracasts.com/topics/clean-code",
+  },
+  {
+    id: "9",
+    name: "CLI",
+    thumbnail: "/images/topics/icons/command-line-logo.svg?v=4",
+    description: "1 Series • 12 Videos",
+    link: "https://laracasts.com/topics/cli",
+  },
+  {
+    id: "10",
+    name: "Continuous Integration",
+    thumbnail: "/images/topics/icons/continuous-integration.svg?v=4",
+    description: "1 Series • 9 Videos",
+    link: "https://laracasts.com/topics/continuous-integration",
+  },
+  {
+    id: "11",
+    name: "CSS",
+    thumbnail: "/images/topics/icons/css-logo.svg?v=4",
+    description: "7 Series • 62 Videos",
+    link: "https://laracasts.com/topics/css",
+  },
+  {
+    id: "12",
+    name: "Cypress",
+    thumbnail: "/images/topics/icons/cypress-logo.svg?v=4",
+    description: "2 Series • 14 Videos",
+    link: "https://laracasts.com/topics/cypress",
+  },
+  {
+    id: "13",
+    name: "Debugging",
+    thumbnail: "/images/topics/icons/debugging-logo.svg?v=4",
+    description: "1 Series • 6 Videos",
+    link: "https://laracasts.com/topics/debugging",
+  },
+  {
+    id: "14",
+    name: "Docker",
+    thumbnail: "/images/topics/icons/docker-logo.svg?v=4",
+    description: "1 Series • 8 Videos",
+    link: "https://laracasts.com/topics/docker",
+  },
+  {
+    id: "15",
+    name: "Eloquent",
+    thumbnail: "/images/topics/icons/eloquent-logo.svg?v=4",
+    description: "2 Series • 34 Videos",
+    link: "https://laracasts.com/topics/eloquent",
+  },
+  {
+    id: "16",
+    name: "Envoyer",
+    thumbnail: "/images/topics/icons/envoyer-logo.svg?v=4",
+    description: "1 Series • 10 Videos",
+    link: "https://laracasts.com/topics/envoyer",
+  },
+  {
+    id: "17",
+    name: "Filament",
+    thumbnail: "/images/topics/icons/filament-logo.svg?v=4",
+    description: "2 Series • 36 Videos",
+    link: "https://laracasts.com/topics/filament",
+  },
+  {
+    id: "18",
+    name: "Git",
+    thumbnail: "/images/topics/icons/git-logo.svg?v=4",
+    description: "3 Series • 44 Videos",
+    link: "https://laracasts.com/topics/git",
+  },
+  {
+    id: "19",
+    name: "GraphQL",
+    thumbnail: "/images/topics/icons/graphql-logo.svg?v=4",
+    description: "1 Series • 16 Videos",
+    link: "https://laracasts.com/topics/graphql",
+  },
+  {
+    id: "20",
+    name: "Inertia",
+    thumbnail: "/images/topics/icons/inertia-logo.svg?v=4",
+    description: "5 Series • 53 Videos",
+    link: "https://laracasts.com/topics/inertia",
+  },
+  {
+    id: "21",
+    name: "JavaScript",
+    thumbnail: "/images/topics/icons/js-logo.svg?v=4",
+    description: "26 Series • 282 Videos",
+    link: "https://laracasts.com/topics/javascript",
+  },
+  {
+    id: "22",
+    name: "Laravel",
+    thumbnail: "/images/topics/icons/laravel-logo.svg?v=4",
+    description: "77 Series • 1034 Videos",
+    link: "https://laracasts.com/topics/laravel",
+  },
+  {
+    id: "23",
+    name: "Laravel Cashier",
+    thumbnail: "/images/topics/icons/cashier-logo.svg?v=4",
+    description: "2 Series • 14 Videos",
+    link: "https://laracasts.com/topics/laravel-cashier",
+  },
+  {
+    id: "24",
+    name: "Laravel Forge",
+    thumbnail: "/images/topics/icons/laravel-forge-logo.svg?v=4",
+    description: "2 Series • 30 Videos",
+    link: "https://laracasts.com/topics/laravel-forge",
+  },
+  {
+    id: "25",
+    name: "Laravel Livewire",
+    thumbnail: "/images/topics/icons/livewire-logo.svg?v=4",
+    description: "11 Series • 241 Videos",
+    link: "https://laracasts.com/topics/laravel-livewire",
+  },
+  {
+    id: "26",
+    name: "MySQL",
+    thumbnail: "/images/topics/icons/mysql-logo.svg?v=4",
+    description: "2 Series • 45 Videos",
+    link: "https://laracasts.com/topics/mysql",
+  },
+  {
+    id: "27",
+    name: "PHP",
+    thumbnail: "/images/topics/icons/php-logo.svg?v=4",
+    description: "25 Series • 280 Videos",
+    link: "https://laracasts.com/topics/php",
+  },
+  {
+    id: "28",
+    name: "React",
+    thumbnail: "/images/topics/icons/react-logo.svg?v=4",
+    description: "3 Series • 56 Videos",
+    link: "https://laracasts.com/topics/react",
+  },
+  {
+    id: "29",
+    name: "Vue",
+    thumbnail: "/images/topics/icons/vue-logo.svg?v=4",
+    description: "13 Series • 201 Videos",
+    link: "https://laracasts.com/topics/vue",
+  },
+  {
+    id: "30",
+    name: "Tailwind CSS",
+    thumbnail: "/images/topics/icons/tailwind-logo.svg?v=4",
+    description: "7 Series • 117 Videos",
+    link: "https://laracasts.com/topics/tailwind",
+  },
+];
 
 const Home: React.FC = () => {
   return (
@@ -298,68 +558,74 @@ const Home: React.FC = () => {
           </div>
         </div>
       </div>
+      {/*Instructor list*/}
 
-      <div className="relative w-full h-[500px] bg-[#0d1118]">
-        {/*Image cards*/}
-        <div className="absolute flex space-x-4 w-full justify-center -translate-y-20 z-10">
-          {cardData.map((card, index) => (
-            <TiltedCard
-              key={index}
-              imageSrc={card.imageSrc}
-              altText={card.altText}
-              captionText={card.captionText}
-              containerHeight="280px"
-              containerWidth="270px"
-              imageHeight="280px"
-              imageWidth="270px"
-              rotateAmplitude={12}
-              scaleOnHover={1.2}
-              showMobileWarning={false}
-              showTooltip={true}
-              displayOverlayContent={true}
-              overlayContent={
-                <p className="tilted-card-demo-text">{card.overlayText}</p>
-              }
-            />
-          ))}
-        </div>
-
-        {/*Testimonial*/}
-        <div className="relative w-full h-[500px] overflow-hidden">
-          <div className="absolute w-fit top-[230px]">
-            <div
-              className="hide-scrollbar flex items-start gap-2 px-4 animate-scroll"
-              style={{
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {[...testimonials, ...testimonials].map((testimonial, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-800 bg-opacity-50 shadow-lg rounded-lg p-6 flex-shrink-0 w-72 max-h-[220px] transition-transform"
-                >
-                  <p className="text-sm font-semibold text-gray-200 line-clamp-6 whitespace-normal">
-                    "{testimonial.text}"
-                  </p>
-                  <div className="flex items-center justify-between mt-4">
-                    <cite className="text-xs font-semibold uppercase text-gray-500">
-                      {testimonial.name}
-                    </cite>
-                    <img
-                      src={testimonial.image}
-                      alt={testimonial.name}
-                      className="w-8 h-8 rounded-full border border-gray-300"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+      <div className="w-full h-fit bg-[#0d1118]">
+        <div className="-mt-20">
+          <div className="grid auto-cols-max grid-flow-col gap-4 overflow-auto hide-scrollbar z-10 relative scrolling-container">
+            {instructorData.map((instructor, index) => (
+              <a
+                key={index}
+                className=" block"
+                href={`/instructors/${instructor.userId}`}
+              >
+                <figure className="relative group overflow-hidden h-full flex">
+                  <img
+                    loading="lazy"
+                    className="transition-all duration-300 w-[266px] h-[382px]"
+                    src={instructor.avatar}
+                    alt={`Photo of ${instructor.organization}`}
+                  />
+                  <figcaption className="absolute bottom-0 w-full py-6 bg-black/40  ">
+                    <div className="flex flex-col font-semibold text-center">
+                      <span className="text-2xl text-gray-100 ">
+                        Instructor name
+                      </span>
+                      <span className="text-gray-300 text-sm mt-1">
+                        {instructor.bio}
+                      </span>
+                    </div>
+                  </figcaption>
+                </figure>
+              </a>
+            ))}
           </div>
         </div>
       </div>
-
+      {/*Testimonial*/}
+      <div className="relative w-full h-[350px] bg-[#0d1118] overflow-hidden">
+        <div className="absolute w-fit top-[50px]">
+          <div
+            className="hide-scrollbar flex items-start gap-2 px-4 animate-scroll"
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {[...testimonials, ...testimonials].map((testimonial, index) => (
+              <div
+                key={index}
+                className="bg-gray-800 bg-opacity-50 shadow-lg rounded-lg p-6 flex-shrink-0 w-72 max-h-[220px] transition-transform"
+              >
+                <p className="text-sm font-semibold text-gray-200 line-clamp-6 whitespace-normal">
+                  "{testimonial.text}"
+                </p>
+                <div className="flex items-center justify-between mt-4">
+                  <cite className="text-xs font-semibold uppercase text-gray-500">
+                    {testimonial.name}
+                  </cite>
+                  <img
+                    src={testimonial.image}
+                    alt={testimonial.name}
+                    className="w-8 h-8 rounded-full border border-gray-300"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
       {/* Stream of Courses Container */}
       <div className="relative bg-[#0d1118] left-0 right-0 top-0 w-full">
         <div className="px-10 pt-5">
@@ -414,7 +680,6 @@ const Home: React.FC = () => {
           </div>
         </div>
       </div>
-
       {/* Forged By Creators Container */}
       <div className=" relative bg-[#0d1118] h-[800px] bottom-0 left-0 right-0 top-0 w-full pt-32">
         <div className="px-10">
@@ -612,7 +877,6 @@ const Home: React.FC = () => {
           </div>
         </div>
       </div>
-
       <div className="relative bg-[#0d1118] w-full">
         <div className="px-32">
           <div className="flex text-4xl justify-center items-center uppercase font-extrabold pt-8">
@@ -646,7 +910,6 @@ const Home: React.FC = () => {
           </div>
         </div>
       </div>
-
       {/* Pick a Topic Container */}
       <div className="relative bg-[#0d1118] w-full">
         <div className="px-10">
@@ -658,8 +921,27 @@ const Home: React.FC = () => {
             <p>any topic</p>
           </div>
         </div>
+        <div>
+          <div className="grid auto-cols-max grid-flow-col grid-rows-3 gap-4 pl-10 overflow-auto hide-scrollbar scrolling-container overflow-y-auto">
+            {topicsMockup.map((topic) => (
+              <div
+                key={topic.id}
+                className="flex justify-center items-center bg-slate-800 w-40 px-2 py-2"
+              >
+                <div className="flex justify-center items-center space-x-2">
+                  <img
+                    src={`https://laracasts.com${topic.thumbnail}`}
+                    className="w-15 h-15"
+                  ></img>
+                  <span className="text-xs font-semibold text-white">
+                    {topic.name}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-
       <Footer />
     </>
   );
