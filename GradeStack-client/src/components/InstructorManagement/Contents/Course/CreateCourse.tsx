@@ -13,6 +13,7 @@ import { ChevronUpDownIcon } from "@heroicons/react/16/solid";
 import { CheckIcon } from "@heroicons/react/20/solid";
 import ReactQill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+
 //React-Quill
 const toolbarOptions = [
   ["bold", "italic", "underline", "strike"],
@@ -225,12 +226,12 @@ const CourseInformation: React.FC<CourseInformationProps> = ({
             <div className="mt-2">
               <input
                 id="course-title"
-                name="title" // Đặt name để nhận diện
+                name="title"
                 type="text"
                 required
                 autoComplete="given-name"
-                value={courseInfo.title} // Liên kết với state
-                onChange={onInputChange} // Gọi hàm xử lý sự kiện
+                value={courseInfo.title}
+                onChange={onInputChange}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
               />
             </div>
@@ -245,11 +246,11 @@ const CourseInformation: React.FC<CourseInformationProps> = ({
             <div className="mt-2">
               <textarea
                 id="course-description"
-                name="description" // Đặt name để nhận diện
+                name="description"
                 required
                 autoComplete="course-description"
-                value={courseInfo.description} // Liên kết với state
-                onChange={onInputChange} // Gọi hàm xử lý sự kiện
+                value={courseInfo.description}
+                onChange={onInputChange}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
               />
             </div>
@@ -264,11 +265,11 @@ const CourseInformation: React.FC<CourseInformationProps> = ({
             <div className="mt-2">
               <input
                 id="course-thumbnail"
-                name="thumbnail" // Đặt name để nhận diện
+                name="thumbnail"
                 type="file"
                 accept="image/*"
                 required
-                onChange={onFileChange} // Gọi hàm xử lý sự kiện
+                onChange={onFileChange}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
               />
             </div>
@@ -278,28 +279,21 @@ const CourseInformation: React.FC<CourseInformationProps> = ({
               htmlFor="course-price"
               className="block text-sm/6 font-medium text-gray-200"
             >
-              Course Price($)
+              Course Price(VND)
             </label>
             <div className="mt-2">
               <input
                 id="course-price"
-                name="price" // Đặt name để nhận diện
+                name="price"
                 type="number"
+                min={1}
                 required
                 autoComplete="given-name"
-                value={courseInfo.price} // Liên kết với state
-                onChange={onInputChange} // Gọi hàm xử lý sự kiện
+                value={courseInfo.price}
+                onChange={onInputChange}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
               />
             </div>
-          </div>
-          <div className="mt-6 flex items-center justify-end">
-            <button
-              type="submit"
-              className="rounded-md bg-gray-500 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-green-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
-              Save
-            </button>
           </div>
         </div>
       </form>
@@ -323,6 +317,7 @@ const CourseStructure: React.FC<CourseStructureProps> = ({
   // Hàm helper để tạo key duy nhất cho mỗi lesson
   const getLessonKey = (moduleIndex: number, lessonIndex: number) =>
     `${moduleIndex}-${lessonIndex}`;
+
   // Cập nhật hàm xử lý click để hiện type selector
 const handleShowContentType = (moduleIndex: number, lessonIndex: number) => {
   setShowSelectContentType((prev) => ({
@@ -856,26 +851,6 @@ const handleShowContentType = (moduleIndex: number, lessonIndex: number) => {
                           setModules(newModules);
                         }}
                       />
-                      {/* <textarea
-                        id="problem-description"
-                        placeholder="Describe the coding problem..."
-                        value={lesson.content.coding?.problem || ""}
-                        onChange={(e) => {
-                          const newModules = [...modules];
-                          newModules[moduleIndex].lessons[lessonIndex].content =
-                            {
-                              coding: {
-                                ...(lesson.content.coding || {
-                                  language: SupportedLanguage.PYTHON,
-                                  solution: "",
-                                }),
-                                problem: e.target.value,
-                              },
-                            };
-                          setModules(newModules);
-                        }}
-                        className="w-full min-h-[150px] p-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 resize-y text-gray-900 font-mono text-sm"
-                      /> */}
                     </div>
 
                     {/* Hint (Optional) */}
@@ -932,25 +907,31 @@ const handleShowContentType = (moduleIndex: number, lessonIndex: number) => {
                     </div>
 
                     {/* Code Snippet (Optional) */}
-                    <textarea
-                      placeholder="Add initial code for students..."
-                      value={lesson.content.coding?.codeSnippet || ""}
-                      onChange={(e) => {
-                        const newModules = [...modules];
-                        newModules[moduleIndex].lessons[lessonIndex].content = {
-                          coding: {
-                            ...(lesson.content.coding || {
-                              language: SupportedLanguage.PYTHON,
-                              problem: "",
-                              solution: "",
-                            }),
-                            codeSnippet: e.target.value,
-                          },
-                        };
-                        setModules(newModules);
-                      }}
-                      className="w-full min-h-[150px] p-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 resize-y text-gray-900 font-mono text-sm"
-                    />
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Code Snippet
+                      </label>
+                      <textarea
+                        placeholder="Add initial code for students..."
+                        value={lesson.content.coding?.codeSnippet || ""}
+                        onChange={(e) => {
+                          const newModules = [...modules];
+                          newModules[moduleIndex].lessons[lessonIndex].content =
+                            {
+                              coding: {
+                                ...(lesson.content.coding || {
+                                  language: SupportedLanguage.PYTHON,
+                                  problem: "",
+                                  solution: "",
+                                }),
+                                codeSnippet: e.target.value,
+                              },
+                            };
+                          setModules(newModules);
+                        }}
+                        className="w-full min-h-[150px] p-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 resize-y text-gray-900 font-mono text-sm"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -972,6 +953,7 @@ const handleShowContentType = (moduleIndex: number, lessonIndex: number) => {
                         value={
                           lesson.content.finalTest?.estimatedDuration || ""
                         }
+                        min={1}
                         onChange={(e) => {
                           const newModules = [...modules];
                           newModules[moduleIndex].lessons[lessonIndex].content =
@@ -1234,7 +1216,7 @@ const handleShowContentType = (moduleIndex: number, lessonIndex: number) => {
                             };
                           setModules(newModules);
                         }}
-                        className="p-2 font-semibold text-indigo-600 bg-indigo-200 hover:bg-indigo-300 rounded-md"
+                        className="p-1 text-sm font-semibold text-indigo-600 bg-indigo-200 hover:bg-indigo-300 rounded-md"
                       >
                         + Add Question
                       </button>
