@@ -13,7 +13,7 @@ import { ChevronUpDownIcon } from "@heroicons/react/16/solid";
 import { CheckIcon } from "@heroicons/react/20/solid";
 import ReactQill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-
+import Editor from "@monaco-editor/react";
 //React-Quill
 const toolbarOptions = [
   ["bold", "italic", "underline", "strike"],
@@ -794,10 +794,10 @@ const handleShowContentType = (moduleIndex: number, lessonIndex: number) => {
                       Coding Exercise
                     </h4>
                   </div>
-                  <div className="">
+                  <div className="space-y-6">
                     {/* Language Selection */}
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">
+                    <div className="space-y-1">
+                      <label className="block text-sm font-bold text-gray-700">
                         Programming Language
                       </label>
                       <select
@@ -826,8 +826,8 @@ const handleShowContentType = (moduleIndex: number, lessonIndex: number) => {
                     </div>
 
                     {/* Problem Description */}
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">
+                    <div className="space-y-1">
+                      <label className="block text-sm font-bold text-gray-700">
                         Problem Description
                       </label>
                       <ReactQill
@@ -855,7 +855,7 @@ const handleShowContentType = (moduleIndex: number, lessonIndex: number) => {
 
                     {/* Hint (Optional) */}
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-bold text-gray-700">
                         Hint (Optional)
                       </label>
                       <textarea
@@ -882,10 +882,30 @@ const handleShowContentType = (moduleIndex: number, lessonIndex: number) => {
 
                     {/* Solution */}
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-bold text-gray-700">
                         Solution
                       </label>
-                      <textarea
+                      <Editor
+                        className="h-52"
+                        defaultLanguage={lesson.content.coding?.language || SupportedLanguage.PYTHON}
+                        defaultValue={lesson.content.coding?.solution || "// write solution"}
+                        onChange={(value) => {
+                          const newModules = [...modules];
+                          newModules[moduleIndex].lessons[lessonIndex].content = {
+                            coding: {
+                              ...(lesson.content.coding || {
+                                language: SupportedLanguage.PYTHON,
+                                problem: "",
+                                hint: "",
+                              }),
+                              solution: value || "",
+                            },
+                          };
+                          setModules(newModules)
+                        }}
+                        
+                      />
+                      {/* <textarea
                         placeholder="Provide the solution code..."
                         value={lesson.content.coding?.solution || ""}
                         onChange={(e) => {
@@ -903,12 +923,12 @@ const handleShowContentType = (moduleIndex: number, lessonIndex: number) => {
                           setModules(newModules);
                         }}
                         className="w-full min-h-[200px] p-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 resize-y text-gray-900 font-mono text-sm"
-                      />
+                      /> */}
                     </div>
 
                     {/* Code Snippet (Optional) */}
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-bold text-gray-700">
                         Code Snippet
                       </label>
                       <textarea
@@ -1531,7 +1551,7 @@ const CreateCourse: React.FC = () => {
       lessons: Lesson[];
     }[]
     >([]);
-  console.log(modules);
+  console.log("Course",modules);
   
   const renderStepContent = () => {
     switch (active) {
