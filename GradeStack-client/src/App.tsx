@@ -13,7 +13,6 @@ import NotFound from "./pages/NotFound";
 // Learner
 import CourseStudy from "./pages/CourseStudyPage/CourseStudy";
 // Instructor
-import SupporterDashboard from "./pages/SupporterDashboard/SupporterDashboard";
 import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
 import CourseList from "./pages/CourseList/CourseList";
 import CourseDetail from "./pages/CourseDetail/CourseDetail";
@@ -27,6 +26,9 @@ import InstructorManagement from "./pages/InstructorDashboard/InstructorDashboar
 import Overview from "./components/InstructorManagement/Contents/Overview";
 import InstructorCourseList from "./components/InstructorManagement/Contents/Course/CourseList";
 import InstructorCreateCourse from "./components/InstructorManagement/Contents/Course/CreateCourse";
+// Supporter Dashboard
+import SupporterDashboard1 from "./pages/SupporterDashboard1/SupporterDashboard";
+import SupporterDashboard from "./pages/SupporterDashboard/SupporterDashboard";
 const App: React.FC = () => {
   return (
     <MantineProvider>
@@ -34,7 +36,10 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/course-study" element={<CourseStudy />} />
-          <Route path="/supporter-dashboard" element={<SupporterDashboard />} />
+          <Route
+            path="/supporter-dashboard"
+            element={<SupporterDashboard1 />}
+          />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/create-course" element={<CreateCourse />} />
           <Route path="/courses" element={<CourseList />} />
@@ -56,7 +61,12 @@ const App: React.FC = () => {
               <Route path="create" element={<InstructorCreateCourse />} />
             </Route>
           </Route>
-
+          {/* Supporter Dashboard*/}
+          <Route
+            path="/supporter-management"
+            element={<SupporterDashboard />}
+          ></Route>
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

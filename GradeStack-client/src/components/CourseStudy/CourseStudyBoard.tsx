@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import SideBar from "./SideBar";
+import SideBar from "./Sidebar";
 import CourseDescription from "./CourseDescription";
 import VideoContent from "./Contents/VideoContent";
 import CodingContent from "./Contents/CodingContent";
