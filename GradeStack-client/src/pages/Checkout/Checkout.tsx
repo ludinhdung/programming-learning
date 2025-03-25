@@ -21,7 +21,7 @@ const CustomCheckbox = styled(Checkbox)`
       border: none;
       border-radius: 0;
     }
-  `;  
+  `;
 
 const Checkout: FC = () => {
   const { courseId } = useParams();
@@ -49,19 +49,19 @@ const Checkout: FC = () => {
       <div className="container mx-auto px-12 py-8">
         {/* Breadcrumb */}
         <Button
-                  type="none"
-                  className="bg-[#29324a] mb-4 uppercase text-[#fff] text-xs font-medium rounded-none hover:border-[#1b55ac] hover:bg-[#1c2e48]"
-                  onClick={() => navigate("/")}
-                >
-                  <svg width="8" height="22" viewBox="0 0 13 22" fill="none" className="fill-current mr-2.5 shrink-0">
-                    <rect x="0.428223" y="8.95117" width="4.16918" height="4.16918"></rect>
-                    <rect x="4.59717" y="4.7832" width="4.16918" height="4.16918"></rect>
-                    <rect x="8.7666" y="0.613281" width="4.16918" height="4.16918"></rect>
-                    <rect x="8.7666" y="17.29" width="4.16918" height="4.16918"></rect>
-                    <rect x="4.59717" y="13.1211" width="4.16918" height="4.16918"></rect>
-                  </svg>
-                  Back 
-                </Button>
+          type="none"
+          className="bg-[#29324a] mb-4 uppercase text-[#fff] text-xs font-medium rounded-none hover:border-[#1b55ac] hover:bg-[#1c2e48]"
+          onClick={() => navigate("/")}
+        >
+          <svg width="8" height="22" viewBox="0 0 13 22" fill="none" className="fill-current mr-2.5 shrink-0">
+            <rect x="0.428223" y="8.95117" width="4.16918" height="4.16918"></rect>
+            <rect x="4.59717" y="4.7832" width="4.16918" height="4.16918"></rect>
+            <rect x="8.7666" y="0.613281" width="4.16918" height="4.16918"></rect>
+            <rect x="8.7666" y="17.29" width="4.16918" height="4.16918"></rect>
+            <rect x="4.59717" y="13.1211" width="4.16918" height="4.16918"></rect>
+          </svg>
+          Back
+        </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Content - Course Summary */}
