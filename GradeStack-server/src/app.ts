@@ -5,6 +5,7 @@ import authRouter from './modules/auth/routes/auth.routes';
 import userRouter from './modules/user/routes/user.routes';
 import { errorHandler } from './shared/middleware/error.middleware';
 import courseRoutes from './modules/course/routes/course.routes';
+import practiceCodeRoutes from './modules/practice-code/routes/coding-exercise.routes';
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(morgan('dev'));
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/courses', courseRoutes);
+app.use('/api/practice-code', practiceCodeRoutes);
 
 app.use(errorHandler);
 

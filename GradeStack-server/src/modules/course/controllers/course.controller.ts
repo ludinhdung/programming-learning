@@ -13,19 +13,23 @@ export class CourseController {
             const {
                 topicId,
                 instructorId,
+                search,
                 page = 1,
                 limit = 10,
                 sortBy = 'createdAt',
-                order = 'desc'
+                order = 'desc',
+                select
             } = req.query;
 
             const courses = await this.courseService.findCourses({
                 topicId: topicId as string,
                 instructorId: instructorId as string,
+                search: search as string,
                 page: Number(page),
                 limit: Number(limit),
                 sortBy: sortBy as string,
-                order: order as 'asc' | 'desc'
+                order: order as 'asc' | 'desc',
+                select: select as string
             });
 
             res.status(200).json(courses);
