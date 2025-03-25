@@ -1,8 +1,8 @@
 import React from "react";
 import TopBar from "./TopBar";
 import SideBar from "./SideBar";
-import Content from "./Content";
 import CourseDescription from "./CourseDescription";
+import Content from "./Content";
 const course: Course = {
   id: "course-001",
   title: "Fullstack Web Development",
@@ -176,8 +176,8 @@ const CourseStudyBoard: React.FC = () => {
             <TopBar />
           </div>
           <div className="bg-[#0e1721] rounded-lg mb-4">
-            <Content />
           </div>
+          <Content/>
           <div>
             <CourseDescription course={course} />
           </div>
