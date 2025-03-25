@@ -14,6 +14,8 @@ import InstructorManagement from "./pages/InstructorManagementPage/InstructorMan
 import Overview from "./components/InstructorManagementComponents/Contents/Overview";
 import Course from "./components/InstructorManagementComponents/Contents/Course";
 import Checkout from "./pages/Checkout/Checkout";
+import PracticeCode from "./pages/PracticeCode/PracticeCode";
+import Profile from "./pages/Profile/Profile";
 
 const App: React.FC = () => {
   return (
@@ -23,8 +25,10 @@ const App: React.FC = () => {
           <Route path="/" element={<Home />} />
           <Route path="/courses" element={<CourseList />} />
           <Route path="/checkout/:courseId" element={<Checkout />} />
+          <Route path="/practice-code/:lessonId" element={<PracticeCode />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/course-study" element={<CourseStudy />} />
+          <Route path="/profile" element={< Profile />} />
           <Route
             path="/instructor-management"
             element={<InstructorManagement />}
