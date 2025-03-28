@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { AppError } from '../../../shared/middleware/error.middleware';
 
 const prisma = new PrismaClient();
 
@@ -36,7 +35,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new AppError('User not found', 404);
+      throw new Error('User not found');
     }
 
     return user;
@@ -46,7 +45,7 @@ export class UserService {
     const user = await prisma.user.findUnique({ where: { id } });
 
     if (!user) {
-      throw new AppError('User not found', 404);
+      throw new Error('User not found');
     }
 
     const updatedUser = await prisma.user.update({

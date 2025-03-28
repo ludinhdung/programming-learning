@@ -1,5 +1,18 @@
+# GradeStack API - Instructor Endpoints
+# ===============================
+
+# Environment Variables
 @baseUrl = http://localhost:4000/api
+@instructorId = cf29e577-dc82-49a3-b6e2-0a8f06496a28
+@topicId = dd32e0e5-3289-4a99-82ce-a798f9ff6543
 @token = YOUR_JWT_TOKEN_HERE
+@courseId = d1bdd98a-9591-47d5-8634-42314a1d1e3f
+@moduleId = 824b4e9f-18ac-4aaf-b9b9-5198a160bd0f
+@lessonId = d162fcc0-ce39-403a-80e4-c25efc0be5aa
+@videoLessonId = 0e9c8acd-1469-4be2-b1fa-bc45c060fa31
+# ===============================
+# INSTRUCTOR MANAGEMENT
+# ===============================
 
 ### Create Instructor (Admin only)
 POST {{baseUrl}}/instructors/
@@ -8,19 +21,18 @@ Content-Type: application/json
 
 {
     "userData": {
-        "email": "abcdfg@example.com",
-        "password": "phudk123",
-        "firstName": "Phu",
-        "lastName": "Duong"
+        "email": "instructor@example.com",
+        "password": "securePassword123",
+        "firstName": "John",
+        "lastName": "Doe"
     },
     "instructorData": {
         "organization": "Example University",
         "bio": "Experienced instructor with 10 years of teaching experience",
-        "avatar": "https://mdbcdn.b-cdn.net/img/new/avatars/2.webp",
+        "avatar": "https://example.com/avatars/instructor.jpg",
         "socials": [
             "https://linkedin.com/in/johndoe",
             "https://twitter.com/johndoe"
-        
         ]
     }
 }
@@ -30,11 +42,11 @@ GET {{baseUrl}}/instructors
 Content-Type: application/json
 
 ### Get Instructor by ID
-GET {{baseUrl}}/instructors/ff6a31d4-5012-4399-98e3-601f715305f2
+GET {{baseUrl}}/instructors/{{instructorId}}
 Content-Type: application/json
 
 ### Update Instructor Profile
-PUT {{baseUrl}}/instructors/ff6a31d4-5012-4399-98e3-601f715305f2/profile
+PUT {{baseUrl}}/instructors/{{instructorId}}/profile
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -43,12 +55,12 @@ Content-Type: application/json
     "organization": "New University",
     "socials": [
         "https://linkedin.com/in/johndoe",
-        "https://johndoe.com"
+        "https://github.com/johndoe"
     ]
 }
 
 ### Update Instructor Avatar
-PUT {{baseUrl}}/instructors/instructor-id-here/avatar
+PUT {{baseUrl}}/instructors/{{instructorId}}/avatar
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -56,8 +68,12 @@ Content-Type: application/json
     "avatarUrl": "https://example.com/new-avatar.jpg"
 }
 
-### Create Course (Instructor only)
-POST {{baseUrl}}/instructors/8293286e-1282-4bb8-8eb4-d3639ba0b07c/courses
+# ===============================
+# COURSE MANAGEMENT
+# ===============================
+
+### Create Simple Course
+POST {{baseUrl}}/instructors/{{instructorId}}/courses
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -65,11 +81,232 @@ Content-Type: application/json
     "title": "Introduction to Programming",
     "description": "A beginner-friendly course to learn programming fundamentals",
     "price": 100000,
-    "duration": 12
+    "duration": 12,
+    "isPublished": false
 }
 
-### Create Workshop (Instructor only)
-POST {{baseUrl}}/instructors/8293286e-1282-4bb8-8eb4-d3639ba0b07c/workshops
+### Create Course with Full Structure (JSON approach)
+POST {{baseUrl}}/instructors/{{instructorId}}/courses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "Python for human 3",
+    "description": "lorem ipsum dolor sit amet, consectetur adipiscing elit",
+    "price": 99.99,
+    "duration": 1800,
+    "isPublished": false,
+    "topicIds": ["{{topicId}}"],
+    "modules": [
+        {
+            "title": "Scaffolding",
+            "description": "lorem ipsum dolor sit amet, consectetur adipiscing elit",
+            "order": 1,
+            "lessons": [
+                {
+                    "title": "Lession 111",
+                    "description": "Hi, there. I'm excited to start this course with you. In this introductory video, we'll quickly review our objective, as well as the tools and technologies we'll be using.",
+                    "lessonType": "VIDEO",
+                    "isPreview": true,
+                    "videoData": {
+                        "url": "placeholder-url-to-be-updated-later"
+                    }
+                },
+                {
+                    "title": "Lession 222",
+                    "description": "Hi, there. I'm excited to start this course with you. In this introductory video, we'll quickly review our objective, as well as the tools and technologies we'll be using.",
+                    "lessonType": "VIDEO",
+                    "isPreview": true,
+                    "videoData": {
+                        "url": "placeholder-url-to-be-updated-later"
+                    }
+                }
+            ]
+        },
+        {
+            "title": "The Storefront",
+            "description": "lorem ipsum dolor sit amet, consectetur adipiscing elit",
+            "order": 2,
+            "lessons": [
+                {
+                    "title": "Lession 111",
+                    "description": "lorem ipsum dolor sit amet, consectetur adipiscing elit",
+                    "lessonType": "VIDEO",
+                    "isPreview": true,
+                    "videoData": {
+                        "url": "placeholder-url-to-be-updated-later"
+                    }
+                },
+                {
+                    "title": "Lession 222",
+                    "description": "lorem ipsum dolor sit amet, consectetur adipiscing elit",
+                    "lessonType": "VIDEO",
+                    "isPreview": true,
+                    "videoData": {
+                        "url": "placeholder-url-to-be-updated-later"
+                    }
+                }
+            ]
+        }
+    ]
+}
+
+# ===============================
+# COURSE CRUD OPERATIONS
+# ===============================
+
+### Get All Courses for an Instructor
+GET {{baseUrl}}/instructors/{{instructorId}}/courses
+Authorization: Bearer {{token}}
+
+### Get Course by ID
+GET {{baseUrl}}/instructors/{{instructorId}}/courses/{{courseId}}
+Authorization: Bearer {{token}}
+
+### Update Course
+PUT {{baseUrl}}/instructors/{{instructorId}}/courses/{{courseId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "Updated Course Title",
+    "description": "Updated course description with more details",
+    "price": 129.99,
+    "isPublished": true,
+    "topicIds": ["{{topicId}}"]
+}
+
+### Delete Course
+DELETE {{baseUrl}}/instructors/{{instructorId}}/courses/{{courseId}}
+Authorization: Bearer {{token}}
+
+# ===============================
+# MODULE CRUD OPERATIONS
+# ===============================
+
+### Get All Courses Full Relation for an Instructor
+GET {{baseUrl}}/instructors/{{instructorId}}/courses-full-relation
+Authorization: Bearer {{token}}
+
+
+### Get All Modules for a Course
+GET {{baseUrl}}/instructors/courses/{{courseId}}/modules
+Authorization: Bearer {{token}}
+
+### Get Module by ID
+GET {{baseUrl}}/instructors/modules/{{moduleId}}
+Authorization: Bearer {{token}}
+
+### Create New Module
+POST {{baseUrl}}/instructors/courses/{{courseId}}/modules
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "Advanced Topics",
+    "description": "Explore advanced concepts and techniques",
+    "order": 2
+}
+
+### Update Module
+PUT {{baseUrl}}/instructors/modules/{{moduleId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "Updated Module Title",
+    "description": "Updated module description with more details",
+    "order": 1
+}
+
+### Delete Module
+DELETE {{baseUrl}}/instructors/modules/{{moduleId}}
+Authorization: Bearer {{token}}
+
+# ===============================
+# LESSON CRUD OPERATIONS
+# ===============================
+
+### Get All Lessons for a Module
+GET {{baseUrl}}/instructors/modules/{{moduleId}}/lessons
+Authorization: Bearer {{token}}
+
+### Get Lesson by ID
+GET {{baseUrl}}/instructors/lessons/{{lessonId}}
+Authorization: Bearer {{token}}
+
+### Update Lesson
+PUT {{baseUrl}}/instructors/lessons/{{lessonId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "Updated Lesson Title",
+    "description": "Updated lesson description with more details",
+    "duration": 25,
+    "isPreview": true
+}
+
+### Delete Lesson
+DELETE {{baseUrl}}/instructors/lessons/{{lessonId}}
+Authorization: Bearer {{token}}
+
+# ===============================
+# VIDEO UPLOADS
+# ===============================
+
+### Upload Video and Create Lesson Automatically (Duration is auto-calculated by the server)
+# Note: For actual testing, use Postman or curl as REST Client has limitations with file uploads
+# 
+# curl -X POST {{baseUrl}}/instructors/{{instructorId}}/upload-video \
+#   -H "Authorization: Bearer {{token}}" \
+#   -F "video=@/path/to/your/video.mp4" \
+#   -F "moduleId=b66b4ed8-6f00-42bc-8eb5-9afe68d353b5" \
+#   -F "lessonId=c77c5fd9-7f00-42bc-8eb5-9afe68d353b6" \
+#   -F "videoLessonId=d88d6fe0-8f00-42bc-8eb5-9afe68d353b7"
+#
+POST {{baseUrl}}/instructors/{{instructorId}}/upload-video
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="video"; filename="css.mp4"
+Content-Type: video/mp4
+
+< C:\Users\duong\Downloads\css.mp4
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="moduleId"
+
+{{moduleId}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lessonId"
+
+{{lessonId}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="videoLessonId"
+
+{{videoLessonId}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+# Response will include:
+# {
+#   "message": "Video uploaded and module updated successfully",
+#   "videoUrl": "https://example.com/videos/123456-sample.mp4",
+#   "thumbnailUrl": "https://example.com/videos/thumbnails/123456-thumbnail.jpg",
+#   "duration": 125.5,  // Duration in seconds, automatically extracted from the video
+#   "module": { ... }
+# }
+
+# Important Note: When creating a course with video modules, you should:
+# 1. First create the course structure with modules
+# 2. Then upload videos to specific modules using the upload-video endpoint above
+# 3. The server will automatically extract video duration and update the module with video information
+
+# ===============================
+# WORKSHOP MANAGEMENT
+# ===============================
+
+### Create Workshop
+POST {{baseUrl}}/instructors/{{instructorId}}/workshops
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -80,92 +317,17 @@ Content-Type: application/json
     "duration": 4
 }
 
-### Create Topic (Instructor only)
-POST {{baseUrl}}/instructors/ff6a31d4-5012-4399-98e3-601f715305f2/topics
-# Authorization: Bearer {{token}}
+# ===============================
+# TOPIC MANAGEMENT
+# ===============================
+
+### Create Topic
+POST {{baseUrl}}/instructors/{{instructorId}}/topics
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "name": "Introduction to Php",
-    "description": "Learn the basics of Php programming language",
+    "name": "Introduction to PYTHON",
+    "description": "Learn the basics of PYTHON programming language",
     "thumbnail": "https://example.com/thumbnail.jpg"
 }
-
-### Get Topic (For all users)
-POST {{baseUrl}}/instructors/ff6a31d4-5012-4399-98e3-601f715305f2/topics
-# Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "name": "Introduction to Java",
-    "description": "Learn the basics of Java programming language",
-    "thumbnail": "https://example.com/thumbnail.jpg"
-}
-
-### Create a course with full structure
-POST {{baseUrl}}/instructors/ff6a31d4-5012-4399-98e3-601f715305f2/courses
-Content-Type: application/json
-
-{
-    "title": "Advanced Java Programming",
-    "description": "Master Java with advanced concepts, design patterns, and real-world applications",
-    "price": 99.99,
-    "duration": 1800,
-    "isPublished": false,
-    "topicIds": ["6d12310a-c6a1-4b63-ab23-1425ab9ca897"],
-    "modules": [
-        {
-            "title": "Java Fundamentals",
-            "description": "Learn the core concepts of Java",
-            "order": 1,
-            "lessons": [
-                {
-                    "title": "Introduction to Java",
-                    "description": "Overview of Java and its benefits",
-                    "lessonType": "VIDEO",
-                    "duration": 15,
-                    "isPreview": true,
-                    "videoData": {
-                        "url": "https://example.com/videos/intro-Java.mp4",
-                        "duration": 900
-                    }
-                },
-                {
-                    "title": "Java Types and Interfaces",
-                    "description": "Understanding Java's type system",
-                    "lessonType": "VIDEO",
-                    "duration": 20,
-                    "videoData": {
-                        "url": "https://example.com/videos/Java-types.mp4",
-                        "duration": 1200
-                    }
-                },
-                {
-                    "title": "Type Challenge",
-                    "description": "Test your knowledge of Java types",
-                    "lessonType": "CODING",
-                    "duration": 30,
-                    "codingData": {
-                        "language": "JAVA",
-                        "problem": "Create an interface for a User object with strongly typed properties",
-                        "hint": "Remember to use correct Java syntax for optional properties",
-                        "solution": "interface User {\n  id: string;\n  name: string;\n  email: string;\n  age?: number;\n  roles: string[];\n}",
-                        "codeSnippet": "interface User {\n  // Your code here\n}"
-                    }
-                }
-            ]
-        } 
-    ]
-}
-
-### Create a simple course without modules
-POST http://localhost:3000/api/instructors/12345/courses
-Content-Type: application/json
-
-{
-    "title": "Introduction to Web Development",
-    "description": "Learn the basics of HTML, CSS, and JavaScript",
-    "price": 49.99,
-    "isPublished": true
-}
-

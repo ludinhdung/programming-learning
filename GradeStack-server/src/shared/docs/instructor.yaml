@@ -1,0 +1,1348 @@
+openapi: 3.0.0
+tags:
+  - name: Instructors
+    description: Instructor management endpoints
+  - name: Courses
+    description: Course management endpoints
+  - name: Modules
+    description: Module management endpoints
+  - name: Lessons
+    description: Lesson management endpoints
+  - name: Videos
+    description: Video upload and management endpoints
+  - name: Workshops
+    description: Workshop management endpoints
+  - name: Topics
+    description: Topic management endpoints
+
+paths:
+  /instructors:
+    post:
+      tags:
+        - Instructors
+      summary: Create a new instructor
+      description: Create a new instructor account with associated user data (Admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userData
+              properties:
+                userData:
+                  type: object
+                  required:
+                    - email
+                    - password
+                    - firstName
+                    - lastName
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                      example: instructor@example.com
+                    password:
+                      type: string
+                      format: password
+                      example: securePassword123
+                    firstName:
+                      type: string
+                      example: John
+                    lastName:
+                      type: string
+                      example: Doe
+                instructorData:
+                  type: object
+                  properties:
+                    organization:
+                      type: string
+                      example: Example University
+                    bio:
+                      type: string
+                      example: Experienced instructor with 10 years of teaching experience
+                    avatar:
+                      type: string
+                      format: uri
+                      example: https://example.com/avatars/instructor.jpg
+                    socials:
+                      type: array
+                      items:
+                        type: string
+                        format: uri
+                      example:
+                        - https://linkedin.com/in/johndoe
+                        - https://twitter.com/johndoe
+      responses:
+        '201':
+          description: Instructor created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Instructor'
+        '400':
+          description: Missing required fields
+        '500':
+          description: Internal server error
+    
+    get:
+      tags:
+        - Instructors
+      summary: Get all instructors
+      description: Retrieve a list of all instructors with pagination
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Number of items per page
+      responses:
+        '200':
+          description: List of instructors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Instructor'
+        '500':
+          description: Internal server error
+
+  /instructors/{id}:
+    get:
+      tags:
+        - Instructors
+      summary: Get instructor by ID
+      description: Retrieve a specific instructor by their ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Instructor ID
+      responses:
+        '200':
+          description: Instructor details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Instructor'
+        '404':
+          description: Instructor not found
+        '500':
+          description: Internal server error
+
+  /instructors/{id}/profile:
+    put:
+      tags:
+        - Instructors
+      summary: Update instructor profile
+      description: Update an instructor's profile information
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Instructor ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bio:
+                  type: string
+                  example: Updated bio with new information about my teaching experience
+                organization:
+                  type: string
+                  example: New University
+                socials:
+                  type: array
+                  items:
+                    type: string
+                    format: uri
+                  example:
+                    - https://linkedin.com/in/johndoe
+                    - https://github.com/johndoe
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Instructor'
+        '400':
+          description: Invalid input
+        '404':
+          description: Instructor not found
+        '500':
+          description: Internal server error
+
+  /instructors/{id}/avatar:
+    put:
+      tags:
+        - Instructors
+      summary: Update instructor avatar
+      description: Update an instructor's avatar image URL
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Instructor ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - avatarUrl
+              properties:
+                avatarUrl:
+                  type: string
+                  format: uri
+                  example: https://example.com/new-avatar.jpg
+      responses:
+        '200':
+          description: Avatar updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Instructor'
+        '400':
+          description: Avatar URL is required
+        '404':
+          description: Instructor not found
+        '500':
+          description: Internal server error
+
+  /instructors/{id}/courses:
+    post:
+      tags:
+        - Courses
+      summary: Create a new course
+      description: Create a new course for an instructor
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Instructor ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseCreate'
+      responses:
+        '201':
+          description: Course created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          description: Missing required fields
+        '404':
+          description: Instructor not found
+        '500':
+          description: Internal server error
+    
+    get:
+      tags:
+        - Courses
+      summary: Get all courses for an instructor
+      description: Retrieve all courses created by a specific instructor
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Instructor ID
+      responses:
+        '200':
+          description: List of courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+        '404':
+          description: Instructor not found
+        '500':
+          description: Internal server error
+
+  /instructors/{id}/courses-full-relation:
+    get:
+      tags:
+        - Courses
+      summary: Get all courses with full relation data
+      description: Retrieve all courses with modules, lessons, and other related data for an instructor
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Instructor ID
+      responses:
+        '200':
+          description: List of courses with full relation data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseFullRelation'
+        '404':
+          description: Instructor not found
+        '500':
+          description: Internal server error
+
+  /instructors/{id}/courses/{courseId}:
+    get:
+      tags:
+        - Courses
+      summary: Get course by ID
+      description: Retrieve a specific course by its ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Instructor ID
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Course ID
+      responses:
+        '200':
+          description: Course details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '404':
+          description: Course not found
+        '500':
+          description: Internal server error
+    
+    put:
+      tags:
+        - Courses
+      summary: Update course
+      description: Update a specific course
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Instructor ID
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Course ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - description
+              properties:
+                title:
+                  type: string
+                  example: Updated Course Title
+                description:
+                  type: string
+                  example: Updated course description with more details
+                price:
+                  type: number
+                  format: float
+                  example: 129.99
+                isPublished:
+                  type: boolean
+                  example: true
+                topicIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  example:
+                    - dd32e0e5-3289-4a99-82ce-a798f9ff6543
+      responses:
+        '200':
+          description: Course updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          description: Missing required fields
+        '404':
+          description: Course not found
+        '500':
+          description: Internal server error
+    
+    delete:
+      tags:
+        - Courses
+      summary: Delete course
+      description: Delete a specific course
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Instructor ID
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Course ID
+      responses:
+        '204':
+          description: Course deleted successfully
+        '404':
+          description: Course not found
+        '500':
+          description: Internal server error
+
+  /instructors/courses/{courseId}/modules:
+    get:
+      tags:
+        - Modules
+      summary: Get all modules for a course
+      description: Retrieve all modules for a specific course
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Course ID
+      responses:
+        '200':
+          description: List of modules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Module'
+        '404':
+          description: Course not found
+        '500':
+          description: Internal server error
+    
+    post:
+      tags:
+        - Modules
+      summary: Create a new module
+      description: Create a new module for a specific course
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Course ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - description
+              properties:
+                title:
+                  type: string
+                  example: Advanced Topics
+                description:
+                  type: string
+                  example: Explore advanced concepts and techniques
+                order:
+                  type: integer
+                  example: 2
+      responses:
+        '201':
+          description: Module created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Module'
+        '400':
+          description: Missing required fields
+        '404':
+          description: Course not found
+        '500':
+          description: Internal server error
+
+  /instructors/modules/{moduleId}:
+    get:
+      tags:
+        - Modules
+      summary: Get module by ID
+      description: Retrieve a specific module by its ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: moduleId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Module ID
+      responses:
+        '200':
+          description: Module details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Module'
+        '404':
+          description: Module not found
+        '500':
+          description: Internal server error
+    
+    put:
+      tags:
+        - Modules
+      summary: Update module
+      description: Update a specific module
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: moduleId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Module ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - description
+              properties:
+                title:
+                  type: string
+                  example: Updated Module Title
+                description:
+                  type: string
+                  example: Updated module description with more details
+                order:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Module updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Module'
+        '400':
+          description: Missing required fields
+        '404':
+          description: Module not found
+        '500':
+          description: Internal server error
+    
+    delete:
+      tags:
+        - Modules
+      summary: Delete module
+      description: Delete a specific module
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: moduleId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Module ID
+      responses:
+        '204':
+          description: Module deleted successfully
+        '404':
+          description: Module not found
+        '500':
+          description: Internal server error
+
+  /instructors/modules/{moduleId}/lessons:
+    get:
+      tags:
+        - Lessons
+      summary: Get all lessons for a module
+      description: Retrieve all lessons for a specific module
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: moduleId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Module ID
+      responses:
+        '200':
+          description: List of lessons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Lesson'
+        '404':
+          description: Module not found
+        '500':
+          description: Internal server error
+
+  /instructors/lessons/{lessonId}:
+    get:
+      tags:
+        - Lessons
+      summary: Get lesson by ID
+      description: Retrieve a specific lesson by its ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: lessonId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Lesson ID
+      responses:
+        '200':
+          description: Lesson details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lesson'
+        '404':
+          description: Lesson not found
+        '500':
+          description: Internal server error
+    
+    put:
+      tags:
+        - Lessons
+      summary: Update lesson
+      description: Update a specific lesson
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: lessonId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Lesson ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - description
+              properties:
+                title:
+                  type: string
+                  example: Updated Lesson Title
+                description:
+                  type: string
+                  example: Updated lesson description with more details
+                duration:
+                  type: integer
+                  example: 25
+                isPreview:
+                  type: boolean
+                  example: true
+      responses:
+        '200':
+          description: Lesson updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lesson'
+        '400':
+          description: Missing required fields
+        '404':
+          description: Lesson not found
+        '500':
+          description: Internal server error
+    
+    delete:
+      tags:
+        - Lessons
+      summary: Delete lesson
+      description: Delete a specific lesson
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: lessonId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Lesson ID
+      responses:
+        '204':
+          description: Lesson deleted successfully
+        '404':
+          description: Lesson not found
+        '500':
+          description: Internal server error
+
+  /instructors/{id}/upload-video:
+    post:
+      tags:
+        - Videos
+      summary: Upload video and update module
+      description: |
+        Upload a video file and automatically update the module with video information.
+        The system will automatically extract the video duration and generate a thumbnail.
+        Note that video information is now stored directly on the Module model instead of creating separate VideoLesson records.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Instructor ID
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - video
+                - moduleId
+              properties:
+                video:
+                  type: string
+                  format: binary
+                  description: Video file to upload (MP4 format recommended)
+                moduleId:
+                  type: string
+                  format: uuid
+                  description: ID of the module to update with video information
+                lessonId:
+                  type: string
+                  format: uuid
+                  description: Optional - ID of the lesson to update with duration information
+                videoLessonId:
+                  type: string
+                  format: uuid
+                  description: Optional - ID of the video lesson to update (for backward compatibility)
+      responses:
+        '200':
+          description: Video uploaded and module updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Video uploaded and information updated successfully
+                  videoUrl:
+                    type: string
+                    format: uri
+                    example: https://example.com/videos/123456-sample.mp4
+                  thumbnailUrl:
+                    type: string
+                    format: uri
+                    example: https://example.com/videos/thumbnails/123456-thumbnail.jpg
+                  duration:
+                    type: number
+                    format: float
+                    example: 125.5
+                    description: Duration in seconds, automatically extracted from the video
+                  module:
+                    $ref: '#/components/schemas/Module'
+                  lesson:
+                    $ref: '#/components/schemas/Lesson'
+                  videoLesson:
+                    $ref: '#/components/schemas/VideoLesson'
+        '400':
+          description: Missing required fields or invalid file
+        '404':
+          description: Module not found
+        '403':
+          description: Unauthorized - instructor does not own this module
+        '500':
+          description: Internal server error
+
+  /instructors/{id}/workshops:
+    post:
+      tags:
+        - Workshops
+      summary: Create a new workshop
+      description: Create a new workshop for an instructor
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Instructor ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - description
+                - scheduledAt
+                - duration
+              properties:
+                title:
+                  type: string
+                  example: Advanced JavaScript Workshop
+                description:
+                  type: string
+                  example: An intensive workshop covering advanced JavaScript topics
+                scheduledAt:
+                  type: string
+                  format: date-time
+                  example: 2025-06-15T10:00:00Z
+                duration:
+                  type: integer
+                  example: 4
+                  description: Duration in hours
+      responses:
+        '201':
+          description: Workshop created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workshop'
+        '400':
+          description: Missing required fields
+        '404':
+          description: Instructor not found
+        '500':
+          description: Internal server error
+
+  /instructors/{id}/topics:
+    post:
+      tags:
+        - Topics
+      summary: Create a new topic
+      description: Create a new topic for an instructor
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Instructor ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - thumbnail
+              properties:
+                name:
+                  type: string
+                  example: Introduction to PYTHON
+                description:
+                  type: string
+                  example: Learn the basics of PYTHON programming language
+                thumbnail:
+                  type: string
+                  format: uri
+                  example: https://example.com/thumbnail.jpg
+      responses:
+        '201':
+          description: Topic created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+        '400':
+          description: Missing required fields
+        '404':
+          description: Instructor not found
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    Instructor:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        organization:
+          type: string
+        bio:
+          type: string
+        avatar:
+          type: string
+          format: uri
+        socials:
+          type: array
+          items:
+            type: string
+            format: uri
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            email:
+              type: string
+              format: email
+            firstName:
+              type: string
+            lastName:
+              type: string
+            role:
+              type: string
+              enum: [STUDENT, INSTRUCTOR, ADMIN]
+
+    CourseCreate:
+      type: object
+      required:
+        - title
+        - description
+      properties:
+        title:
+          type: string
+          example: Introduction to Programming
+        description:
+          type: string
+          example: A beginner-friendly course to learn programming fundamentals
+        price:
+          type: number
+          format: float
+          example: 100000
+        duration:
+          type: integer
+          example: 12
+        isPublished:
+          type: boolean
+          example: false
+        topicIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          example:
+            - dd32e0e5-3289-4a99-82ce-a798f9ff6543
+        modules:
+          type: array
+          items:
+            type: object
+            required:
+              - title
+              - description
+            properties:
+              title:
+                type: string
+                example: Scaffolding
+              description:
+                type: string
+                example: lorem ipsum dolor sit amet, consectetur adipiscing elit
+              order:
+                type: integer
+                example: 1
+              lessons:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - title
+                    - description
+                    - lessonType
+                  properties:
+                    title:
+                      type: string
+                      example: Lesson 111
+                    description:
+                      type: string
+                      example: Introduction to the course
+                    lessonType:
+                      type: string
+                      enum: [VIDEO, CODING, FINAL_TEST]
+                      example: VIDEO
+                    isPreview:
+                      type: boolean
+                      example: true
+                    videoData:
+                      type: object
+                      properties:
+                        url:
+                          type: string
+                          format: uri
+                          example: placeholder-url-to-be-updated-later
+                    codingData:
+                      type: object
+                      properties:
+                        language:
+                          type: string
+                          example: javascript
+                        problem:
+                          type: string
+                          example: Write a function that adds two numbers
+                        solution:
+                          type: string
+                          example: function add(a, b) { return a + b; }
+                    finalTestData:
+                      type: object
+                      properties:
+                        questions:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              content:
+                                type: string
+                                example: What is JavaScript?
+                              answers:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    content:
+                                      type: string
+                                      example: A programming language
+                                    isCorrect:
+                                      type: boolean
+                                      example: true
+
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+        duration:
+          type: integer
+        isPublished:
+          type: boolean
+        instructorId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        topics:
+          type: array
+          items:
+            $ref: '#/components/schemas/Topic'
+
+    CourseFullRelation:
+      allOf:
+        - $ref: '#/components/schemas/Course'
+        - type: object
+          properties:
+            modules:
+              type: array
+              items:
+                $ref: '#/components/schemas/ModuleWithLessons'
+
+    Module:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        order:
+          type: integer
+        courseId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        videoUrl:
+          type: string
+          format: uri
+          description: URL to the video file (stored directly on the module)
+        thumbnailUrl:
+          type: string
+          format: uri
+          description: URL to the video thumbnail (stored directly on the module)
+        videoDuration:
+          type: integer
+          description: Duration of the video in seconds (stored directly on the module)
+
+    ModuleWithLessons:
+      allOf:
+        - $ref: '#/components/schemas/Module'
+        - type: object
+          properties:
+            lessons:
+              type: array
+              items:
+                $ref: '#/components/schemas/Lesson'
+
+    Lesson:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        duration:
+          type: integer
+          description: Duration in minutes, automatically calculated for video lessons
+        isPreview:
+          type: boolean
+        lessonType:
+          type: string
+          enum: [VIDEO, CODING, FINAL_TEST]
+        moduleId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        videoLesson:
+          $ref: '#/components/schemas/VideoLesson'
+        codingExercise:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            language:
+              type: string
+            problem:
+              type: string
+            solution:
+              type: string
+        finalTest:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            questions:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  content:
+                    type: string
+                  answers:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        content:
+                          type: string
+                        isCorrect:
+                          type: boolean
+
+    VideoLesson:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+        thumbnailUrl:
+          type: string
+          format: uri
+          description: Optional thumbnail URL
+        duration:
+          type: integer
+          description: Duration in seconds, automatically extracted from the video
+        lessonId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      description: |
+        Note: This schema is maintained for backward compatibility.
+        New implementations should use the video information stored directly on the Module model.
+
+    Workshop:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+        duration:
+          type: integer
+          description: Duration in hours
+        instructorId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Topic:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        thumbnail:
+          type: string
+          format: uri
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
