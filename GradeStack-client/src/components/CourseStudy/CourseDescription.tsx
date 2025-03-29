@@ -1,22 +1,232 @@
-import React from "react";
+import React, { useState } from "react";
 import { Course, Comment, User } from "./CourseStudyBoard";
+import { Tabs } from "antd";
+import type { TabsProps } from "antd";
+import { Input, Select, Button, Tooltip } from "antd";
+import styled from "styled-components";
+import "../../styles/TabStudyCourseStyles.css"
+import {
+  EditOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+  BoldOutlined,
+  ItalicOutlined,
+  OrderedListOutlined,
+  UnorderedListOutlined,
+  CodeOutlined,
+  PlayCircleOutlined,
+} from "@ant-design/icons";
+import { Note } from "./Contents/VideoContent";
+const NotesContainer = styled.div`
+  margin-top: 20px;
+`;
 
+const CreateNoteInput = styled.div`
+  position: relative;
+  margin-bottom: 20px;
+
+  .ant-input {
+    padding: 12px 40px 12px 16px;
+    border-radius: 8px;
+    background: #1c2936;
+    border: 1px solid #29334a;
+    font-size: 15px;
+    color: #e5e7eb;
+
+    &::placeholder {
+      color: #6b7280;
+    }
+
+    &:hover,
+    &:focus {
+      border-color: #3b82f6;
+      box-shadow: none;
+    }
+  }
+
+  .action-button {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #3b82f6;
+    cursor: pointer;
+    font-size: 18px;
+  }
+`;
+
+const EditorContainer = styled.div`
+  margin-bottom: 20px;
+  background: #1c2936;
+  border-radius: 8px;
+  border: 1px solid #29334a;
+  overflow: hidden;
+`;
+
+const EditorToolbar = styled.div`
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #374151;
+  background: #29334a;
+  justify-content: space-between;
+
+  .toolbar-left {
+    display: flex;
+    gap: 8px;
+  }
+
+  .toolbar-right {
+    display: flex;
+    gap: 8px;
+  }
+
+  .toolbar-btn {
+    padding: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #6b7280;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #1c2936;
+      color: #e5e7eb;
+    }
+  }
+`;
+
+const EditorContent = styled.div`
+  padding: 16px;
+  min-height: 120px;
+  background: #1c2936;
+
+  textarea {
+    width: 100%;
+    min-height: 100px;
+    border: none;
+    resize: none;
+    outline: none;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #e5e7eb;
+    background: transparent;
+
+    &::placeholder {
+      color: #6b7280;
+    }
+  }
+`;
+
+const FilterContainer = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  .ant-select {
+    min-width: 150px;
+
+    .ant-select-selector {
+      background: #1c2936 !important;
+      border-color: #29334a !important;
+      color: #e5e7eb !important;
+    }
+
+    .ant-select-arrow {
+      color: #6b7280;
+    }
+  }
+`;
+
+const NoteItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #1c2936;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 1px solid #29334a;
+
+  .timestamp {
+    color: #ffd60a;
+    font-weight: 500;
+    font-size: 14px;
+    min-width: 50px;
+    cursor: pointer;
+  }
+
+  .lecture-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+
+    .lecture-title {
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+
+    .note-text {
+      color: #9ca3af;
+    }
+  }
+
+  .actions {
+    display: flex;
+    gap: 12px;
+
+    .action-btn {
+      color: #6b7280;
+      cursor: pointer;
+      font-size: 16px;
+
+      &:hover {
+        color: #3b82f6;
+      }
+
+      &.delete:hover {
+        color: #ef4444;
+      }
+    }
+  }
+`;
+
+interface NotesSectionProps {
+  currentTime: number;
+  notes: Note[];
+  setNotes: React.Dispatch<React.SetStateAction<Note[]>>;
+  lectureTitle: string;
+  onJumpToTimestamp: (timestamp: number) => void;
+  onPlayVideo: () => void;
+  onPauseVideo: () => void;
+  formatTime: (seconds: number) => string;
+}
+
+const { Option } = Select;
 interface CourseDescriptionProps {
   course: Course;
   comments: Comment[];
   users: User[];
 }
+
+const onChange = (key: string) => {
+  console.log(key);
+};
+
+
+
 const formatDuration = (durationInMinutes: number) => {
   const hour = Math.floor(durationInMinutes / 60);
   const minutes = durationInMinutes % 60;
   return `${hour}h ${minutes}m`;
 };
+
 const CourseDescription: React.FC<CourseDescriptionProps> = ({
   course,
   comments,
   users,
 }) => {
-  return (
+  const renderTab1Content = () => (
     <div>
       <div className="flex flex-col items-center space-y-6 bg-[#0e1721] rounded-md border border-blue-400/15 py-6">
         <p className="text-gray-300 text-center text-3xl font-extrabold pt-2">
@@ -210,148 +420,381 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
             </p>
           </div>
         </div>
-        <div>
-          <div className="flex justify-end items-center">
-            <span className="text-[100px] uppercase font-extrabold text-slate-800">
-              Discuss
-            </span>
+      </div>
+    </div>
+  );
+
+  const renderTab2Content = () => (
+    <div className="bg-[#0e1721] rounded-md border border-blue-400/15 w-full ">
+      <div className="px-16 w-full items-center">
+        <div className="flex justify-end items-center">
+          <span className="text-[100px] uppercase font-extrabold text-slate-800">
+            Discuss
+          </span>
+        </div>
+        <div className="space-y-2">
+          <div className="flex justify-between items-center gap-1 -mt-14 mb-8">
+            <img
+              src="https://www.gravatar.com/avatar/0d21dcc25204fa226e115bbdfe2aa4af742ec76c2a8093bbfe9722a181327ea9?s=100&d=https%3A%2F%2Flaracasts.nyc3.digitaloceanspaces.com%2Fmembers%2Favatars%2Fdefault%2F24.png"
+              className="w-15 h-15"
+            ></img>
+            <textarea
+              className="flex w-full h-[100px] border border-gray-600 bg-slate-800 text-gray-400 px-2 py-1"
+              placeholder="Write a reply..."
+            ></textarea>
           </div>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center gap-1 -mt-14 mb-8">
-              <img
-                src="https://www.gravatar.com/avatar/0d21dcc25204fa226e115bbdfe2aa4af742ec76c2a8093bbfe9722a181327ea9?s=100&d=https%3A%2F%2Flaracasts.nyc3.digitaloceanspaces.com%2Fmembers%2Favatars%2Fdefault%2F24.png"
-                className="w-15 h-15"
-              ></img>
-              <textarea
-                className="flex w-full h-[100px] border border-gray-600 bg-slate-800 text-gray-400 px-2 py-1"
-                placeholder="Write a reply..."
-              ></textarea>
-            </div>
-            <div className="space-y-4">
-              {comments.map((comment) => {
-                const user = users.find((user) => user.id === comment.userId);
-                const fullName = user
-                  ? `${user.firstName} ${user.lastName}`
-                  : "Unknown User";
-                return (
-                  <div className="space-y-3">
-                    <div key={comment.id} className=" bg-gray-800 px-4 py-2">
-                      <div className="flex justify-start gap-4">
-                        <img
-                          className="w-16 h-16"
-                          src={`https://unavatar.io/github/${comment.userId}`}
-                          alt={comment.userId}
-                        ></img>
-                        <div className="flex">
-                          <div className="flex flex-col">
-                            <span className="text-gray-100 font-bold">
-                              {fullName}
-                            </span>
-                            <span className="text-xs font-semibold text-gray-400">
-                              Posted {comment.createdAt.toLocaleDateString()}
-                            </span>
-                            <span className="text-sm font-semibold text-gray-300 mt-2">
-                              {comment.content}
-                            </span>
-                            <button className="flex mt-2 bg-slate-600 text-white font-semibold w-fit py-1 px-4 items-center">Reply</button>
-                          </div>
+          <div className="space-y-4">
+            {comments.map((comment) => {
+              const user = users.find((user) => user.id === comment.userId);
+              const fullName = user
+                ? `${user.firstName} ${user.lastName}`
+                : "Unknown User";
+              return (
+                <div className="space-y-3">
+                  <div key={comment.id} className=" bg-gray-800 px-4 py-2">
+                    <div className="flex justify-start gap-4">
+                      <img
+                        className="w-16 h-16"
+                        src={`https://unavatar.io/github/${comment.userId}`}
+                        alt={comment.userId}
+                      ></img>
+                      <div className="flex">
+                        <div className="flex flex-col">
+                          <span className="text-gray-100 font-bold">
+                            {fullName}
+                          </span>
+                          <span className="text-xs font-semibold text-gray-400">
+                            Posted {comment.createdAt.toLocaleDateString()}
+                          </span>
+                          <span className="text-sm font-semibold text-gray-300 mt-2">
+                            {comment.content}
+                          </span>
+                          <button className="flex mt-2 bg-slate-600 text-white font-semibold w-fit py-1 px-4 items-center">
+                            Reply
+                          </button>
                         </div>
                       </div>
                     </div>
+                  </div>
 
-                    <div>
-                      {comment.replies.length > 0 && (
-                        <div className="ml-24 space-y-2">
-                          {comment.replies.map((reply) => {
-                            const replyUser = users.find(
-                              (user) => user.id === reply.userId
-                            );
-                            const replyFullName = replyUser
-                              ? `${replyUser.firstName} ${replyUser.lastName}`
-                              : "Unknown User";
-                            return (
-                              <div
-                                key={reply.id}
-                                className="flex justify-start bg-gray-800 px-4 py-2 gap-4"
-                              >
-                                <img
-                                  className="w-12 h-12"
-                                  src={`https://unavatar.io/github/${reply.userId}`}
-                                  alt={reply.userId}
-                                ></img>
-                                <div className="flex">
-                                  <div className="flex flex-col">
-                                    <span className="text-gray-100 font-bold">
-                                      {replyFullName}
-                                    </span>
-                                    <span className="text-xs font-semibold text-gray-400">
-                                      Posted{" "}
-                                      {reply.createdAt.toLocaleDateString()}
-                                    </span>
-                                    <span className="text-sm font-semibold text-gray-300 mt-2">
-                                      {reply.content}
-                                    </span>
+                  <div>
+                    {comment.replies.length > 0 && (
+                      <div className="ml-24 space-y-2">
+                        {comment.replies.map((reply) => {
+                          const replyUser = users.find(
+                            (user) => user.id === reply.userId
+                          );
+                          const replyFullName = replyUser
+                            ? `${replyUser.firstName} ${replyUser.lastName}`
+                            : "Unknown User";
+                          return (
+                            <div
+                              key={reply.id}
+                              className="flex justify-start bg-gray-800 px-4 py-2 gap-4"
+                            >
+                              <img
+                                className="w-12 h-12"
+                                src={`https://unavatar.io/github/${reply.userId}`}
+                                alt={reply.userId}
+                              ></img>
+                              <div className="flex">
+                                <div className="flex flex-col">
+                                  <span className="text-gray-100 font-bold">
+                                    {replyFullName}
+                                  </span>
+                                  <span className="text-xs font-semibold text-gray-400">
+                                    Posted{" "}
+                                    {reply.createdAt.toLocaleDateString()}
+                                  </span>
+                                  <span className="text-sm font-semibold text-gray-300 mt-2">
+                                    {reply.content}
+                                  </span>
                                   <button className="flex mt-2 bg-slate-600 text-white font-semibold w-fit py-1 px-4 items-center text-sm">
                                     Reply
                                   </button>
-                                  </div>
                                 </div>
                               </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            {/* <div className="space-y-4">
-              <div className="flex justify-start bg-gray-800 px-4 py-2 gap-4">
-                <img
-                  className="w-16 h-16"
-                  src="https://unavatar.io/github/sadhakbj"
-                ></img>
-                <div className="flex flex-col">
-                  <span className="text-gray-100 font-bold">User name</span>
-                  <span className="text-xs font-semibold text-gray-400">
-                    Posted 1 year ago
-                  </span>
-                  <span className="text-sm font-semibold text-gray-300 mt-2">
-                    "Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Omnis animi quis excepturi, nisi, corrupti magni ab minima
-                    sequi impedit aspernatur quaerat placeat? Quibusdam iure
-                    facilis vero repellendus harum quod dignissimos!"
-                  </span>
-                </div>
-              </div> */}
-            {/*Reply*/}
-            {/* <div className="relative">
-                <div className="absolute left-12 top-0 w-0.5 bg-gray-400 h-10"></div>
-                <div className="absolute left-12 top-10 bg-gray-400 w-10 h-0.5"></div>
-                <div className="ml-24 space-y-2">
-                  <div className="flex justify-start bg-gray-800 px-4 py-2 gap-4">
-                    <img
-                      className="w-12 h-12"
-                      src="https://unavatar.io/github/anotheruser"
-                    ></img>
-                    <div className="flex flex-col">
-                      <span className="text-gray-100 font-bold">
-                        Another User
-                      </span>
-                      <span className="text-xs font-semibold text-gray-400">
-                        Posted 6 months ago
-                      </span>
-                      <span className="text-sm font-semibold text-gray-300 mt-2">
-                        "This is a reply to the original comment."
-                      </span>
-                    </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            </div> */}
+              );
+            })}
           </div>
         </div>
+      </div>
+    </div>
+  );
+  
+const NotesSection: React.FC<NotesSectionProps> = ({
+  currentTime,
+  notes,
+  setNotes,
+  lectureTitle,
+  onJumpToTimestamp,
+  onPlayVideo,
+  onPauseVideo,
+  formatTime,
+}) => {
+  const [noteText, setNoteText] = useState<string>("");
+  const [filter, setFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("recent");
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+
+  const getExistingNoteAtTime = (time: number) => {
+    return notes.find((note) => Math.abs(note.timestamp - time) < 1);
+  };
+
+  const handleStartEditing = () => {
+    const existingNote = getExistingNoteAtTime(currentTime);
+    if (existingNote) {
+      setEditingNoteId(existingNote.id);
+      setNoteText(existingNote.text);
+    } else {
+      setEditingNoteId(null);
+      setNoteText("");
+    }
+    onPauseVideo();
+    setIsEditing(true);
+  };
+
+  const handleCancelEditing = () => {
+    setIsEditing(false);
+    setNoteText("");
+    setEditingNoteId(null);
+  };
+
+  const handleSaveNote = () => {
+    if (noteText.trim()) {
+      if (editingNoteId) {
+        setNotes((prev) =>
+          prev.map((note) =>
+            note.id === editingNoteId
+              ? { ...note, text: noteText.trim() }
+              : note
+          )
+        );
+      } else {
+        const newNote: Note = {
+          id: Date.now().toString(),
+          timestamp: currentTime,
+          lectureTitle,
+          text: noteText.trim(),
+        };
+        setNotes((prev) => [...prev, newNote]);
+      }
+      setIsEditing(false);
+      setNoteText("");
+      setEditingNoteId(null);
+    }
+  };
+
+  const handleSaveAndPlay = () => {
+    handleSaveNote();
+    onPlayVideo();
+  };
+
+  const handleDeleteNote = (id: string) => {
+    setNotes((prev) => prev.filter((note) => note.id !== id));
+  };
+
+  return (
+    <NotesContainer>
+      {isEditing ? (
+        <EditorContainer>
+          <EditorToolbar>
+            <div className="toolbar-left">
+              <Tooltip title="Bold">
+                <BoldOutlined className="toolbar-btn" />
+              </Tooltip>
+              <Tooltip title="Italic">
+                <ItalicOutlined className="toolbar-btn" />
+              </Tooltip>
+              <Tooltip title="Ordered List">
+                <OrderedListOutlined className="toolbar-btn" />
+              </Tooltip>
+              <Tooltip title="Unordered List">
+                <UnorderedListOutlined className="toolbar-btn" />
+              </Tooltip>
+              <Tooltip title="Code">
+                <CodeOutlined className="toolbar-btn" />
+              </Tooltip>
+            </div>
+            <div className="toolbar-right">
+              <Button
+                type="text"
+                onClick={handleCancelEditing}
+                style={{ color: "#6b7280" }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="primary"
+                onClick={handleSaveNote}
+                style={{ background: "#3b82f6", marginRight: "8px" }}
+              >
+                Save
+              </Button>
+              <Button
+                type="primary"
+                icon={<PlayCircleOutlined />}
+                onClick={handleSaveAndPlay}
+                style={{ background: "#10b981" }}
+              >
+                Save & Play
+              </Button>
+            </div>
+          </EditorToolbar>
+          <EditorContent>
+            <textarea
+              placeholder="Type your note here..."
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              autoFocus
+            />
+          </EditorContent>
+        </EditorContainer>
+      ) : (
+        <CreateNoteInput>
+          <Input
+            placeholder={
+              getExistingNoteAtTime(currentTime)
+                ? `Edit note at ${formatTime(currentTime)}`
+                : `Create a new note at ${formatTime(currentTime)}`
+            }
+            onClick={handleStartEditing}
+            readOnly
+          />
+          <Tooltip
+            title={
+              getExistingNoteAtTime(currentTime) ? "Edit note" : "Add note"
+            }
+          >
+            <div
+              className="action-button"
+              onClick={handleStartEditing}
+              style={{
+                color: getExistingNoteAtTime(currentTime)
+                  ? "#ffd60a"
+                  : "#3b82f6",
+              }}
+            >
+              {getExistingNoteAtTime(currentTime) ? (
+                <EditOutlined />
+              ) : (
+                <PlusOutlined />
+              )}
+            </div>
+          </Tooltip>
+        </CreateNoteInput>
+      )}
+
+      <FilterContainer>
+        <Select defaultValue="all" onChange={setFilter}>
+          <Option value="all">All lectures</Option>
+          <Option value="current">Current lecture</Option>
+        </Select>
+        <Select defaultValue="recent" onChange={setSortBy}>
+          <Option value="recent">Sort by most recent</Option>
+          <Option value="oldest">Sort by oldest</Option>
+          <Option value="timestamp">Sort by timestamp</Option>
+        </Select>
+      </FilterContainer>
+
+      {notes
+        .sort((a, b) => {
+          switch (sortBy) {
+            case "oldest":
+              return parseInt(a.id) - parseInt(b.id);
+            case "timestamp":
+              return a.timestamp - b.timestamp;
+            default:
+              return parseInt(b.id) - parseInt(a.id);
+          }
+        })
+        .filter(
+          (note) => filter === "all" || note.lectureTitle === lectureTitle
+        )
+        .map((note) => (
+          <NoteItem key={note.id}>
+            <div
+              className="timestamp"
+              onClick={() => onJumpToTimestamp(note.timestamp)}
+            >
+              {formatTime(note.timestamp)}
+            </div>
+            <div className="lecture-info">
+              <div className="lecture-title">{note.lectureTitle}</div>
+              <div className="note-text">{note.text}</div>
+            </div>
+            <div className="actions">
+              <EditOutlined
+                className="action-btn"
+                onClick={() => {
+                  setEditingNoteId(note.id);
+                  setNoteText(note.text);
+                  setIsEditing(true);
+                  onPauseVideo();
+                  onJumpToTimestamp(note.timestamp);
+                }}
+              />
+              <DeleteOutlined
+                className="action-btn delete"
+                onClick={() => handleDeleteNote(note.id)}
+              />
+            </div>
+          </NoteItem>
+        ))}
+    </NotesContainer>
+  );
+};
+  
+  const items: TabsProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <span className="text-gray-200 text-lg font-semibold">Overview</span>
+      ),
+      children: renderTab1Content(),
+    },
+    {
+      key: "2",
+      label: (
+        <span className="text-gray-200 text-lg font-semibold">Discuss</span>
+      ),
+      children: renderTab2Content(),
+    },
+    // {
+    //   key: "3",
+    //   label: <span className="text-gray-200 text-lg font-semibold">Notes</span>,
+    //   children: (
+    //     <NotesSection
+    //       currentTime={currentTime} // Replace with actual current time value
+    //       notes={notes} // Replace with actual notes array
+    //       setNotes={setNotes} // Replace with actual setNotes function
+    //       lectureTitle={lectureTitle} // Replace with actual lecture title
+    //       onJumpToTimestamp={onJumpToTimestamp} // Replace with actual function
+    //       onPlayVideo={onPlayVideo} // Replace with actual function
+    //       onPauseVideo={onPauseVideo} // Replace with actual function
+    //       formatTime={formatTime} // Replace with actual function
+    //     />
+    //   ),
+    // },
+  ];
+
+  return (
+    <div>
+      <div>
+        <Tabs
+          className="!border-none"
+          defaultActiveKey="1"
+          items={items}
+          onChange={onChange}
+        />
       </div>
     </div>
   );

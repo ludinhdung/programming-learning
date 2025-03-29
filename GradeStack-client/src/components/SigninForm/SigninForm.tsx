@@ -1,14 +1,17 @@
 import React, { useState } from "react";
 import "../../styles/FormStyles.css";
-import { authService } from '../../services/api';
-import { message } from 'antd';
+import { authService } from "../../services/api";
+import { message } from "antd";
 
 type SigninFormProps = {
   onSwitchForm: () => void;
   onForgotPassword: () => void;
 };
 
-const SigninForm: React.FC<SigninFormProps> = ({onSwitchForm, onForgotPassword}) => {
+const SigninForm: React.FC<SigninFormProps> = ({
+  onSwitchForm,
+  onForgotPassword,
+}) => {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -17,20 +20,43 @@ const SigninForm: React.FC<SigninFormProps> = ({onSwitchForm, onForgotPassword})
 
     try {
       const formData = new FormData(e.currentTarget);
-      const email = formData.get('email') as string;
-      const password = formData.get('password') as string;
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
 
       const response = await authService.login(email, password);
-      
-      // Store token
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
 
-      message.success('Successfully logged in!');
-      // Redirect or update app state here
-      window.location.href = '/'; // or use React Router navigation
+
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      localStorage.setItem("role", response.data.user.role);
+
+      // Redirect based on user role
+     const redirectWithMessage = () => {
+       message.success("Login successfully! Redirecting...", 1.5);
+       setTimeout(() => {
+         switch (response.data.user.role) {
+           case "INSTRUCTOR":
+             window.location.href = "/instructor-management";
+             break;
+           case "INSTRUCTOR_LEAD":
+             window.location.href = "/instructor-lead-dashboard";
+             break;
+           case "ADMIN":
+             window.location.href = "/admin-dashboard";
+             break;
+           case "LEARNER":
+             window.location.href = "/";
+             break;
+           default:
+             window.location.href = "/";
+             break;
+         }
+       }, 1500);
+     };
+      redirectWithMessage();
+      
     } catch (error: any) {
-      message.error(error.response?.data?.message || 'Login failed');
+      message.error(error.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -101,7 +127,7 @@ const SigninForm: React.FC<SigninFormProps> = ({onSwitchForm, onForgotPassword})
                 disabled={loading}
                 className="flex w-full justify-center rounded-md bg-blue-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
               >
-                {loading ? 'Logging in...' : 'Log in'}
+                {loading ? "Logging in..." : "Log in"}
               </button>
             </div>
           </form>

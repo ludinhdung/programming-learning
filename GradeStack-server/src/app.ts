@@ -1,21 +1,20 @@
-import express from 'express';
-import morgan from 'morgan';
-import cors from 'cors';
+import express from "express";
+import morgan from "morgan";
+import cors from "cors";
+import authRouter from "./modules/auth/routes/auth.routes";
+import userRouter from "./modules/user/routes/user.routes";
+import supporterRouter from "./modules/supporter/routes/supporter.routes";
+import { errorHandler } from "./shared/middleware/error.middleware";
 
 const app = express();
 
-// Middleware
-app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:5173'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-}));
+app.use(cors());
 app.use(express.json());
-app.use(morgan('dev'));
+app.use(morgan("dev"));
 
-// Routes
+app.use("/api/auth", authRouter);
+app.use("/api/users", userRouter);
+app.use("/api/supporter", supporterRouter);
+app.use(errorHandler);
 
-// Error handling middleware
-
-export default app; 
+export default app;
