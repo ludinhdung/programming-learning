@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Instructor" ALTER COLUMN "avatar" DROP NOT NULL,
+ALTER COLUMN "bio" DROP NOT NULL;

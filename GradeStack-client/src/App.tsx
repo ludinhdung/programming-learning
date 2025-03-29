@@ -27,8 +27,12 @@ import Overview from "./components/InstructorManagement/Contents/Overview";
 import InstructorCourseList from "./components/InstructorManagement/Contents/Course/CourseList";
 import InstructorCreateCourse from "./components/InstructorManagement/Contents/Course/CreateCourse";
 // Supporter Dashboard
-import SupporterDashboard1 from "./pages/SupporterDashboard1/SupporterDashboard";
 import SupporterDashboard from "./pages/SupporterDashboard/SupporterDashboard";
+import SupporterOverview from "./components/SupporterManagement/Contents/Overview";
+import SupporterManageInstructor from "./components/SupporterManagement/Contents/InstructorManagement";
+import SupporterManageLearner from "./components/SupporterManagement/Contents/LearnerManagement/LearnerList";
+import SupporterManageLearnerComments from "./components/SupporterManagement/Contents/LearnerManagement/LearnerComment";
+
 const App: React.FC = () => {
   return (
     <MantineProvider>
@@ -36,10 +40,6 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/course-study" element={<CourseStudy />} />
-          <Route
-            path="/supporter-dashboard"
-            element={<SupporterDashboard1 />}
-          />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/create-course" element={<CreateCourse />} />
           <Route path="/courses" element={<CourseList />} />
@@ -62,11 +62,18 @@ const App: React.FC = () => {
             </Route>
           </Route>
           {/* Supporter Dashboard*/}
-          <Route
-            path="/supporter-management"
-            element={<SupporterDashboard />}
-          ></Route>
-          
+          <Route path="/supporter-management" element={<SupporterDashboard />}>
+            <Route index element={<SupporterOverview />}></Route>
+            <Route
+              path="instructor"
+              element={<SupporterManageInstructor />}
+            ></Route>
+            <Route path="learner" element={<Outlet />}>
+              <Route index element={<SupporterManageLearner />}></Route>
+              <Route path="comment/:learnerId" element={<SupporterManageLearnerComments />} />
+            </Route>
+          </Route>
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

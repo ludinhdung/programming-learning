@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import "../../styles/FormStyles.css";
 import { Form } from "antd";
-import { authService } from '../../services/api';
-import { message } from 'antd';
+import { authService } from "../../services/api";
+import { message } from "antd";
 
 type SignupFormProps = {
   onSwitchForm: () => void;
@@ -22,10 +22,21 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchForm }) => {
         lastName: values.lastName,
       });
 
-      message.success('Registration successful! Please log in.');
-      onSwitchForm(); // Switch to login form
+      if (response.success) {
+        // Optionally store token and user data if you want auto-login after registration
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+
+        message.success("Registration successful!");
+        setTimeout(() => {
+          window.location.href = "/"; // Redirect to home if auto-login
+        }, 2000);
+        // OR
+        // message.success('Registration successful! Please log in.');
+        // onSwitchForm(); // Switch to login form if not auto-login
+      }
     } catch (error: any) {
-      message.error(error.response?.data?.message || 'Registration failed');
+      message.error(error.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -41,15 +52,13 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchForm }) => {
         </div>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-sm">
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={handleSubmit}
-          >
+          <Form form={form} layout="vertical" onFinish={handleSubmit}>
             <Form.Item
               name="firstName"
               label={<span className="text-gray-400">First Name</span>}
-              rules={[{ required: true, message: 'Please input your first name!' }]}
+              rules={[
+                { required: true, message: "Please input your first name!" },
+              ]}
             >
               <input
                 type="text"
@@ -60,14 +69,16 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchForm }) => {
             <Form.Item
               name="lastName"
               label={<span className="text-gray-400">Last Name</span>}
-              rules={[{ required: true, message: 'Please input your last name!' }]}
+              rules={[
+                { required: true, message: "Please input your last name!" },
+              ]}
             >
               <input
                 type="text"
                 className="block w-full rounded-md bg-slate-400 px-3 py-1.5 font-semibold text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
               />
             </Form.Item>
-{/* 
+            {/* 
             <Form.Item
               name="username"
               label={<span className="text-gray-400">Username</span>}
@@ -131,7 +142,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchForm }) => {
               disabled={loading}
               className="mt-6 flex w-full justify-center rounded-md bg-blue-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 disabled:opacity-50"
             >
-              {loading ? 'Signing up...' : 'Sign up'}
+              {loading ? "Signing up..." : "Sign up"}
             </button>
           </Form>
 

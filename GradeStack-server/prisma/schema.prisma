@@ -28,6 +28,8 @@ model User {
 
   role Role @default(LEARNER)
 
+  warningCount Int? @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -49,8 +51,8 @@ model Instructor {
   userId String @id
 
   organization String
-  avatar       String
-  bio          String
+  avatar       String?
+  bio          String?
   socials      String[]
 
   createdAt DateTime @default(now())
