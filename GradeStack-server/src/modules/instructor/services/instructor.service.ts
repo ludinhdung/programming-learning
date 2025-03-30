@@ -1,8 +1,19 @@
 import { InstructorBaseService, InstructorWithRelations } from '../../../shared/base/domain-services/instructor-base.service';
-import { Instructor, Prisma, User, Course, Workshop, Role, Topic  } from '@prisma/client';
-import { CourseCreateDTO } from './../dto/CourseCreateDTO';
+import { Instructor, Prisma, Course, Workshop, Role, Topic  } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
-import { r2StorageService, UploadedFile } from '../../../shared/services/r2-storage.service';
+import { PrismaErrorHandler } from '../../../shared/errors/prisma-error-handler';
+import { ApiError } from '../../../shared/errors/api-error';
+import { 
+    createInstructorSchema, 
+    instructorUpdateSchema, 
+    avatarUpdateSchema,
+    courseCreateSchema,
+    workshopCreateSchema,
+    videoLessonUpdateSchema,
+    topicCreateSchema,
+    topicUpdateSchema
+} from '../validation/instructor.validation';
+import { z } from 'zod';
 
 const prisma = new PrismaClient();
 
@@ -21,82 +32,203 @@ export class InstructorService extends InstructorBaseService<
     
     // Instructor-specific business logic
     async createInstructor(userData: Prisma.UserCreateInput, instructorData: Omit<Prisma.InstructorCreateInput, 'user'>): Promise<InstructorWithRelations> {
-        // First, create the user with INSTRUCTOR role
-        const user = await prisma.user.create({
-            data: {
-                ...userData,
-                role: Role.INSTRUCTOR
-            }
-        });
-        // Then create the instructor profile linked to the user
-        const instructor = await this.create({
-            user: {
-                connect: { id: user.id }
-            },
-            organization: instructorData.organization,
-            avatar: instructorData.avatar || '',
-            bio: instructorData.bio || '',
-            socials: instructorData.socials || []
-        });
+        try {
+            // Validate input data using Zod
+            const validatedData = createInstructorSchema.parse({
+                userData,
+                instructorData
+            });
 
-        return {
-            ...instructor,
-            user
-        };
+            // First, create the user with INSTRUCTOR role
+            const user = await prisma.user.create({
+                data: {
+                    ...validatedData.userData,
+                    role: Role.INSTRUCTOR
+                }
+            }).catch(error => {
+                throw PrismaErrorHandler.handle(error, 'User');
+            });
+
+            // Then create the instructor profile linked to the user
+            const instructor = await this.create({
+                user: {
+                    connect: { id: user.id }
+                },
+                organization: validatedData.instructorData.organization,
+                avatar: validatedData.instructorData.avatar || '',
+                bio: validatedData.instructorData.bio || '',
+                socials: validatedData.instructorData.socials || []
+            }).catch(error => {
+                throw PrismaErrorHandler.handle(error, 'Instructor');
+            });
+
+            return {
+                ...instructor,
+                user
+            };
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                const errorMessage = error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+                throw ApiError.validationError(`Dữ liệu không hợp lệ: ${errorMessage}`);
+            }
+            throw error;
+        }
+    }
+
+    async findByUserId(userId: string, include?: any): Promise<InstructorWithRelations | null> {
+        try {
+            const instructor = await super.findByUserId(userId, include);
+            if (!instructor) {
+                throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${userId}`);
+            }
+            return instructor;
+        } catch (error) {
+            if (error instanceof ApiError) {
+                throw error;
+            }
+            throw PrismaErrorHandler.handle(error, 'Instructor');
+        }
     }
 
     async updateProfile(userId: string, data: Prisma.InstructorUncheckedCreateInput): Promise<Instructor> {
-        const instructor = await this.findByUserId(userId);
-        if (!instructor) {
-            throw new Error(`Instructor with userId ${userId} not found`);
-        }   
-        return this.model.update({
-            where: { userId },
-            data
-        });
+        try {
+            // Validate input data using Zod
+            const validatedData = instructorUpdateSchema.parse(data);
+            
+            // Check if instructor exists
+            const instructor = await this.model.findUnique({ where: { userId } });
+            if (!instructor) {
+                throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${userId}`);
+            }
+            
+            // Update instructor profile
+            return this.model.update({
+                where: { userId },
+                data: validatedData
+            }).catch(error => {
+                throw PrismaErrorHandler.handle(error, 'Instructor');
+            });
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                const errorMessage = error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+                throw ApiError.validationError(`Dữ liệu không hợp lệ: ${errorMessage}`);
+            }
+            throw error;
+        }
     }
 
     async updateAvatar(userId: string, avatarUrl: string): Promise<Instructor> {
-        return this.update(userId, { avatar: avatarUrl });
-    }
-
-    async createCourse(instructorId: string, courseData: CourseCreateDTO): Promise<any> {
-        // 1. Kiểm tra sự tồn tại của giảng viên
-        const instructor = await this.findByUserId(instructorId);
-        
-        if (!instructor) {
-            throw new Error(`Instructor with userId ${instructorId} not found`);
-        }
-
-        // Bắt đầu giao dịch để đảm bảo tính nhất quán của dữ liệu
-        return prisma.$transaction(async (tx) => {
-            // 2. Tạo khóa học
-            const course = await this._createCourseBase(tx, courseData, instructor.userId);
+        try {
+            // Validate avatar URL
+            const validatedData = avatarUpdateSchema.parse({ avatarUrl });
             
-            // 3. Kết nối khóa học với các chủ đề nếu có
-            if (courseData.topicIds && courseData.topicIds.length > 0) {
-                await this._connectCourseTopics(tx, course.id, courseData.topicIds);
+            // Check if instructor exists
+            const instructor = await this.model.findUnique({ where: { userId } });
+            if (!instructor) {
+                throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${userId}`);
             }
-
-            // 4. Tạo các module nếu được cung cấp
-            if (courseData.modules && courseData.modules.length > 0) {
-                await this._createCourseModules(tx, course.id, courseData.modules);
+            
+            // Update avatar
+            return this.update(userId, { avatar: validatedData.avatarUrl }).catch(error => {
+                throw PrismaErrorHandler.handle(error, 'Instructor');
+            });
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                const errorMessage = error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+                throw ApiError.validationError(`Dữ liệu không hợp lệ: ${errorMessage}`);
             }
-
-            // Trả về khóa học đã tạo với tất cả các mối quan hệ
-            return this._getCourseWithRelations(tx, course.id);
-        });
+            throw error;
+        }
     }
 
-    // Phương thức private để tạo khóa học cơ bản
-    private async _createCourseBase(tx: any, courseData: CourseCreateDTO, instructorUserId: string) {
+    async createCourse(instructorId: string, courseData: any): Promise<any> {
+        try {
+            // Validate course data
+            const validatedData = courseCreateSchema.parse(courseData);
+            
+            // Check if instructor exists
+            const instructor = await this.findByUserId(instructorId);
+            
+            if (!instructor) {
+                throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+            }
+
+            // Bắt đầu giao dịch để đảm bảo tính nhất quán của dữ liệu
+            return prisma.$transaction(async (tx) => {
+                try {
+                    // 2. Tạo khóa học
+                    const course = await this._createCourseBase(tx, {
+                        ...validatedData,
+                        price: validatedData.price || 0
+                    }, instructor.userId);
+                    
+                    // 3. Kết nối khóa học với các chủ đề nếu có
+                    if (validatedData.topicIds && validatedData.topicIds.length > 0) {
+                        await this._connectCourseTopics(tx, course.id, validatedData.topicIds);
+                    }
+
+                    // 4. Tạo các module nếu được cung cấp
+                    if (validatedData.modules && validatedData.modules.length > 0) {
+                        await this._createCourseModules(tx, course.id, validatedData.modules);
+                    }
+
+                    // Trả về khóa học đã tạo với tất cả các mối quan hệ
+                    return this._getCourseWithRelations(tx, course.id);
+                } catch (error) {
+                    throw PrismaErrorHandler.handle(error, 'Course');
+                }
+            });
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                const errorMessage = error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+                throw ApiError.validationError(`Dữ liệu khóa học không hợp lệ: ${errorMessage}`);
+            }
+            throw error;
+        }
+    }
+
+    async createWorkshop(instructorId: string, workshopData: any): Promise<Workshop> {
+        try {
+            // Validate workshop data
+            const validatedData = workshopCreateSchema.parse(workshopData);
+            
+            // Check if instructor exists
+            const instructor = await this.findByUserId(instructorId);
+            
+            if (!instructor) {
+                throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+            }
+            
+            // Create workshop
+            return prisma.workshop.create({
+                data: {
+                    ...validatedData,
+                    instructor: {
+                        connect: { userId: instructorId }
+                    }
+                }
+            }).catch(error => {
+                throw PrismaErrorHandler.handle(error, 'Workshop');
+            });
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                const errorMessage = error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+                throw ApiError.validationError(`Dữ liệu workshop không hợp lệ: ${errorMessage}`);
+            }
+            throw error;
+        }
+    }
+
+    // Tạo khoá học cơ bản
+    private async _createCourseBase(tx: any, courseData: any, instructorUserId: string) {
         return tx.course.create({
             data: {
                 title: courseData.title,
                 description: courseData.description,
                 price: courseData.price,
-                duration: courseData.duration || 0, // Provide default value if undefined
+                duration: courseData.duration || 0, // Cung cấp giá trị mặc định nếu undefined
                 isPublished: courseData.isPublished || false,
+                thumbnail: courseData.thumbnail || null,
                 instructor: {
                     connect: { userId: instructorUserId }
                 }
@@ -118,186 +250,134 @@ export class InstructorService extends InstructorBaseService<
         await Promise.all(topicConnections);
     }
 
-    // Phương thức private để tạo modules cho khóa học
+    // Tạo module cho khoá học
     private async _createCourseModules(tx: any, courseId: string, modules: any[]) {
-        for (const [index, moduleData] of modules.entries()) {
-            const module = await this._createModule(tx, courseId, moduleData, index);
+        for (let i = 0; i < modules.length; i++) {
+            const moduleData = modules[i];
             
+            // Create module
+            const module = await tx.module.create({
+                data: {
+                    title: moduleData.title,
+                    description: moduleData.description,
+                    order: moduleData.order || i + 1,
+                    course: {
+                        connect: { id: courseId }
+                    },
+                    videoUrl: moduleData.videoUrl || null,
+                    thumbnailUrl: moduleData.thumbnailUrl || null,
+                    videoDuration: moduleData.videoDuration || null
+                }
+            });
+            
+            // Create lessons if provided
             if (moduleData.lessons && moduleData.lessons.length > 0) {
                 await this._createModuleLessons(tx, module.id, moduleData.lessons);
             }
         }
     }
-
-    // Phương thức private để tạo một module
-    private async _createModule(tx: any, courseId: string, moduleData: any, index: number) {
-        return tx.module.create({
-            data: {
-                title: moduleData.title,
-                description: moduleData.description,
-                order: moduleData.order || index + 1,
-                course: {
-                    connect: { id: courseId }
-                }
-            }
-        });
-    }
-
-    // Phương thức private để tạo các bài học cho module
+    
+    // Tạo bài học cho module
     private async _createModuleLessons(tx: any, moduleId: string, lessons: any[]) {
-        for (const [index, lessonData] of lessons.entries()) {
-            const lesson = await this._createLesson(tx, moduleId, lessonData);
+        for (let i = 0; i < lessons.length; i++) {
+            const lessonData = lessons[i];
             
-            if (lessonData.lessonType) {
-                await this._createLessonContent(tx, lesson.id, lessonData);
-            }
-        }
-    }
-
-    // Phương thức private để tạo một bài học
-    private async _createLesson(tx: any, moduleId: string, lessonData: any) {
-        return tx.lesson.create({
-            data: {
-                title: lessonData.title,
-                description: lessonData.description,
-                lessonType: lessonData.lessonType,
-                duration: lessonData.duration || 0,
-                isPreview: lessonData.isPreview || false,
-                module: {
-                    connect: { id: moduleId }
-                }
-            }
-        });
-    }
-
-    // Phương thức private để tạo nội dung bài học dựa trên loại
-    private async _createLessonContent(tx: any, lessonId: string, lessonData: any) {
-        const lessonType = lessonData.lessonType;
-        
-        if (lessonType === 'VIDEO') {
-            if (lessonData.videoData) {
-                await this._createVideoLesson(tx, lessonId, lessonData.videoData);
-            }
-        } 
-        else if (lessonType === 'CODING') {
-            if (lessonData.codingData) {
-                await this._createCodingLesson(tx, lessonId, lessonData.codingData);
-            }
-        } 
-        else if (lessonType === 'FINAL_TEST') {
-            if (lessonData.finalTestData) {
-                await this._createFinalTestLesson(tx, lessonId, lessonData.finalTestData);
-            }
-        }
-    }
-
-    // Phương thức private để tạo bài học video
-    private async _createVideoLesson(tx: any, lessonId: string, videoData: any) {
-        // Check if we have a video file to upload
-        if (videoData.file) {
-            try {
-                // Upload video to Cloudflare R2
-                const uploadResult = await r2StorageService.uploadVideo(videoData.file, 'course-videos');
-                
-                // Update videoData with the URLs from R2
-                videoData.url = uploadResult.videoUrl;
-                videoData.thumbnailUrl = uploadResult.thumbnailUrl;
-            } catch (error) {
-                console.error('Error uploading video to R2:', error);
-                throw new Error(`Failed to upload video: ${(error as Error).message}`);
-            }
-        }
-
-        // Prepare data object with required fields
-        const videoLessonData: any = {
-            url: videoData.url,
-            duration: videoData.duration || 0,
-            lesson: {
-                connect: { id: lessonId }
-            }
-        };
-        
-        // Only add thumbnailUrl if it exists
-        if (videoData.thumbnailUrl) {
-            videoLessonData.thumbnailUrl = videoData.thumbnailUrl;
-        }
-        
-        return tx.videoLesson.create({
-            data: videoLessonData
-        });
-    }
-
-    // Phương thức private để tạo bài tập lập trình
-    private async _createCodingLesson(tx: any, lessonId: string, codingData: any) {
-        return tx.codingExercise.create({
-            data: {
-                language: codingData.language,
-                problem: codingData.problem,
-                hint: codingData.hint || '',
-                solution: codingData.solution,
-                codeSnippet: codingData.codeSnippet || '',
-                lesson: {
-                    connect: { id: lessonId }
-                }
-            }
-        });
-    }
-
-    // Phương thức private để tạo bài kiểm tra cuối cùng
-    private async _createFinalTestLesson(tx: any, lessonId: string, finalTestData: any) {
-        const finalTest = await tx.finalTestLesson.create({
-            data: {
-                estimatedDuration: finalTestData.estimatedDuration || 0,
-                lesson: {
-                    connect: { id: lessonId }
-                }
-            }
-        });
-
-        if (finalTestData.questions && finalTestData.questions.length > 0) {
-            await this._createTestQuestions(tx, finalTest.id, finalTestData.questions);
-        }
-        
-        return finalTest;
-    }
-
-    // Phương thức private để tạo câu hỏi cho bài kiểm tra
-    private async _createTestQuestions(tx: any, testId: string, questions: any[]) {
-        for (const [qIndex, questionData] of questions.entries()) {
-            const question = await tx.question.create({
+            // Create base lesson
+            const lesson = await tx.lesson.create({
                 data: {
-                    content: questionData.content,
-                    order: questionData.order || qIndex + 1,
-                    test: {
-                        connect: { id: testId }
+                    title: lessonData.title,
+                    description: lessonData.description,
+                    lessonType: lessonData.lessonType,
+                    duration: lessonData.duration || 0,
+                    isPreview: lessonData.isPreview || false,
+                    order: lessonData.order || i + 1,
+                    module: {
+                        connect: { id: moduleId }
                     }
                 }
             });
-
-            if (questionData.answers && questionData.answers.length > 0) {
-                await this._createQuestionAnswers(tx, question.id, questionData.answers);
+            
+            // Create lesson content based on type
+            switch (lessonData.lessonType) {
+                case 'VIDEO':
+                    if (lessonData.videoData) {
+                        await tx.videoLesson.create({
+                            data: {
+                                url: lessonData.videoData.videoUrl || lessonData.videoData.url,
+                                duration: lessonData.videoData.duration || 0,
+                                thumbnailUrl: lessonData.videoData.thumbnailUrl || null,
+                                lesson: {
+                                    connect: { id: lesson.id }
+                                }
+                            }
+                        });
+                    }
+                    break;
+                case 'CODING':
+                    if (lessonData.codingData) {
+                        await tx.codingExercise.create({
+                            data: {
+                                language: lessonData.codingData.language,
+                                problem: lessonData.codingData.problem,
+                                hint: lessonData.codingData.hint || null,
+                                solution: lessonData.codingData.solution,
+                                codeSnippet: lessonData.codingData.codeSnippet || null,
+                                lesson: {
+                                    connect: { id: lesson.id }
+                                }
+                            }
+                        });
+                    }
+                    break;
+                case 'FINAL_TEST':
+                    if (lessonData.finalTestData) {
+                        const finalTest = await tx.finalTestLesson.create({
+                            data: {
+                                estimatedDuration: lessonData.finalTestData.estimatedDuration || 30,
+                                lesson: {
+                                    connect: { id: lesson.id }
+                                }
+                            }
+                        });
+                        
+                        // Create questions and answers
+                        if (lessonData.finalTestData.questions && lessonData.finalTestData.questions.length > 0) {
+                            for (let j = 0; j < lessonData.finalTestData.questions.length; j++) {
+                                const questionData = lessonData.finalTestData.questions[j];
+                                
+                                const question = await tx.question.create({
+                                    data: {
+                                        content: questionData.content,
+                                        order: questionData.order || j + 1,
+                                        finalTestLesson: {
+                                            connect: { id: finalTest.id }
+                                        }
+                                    }
+                                });
+                                
+                                // Create answers
+                                if (questionData.answers && questionData.answers.length > 0) {
+                                    for (const answerData of questionData.answers) {
+                                        await tx.answer.create({
+                                            data: {
+                                                content: answerData.content,
+                                                isCorrect: answerData.isCorrect || false,
+                                                question: {
+                                                    connect: { id: question.id }
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break;
             }
         }
     }
-
-    // Phương thức private để tạo các câu trả lời cho câu hỏi
-    private async _createQuestionAnswers(tx: any, questionId: string, answers: any[]) {
-        const answerPromises = answers.map(answerData => {
-            return tx.answer.create({
-                data: {
-                    content: answerData.content,
-                    isCorrect: answerData.isCorrect || false,
-                    question: {
-                        connect: { id: questionId }
-                    }
-                }
-            });
-        });
-        
-        await Promise.all(answerPromises);
-    }
-
-    // Phương thức private để lấy khóa học với tất cả các mối quan hệ
+    
+    // Lấy khoá học với quan hệ liên quan
     private async _getCourseWithRelations(tx: any, courseId: string) {
         return tx.course.findUnique({
             where: { id: courseId },
@@ -319,262 +399,26 @@ export class InstructorService extends InstructorBaseService<
                                 }
                             }
                         }
-                    }
-                },
-                CourseTopic: {
-                    include: {
-                        topic: true
-                    }
-                }
-            }
-        });
-    }
-    
-    async createWorkshop(instructorId: string, workshopData: Omit<Prisma.WorkshopCreateInput, 'instructor'>): Promise<Workshop> {
-        // Verify instructor exists
-        const instructor = await this.findByUserId(instructorId);
-        if (!instructor) {
-            throw new Error(`Instructor with userId ${instructorId} not found`);
-        }
-        return prisma.workshop.create({
-            data: {
-                ...workshopData,
-                instructor: {
-                    connect: { userId: instructor.userId  }
-                }
-            }
-        });
-    }
-    
-    async createTopic(instructorId: string, topicData: Prisma.TopicCreateInput): Promise<Prisma.TopicCreateInput> {
-        // Verify instructor exists
-        const instructor = await this.findByUserId(instructorId);
-        if (!instructor) {
-            throw new Error(`Instructor with userId ${instructorId} not found`);
-        }
-        return prisma.topic.create({
-                data: {
-                ...topicData,
-                Instructor: {
-                    connect: { userId: instructor.userId }
-                }
-            }
-        });
-    }
-
-    // Course CRUD operations
-    async getCoursesByInstructor(instructorId: string): Promise<Course[]> {
-        // Verify instructor exists
-        const instructor = await this.findByUserId(instructorId);
-        if (!instructor) {
-            throw new Error(`Instructor with userId ${instructorId} not found`);
-        }
-
-        return prisma.course.findMany({
-            where: {
-                instructorId: instructor.userId
-            },
-            include: {
-                CourseTopic: {
-                    include: {
-                        topic: true
-                    }
-                }
-            }
-        });
-    }
-
-    async getFullRelationCourses(instructorId: string): Promise<Course[]> {
-        // Verify instructor exists
-        const instructor = await this.findByUserId(instructorId);
-        if (!instructor) {
-            throw new Error(`Instructor with userId ${instructorId} not found`);
-        }
-
-        return prisma.course.findMany({
-            where: {
-                instructorId: instructor.userId
-            },
-            include: {
-                modules: {
-                    include: {
-                        lessons: {
-                            include: {
-                                video: true,
-                                coding: true,
-                                finalTest: {
-                                    include: {
-                                        questions: {
-                                            include: {
-                                                answers: true
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                CourseTopic: {
-                    include: {
-                        topic: true
-                    }
-                }
-            }
-        });
-    }
-    
-    async getCourseById(courseId: string, instructorId: string): Promise<any> {
-        // Verify instructor exists
-        const instructor = await this.findByUserId(instructorId);
-        if (!instructor) {
-            throw new Error(`Instructor with userId ${instructorId} not found`);
-        }
-
-        // Verify course belongs to instructor
-        const course = await prisma.course.findUnique({
-            where: {
-                id: courseId,
-                instructorId: instructor.userId
-            },
-            include: {
-                modules: {
+                    },
                     orderBy: {
                         order: 'asc'
-                    },
-                    include: {
-                        lessons: {
-                            include: {
-                                video: true,
-                                coding: true,
-                                finalTest: {
-                                    include: {
-                                        questions: {
-                                            include: {
-                                                answers: true
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     }
                 },
                 CourseTopic: {
                     include: {
                         topic: true
                     }
+                },
+                instructor: {
+                    include: {
+                        user: true
+                    }
                 }
             }
         });
-
-        if (!course) {
-            throw new Error(`Course with id ${courseId} not found or does not belong to instructor ${instructorId}`);
-        }
-
-        return course;
     }
 
-    async updateCourse(instructorId: string, courseId: string, courseData: any): Promise<any> {
-        // Verify instructor exists
-        const instructor = await this.findByUserId(instructorId);
-        if (!instructor) {
-            throw new Error(`Instructor with userId ${instructorId} not found`);
-        }
-
-        // Verify course belongs to instructor
-        const existingCourse = await prisma.course.findUnique({
-            where: {
-                id: courseId,
-                instructorId: instructor.userId
-            }
-        });
-
-        if (!existingCourse) {
-            throw new Error(`Course with id ${courseId} not found or does not belong to instructor ${instructorId}`);
-        }
-
-        // Update course
-        return prisma.$transaction(async (tx) => {
-            // Update basic course info
-            const updatedCourse = await tx.course.update({
-                where: { id: courseId },
-                data: {
-                    title: courseData.title,
-                    description: courseData.description,
-                    price: courseData.price,
-                    duration: courseData.duration || existingCourse.duration,
-                    isPublished: courseData.isPublished !== undefined ? courseData.isPublished : existingCourse.isPublished
-                }
-            });
-
-            // Update topics if provided
-            if (courseData.topicIds && courseData.topicIds.length > 0) {
-                // Remove existing topics
-                await tx.courseTopic.deleteMany({
-                    where: { courseId }
-                });
-
-                // Add new topics
-                await this._connectCourseTopics(tx, courseId, courseData.topicIds);
-            }
-
-            return this._getCourseWithRelations(tx, courseId);
-        });
-    }
-
-    async deleteCourse(instructorId: string, courseId: string): Promise<void> {
-        // Verify instructor exists
-        const instructor = await this.findByUserId(instructorId);
-        if (!instructor) {
-            throw new Error(`Instructor with userId ${instructorId} not found`);
-        }
-
-        // Verify course belongs to instructor
-        const course = await prisma.course.findUnique({
-            where: {
-                id: courseId,
-                instructorId: instructor.userId
-            }
-        });
-
-        if (!course) {
-            throw new Error(`Course with id ${courseId} not found or does not belong to instructor ${instructorId}`);
-        }
-
-        // Delete course and all related data
-        await prisma.$transaction(async (tx) => {
-            // Get all modules
-            const modules = await tx.module.findMany({
-                where: { courseId },
-                include: { lessons: true }
-            });
-
-            // Delete all lessons and their related content
-            for (const module of modules) {
-                for (const lesson of module.lessons) {
-                    await this._deleteLesson(tx, lesson.id);
-                }
-                
-                // Delete module
-                await tx.module.delete({
-                    where: { id: module.id }
-                });
-            }
-
-            // Delete course topics
-            await tx.courseTopic.deleteMany({
-                where: { courseId }
-            });
-
-            // Delete course
-            await tx.course.delete({
-                where: { id: courseId }
-            });
-        });
-    }
-
-    // Module CRUD operations
+    // Lấy module theo khoá học
     async getModulesByCourse(courseId: string): Promise<any[]> {
         return prisma.module.findMany({
             where: { courseId },
@@ -584,13 +428,22 @@ export class InstructorService extends InstructorBaseService<
                     include: {
                         video: true,
                         coding: true,
-                        finalTest: true
+                        finalTest: {
+                            include: {
+                                questions: {
+                                    include: {
+                                        answers: true
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         });
     }
 
+    // Lấy module theo id
     async getModuleById(moduleId: string): Promise<any> {
         const module = await prisma.module.findUnique({
             where: { id: moduleId },
@@ -621,6 +474,7 @@ export class InstructorService extends InstructorBaseService<
         return module;
     }
 
+    // Tạo module cho khoá học
     async createModule(courseId: string, moduleData: any): Promise<any> {
         // Verify course exists
         const course = await prisma.course.findUnique({
@@ -655,6 +509,7 @@ export class InstructorService extends InstructorBaseService<
         });
     }
 
+    // Cập nhật module
     async updateModule(moduleId: string, moduleData: any): Promise<any> {
         // Verify module exists
         const module = await prisma.module.findUnique({
@@ -685,6 +540,7 @@ export class InstructorService extends InstructorBaseService<
         });
     }
 
+    // Xóa module
     async deleteModule(moduleId: string): Promise<void> {
         // Verify module exists
         const module = await prisma.module.findUnique({
@@ -710,7 +566,7 @@ export class InstructorService extends InstructorBaseService<
         });
     }
 
-    // Lesson CRUD operations
+    // Lấy bài học theo module
     async getLessonsByModule(moduleId: string): Promise<any[]> {
         return prisma.lesson.findMany({
             where: { moduleId },
@@ -728,8 +584,9 @@ export class InstructorService extends InstructorBaseService<
                 }
             }
         });
-    }
+    }   
 
+    // Lấy bài học theo id
     async getLessonById(lessonId: string): Promise<any> {
         const lesson = await prisma.lesson.findUnique({
             where: { id: lessonId },
@@ -760,6 +617,7 @@ export class InstructorService extends InstructorBaseService<
         return lesson;
     }
 
+    // Cập nhật bài học
     async updateLesson(lessonId: string, lessonData: any): Promise<any> {
         // Verify lesson exists
         const lesson = await prisma.lesson.findUnique({
@@ -777,7 +635,8 @@ export class InstructorService extends InstructorBaseService<
                 title: lessonData.title,
                 description: lessonData.description,
                 duration: lessonData.duration || lesson.duration,
-                isPreview: lessonData.isPreview !== undefined ? lessonData.isPreview : lesson.isPreview
+                isPreview: lessonData.isPreview !== undefined ? lessonData.isPreview : lesson.isPreview,
+                order: lessonData.order || lesson.order
             },
             include: {
                 video: true,
@@ -795,6 +654,7 @@ export class InstructorService extends InstructorBaseService<
         });
     }
 
+    // Xóa bài học
     async deleteLesson(lessonId: string): Promise<void> {
         // Verify lesson exists
         const lesson = await prisma.lesson.findUnique({
@@ -811,7 +671,7 @@ export class InstructorService extends InstructorBaseService<
         });
     }
 
-    // Helper method to delete a lesson and its related content
+    // Phương thức trợ giúp để xóa một bài học và nội dung liên quan
     private async _deleteLesson(tx: any, lessonId: string): Promise<void> {
         const lesson = await tx.lesson.findUnique({
             where: { id: lessonId }
@@ -865,5 +725,488 @@ export class InstructorService extends InstructorBaseService<
         await tx.lesson.delete({
             where: { id: lessonId }
         });
+    }
+
+    // Tạo chủ đề mới
+    async createTopic(instructorId: string, topicData: any): Promise<Topic> {
+        try {
+            // Validate topic data
+            const validatedData = topicCreateSchema.parse(topicData);
+            
+            // Check if instructor exists
+            const instructor = await this.findByUserId(instructorId);
+            
+            if (!instructor) {
+                throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+            }
+            
+            // Create topic
+            return prisma.topic.create({
+                data: {
+                    name: validatedData.name,
+                    description: validatedData.description,
+                    thumbnail: validatedData.thumbnail,
+                    Instructor: {
+                        connect: { userId: instructorId }
+                    }
+                }
+            }).catch(error => {
+                throw PrismaErrorHandler.handle(error, 'Topic');
+            });
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                const errorMessage = error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+                throw ApiError.validationError(`Dữ liệu chủ đề không hợp lệ: ${errorMessage}`);
+            }
+            throw error;
+        }
+    }
+
+    // Lấy tất cả khoá học của một giảng viên
+    async getCoursesByInstructor(instructorId: string): Promise<Course[]> {
+        try {
+            // Check if instructor exists
+            const instructor = await this.findByUserId(instructorId);
+            
+            if (!instructor) {
+                throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+            }
+            
+            // Get all courses
+            return prisma.course.findMany({
+                where: {
+                    instructor: {
+                        userId: instructorId
+                    }
+                },
+                include: {
+                    modules: true,
+                    instructor: true
+                }
+            });
+        } catch (error) {
+            throw PrismaErrorHandler.handle(error, 'Course');
+        }
+    }
+
+    // Lấy khoá học theo ID
+    async getCourseById(courseId: string, instructorId: string): Promise<any> {
+        try {
+            // Check if instructor exists
+            const instructor = await this.findByUserId(instructorId);
+            
+            if (!instructor) {
+                throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+            }
+            
+            // Get course
+            const course = await prisma.course.findFirst({
+                where: {
+                    id: courseId,
+                    instructor: {
+                        userId: instructorId
+                    }
+                },
+                include: {
+                    modules: {
+                        include: {
+                            lessons: {
+                                include: {
+                                    video: true,
+                                    coding: true,
+                                    finalTest: {
+                                        include: {
+                                            questions: {
+                                                include: {
+                                                    answers: true
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        orderBy: {
+                            order: 'asc'
+                        }
+                    },
+                    instructor: true
+                }
+            });
+            
+            if (!course) {
+                throw ApiError.notFound(`Không tìm thấy khóa học với ID ${courseId}`);
+            }
+            
+            return course;
+        } catch (error) {
+            if (error instanceof ApiError) {
+                throw error;
+            }
+            throw PrismaErrorHandler.handle(error, 'Course');
+        }
+    }
+
+    // Cập nhật khoá học
+    async updateCourse(instructorId: string, courseId: string, courseData: any): Promise<any> {
+        try {
+            // Check if instructor exists
+            const instructor = await this.findByUserId(instructorId);
+            
+            if (!instructor) {
+                throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+            }
+            
+            // Check if course exists and belongs to instructor
+            const existingCourse = await prisma.course.findFirst({
+                where: {
+                    id: courseId,
+                    instructor: {
+                        userId: instructorId
+                    }
+                }
+            });
+            
+            if (!existingCourse) {
+                throw ApiError.notFound(`Không tìm thấy khóa học với ID ${courseId} hoặc bạn không có quyền cập nhật khóa học này`);
+            }
+            
+            // Update course
+            const updatedCourse = await prisma.course.update({
+                where: {
+                    id: courseId
+                },
+                data: {
+                    title: courseData.title,
+                    description: courseData.description,
+                    price: courseData.price !== undefined ? courseData.price : existingCourse.price,
+                    duration: courseData.duration !== undefined ? courseData.duration : existingCourse.duration,
+                    isPublished: courseData.isPublished !== undefined ? courseData.isPublished : existingCourse.isPublished,
+                    thumbnail: courseData.thumbnail || existingCourse.thumbnail
+                },
+                include: {
+                    modules: {
+                        include: {
+                            lessons: true
+                        },
+                        orderBy: {
+                            order: 'asc'
+                        }
+                    },
+                    instructor: true
+                }
+            });
+            
+            // Update topics if provided
+            if (courseData.topicIds && Array.isArray(courseData.topicIds)) {
+                // Delete existing topic connections
+                await prisma.courseTopic.deleteMany({
+                    where: {
+                        courseId
+                    }
+                });
+                
+                // Create new topic connections
+                if (courseData.topicIds.length > 0) {
+                    await this._connectCourseTopics(prisma, courseId, courseData.topicIds);
+                }
+                
+                // Fetch updated course with new topic connections
+                return this.getCourseById(courseId, instructorId);
+            }
+            
+            return updatedCourse;
+        } catch (error) {
+            if (error instanceof ApiError) {
+                throw error;
+            }
+            throw PrismaErrorHandler.handle(error, 'Course');
+        }
+    }
+
+    // Xóa khoá học
+    async deleteCourse(instructorId: string, courseId: string): Promise<void> {
+        try {
+            // Check if instructor exists
+            const instructor = await this.findByUserId(instructorId);
+            
+            if (!instructor) {
+                throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+            }
+            
+            // Check if course exists and belongs to instructor
+            const course = await prisma.course.findFirst({
+                where: {
+                    id: courseId,
+                    instructor: {
+                        userId: instructorId
+                    }
+                },
+                include: {
+                    modules: {
+                        include: {
+                            lessons: true
+                        }
+                    }
+                }
+            });
+            
+            if (!course) {
+                throw ApiError.notFound(`Không tìm thấy khóa học với ID ${courseId} hoặc bạn không có quyền xóa khóa học này`);
+            }
+            
+            // Delete course and all related data
+            await prisma.$transaction(async (tx) => {
+                // Delete all modules and their lessons
+                for (const module of course.modules) {
+                    // Delete all lessons in the module
+                    for (const lesson of module.lessons) {
+                        await this._deleteLesson(tx, lesson.id);
+                    }
+                    
+                    // Delete module
+                    await tx.module.delete({
+                        where: { id: module.id }
+                    });
+                }
+                
+                // Delete course topics
+                await tx.courseTopic.deleteMany({
+                    where: { courseId }
+                });
+                
+                // Try to delete enrollments if the model exists
+                try {
+                    // Since we're not sure if the enrollment model exists in the transaction
+                    // Use a safer approach by checking the schema first
+                    const enrollmentTableExists = await tx.$queryRaw`
+                        SELECT EXISTS (
+                            SELECT FROM information_schema.tables 
+                            WHERE table_schema = 'public' 
+                            AND table_name = 'Enrollment'
+                        );
+                    `;
+                    
+                    if (enrollmentTableExists) {
+                        await tx.$executeRaw`DELETE FROM "Enrollment" WHERE "courseId" = ${courseId}`;
+                    }
+                } catch (error) {
+                    console.error('Error deleting enrollments:', error);
+                    // Continue with course deletion even if enrollment deletion fails
+                }
+                
+                // Delete course
+                await tx.course.delete({
+                    where: { id: courseId }
+                });
+            });
+        } catch (error) {
+            if (error instanceof ApiError) {
+                throw error;
+            }
+            throw PrismaErrorHandler.handle(error, 'Course');
+        }
+    }
+
+    // Lấy khoá học với quan hệ liên quan theo giảng viên
+    async getFullRelationCourses(instructorId: string): Promise<any[]> {
+        try {
+            // Check if instructor exists
+            const instructor = await this.findByUserId(instructorId);
+            
+            if (!instructor) {
+                throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+            }
+            
+            // Get all courses with full relations
+            return prisma.course.findMany({
+                where: {
+                    instructor: {
+                        userId: instructorId
+                    }
+                },
+                include: {
+                    modules: {
+                        include: {
+                            lessons: {
+                                include: {
+                                    video: true,
+                                    coding: true,
+                                    finalTest: {
+                                        include: {
+                                            questions: {
+                                                include: {
+                                                    answers: true
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        orderBy: {
+                            order: 'asc'
+                        }
+                    },
+                    instructor: {
+                        include: {
+                            user: true
+                        }
+                    },
+                    _count: true
+                }
+            });
+        } catch (error) {
+            if (error instanceof ApiError) {
+                throw error;
+            }
+            throw PrismaErrorHandler.handle(error, 'Course');
+        }
+    }
+
+    // Update video lesson
+    async updateVideoLesson(lessonId: string, videoData: any): Promise<any> {
+        try {
+            // Validate video data
+            const validatedData = videoLessonUpdateSchema.parse(videoData);
+            
+            // Verify lesson exists and is a video lesson
+            const lesson = await prisma.lesson.findUnique({
+                where: { id: lessonId },
+                include: { video: true }
+            });
+
+            if (!lesson) {
+                throw ApiError.notFound(`Không tìm thấy bài học với ID ${lessonId}`);
+            }
+
+            if (lesson.lessonType !== 'VIDEO' || !lesson.video) {
+                throw ApiError.badRequest(`Bài học với ID ${lessonId} không phải là bài học video`);
+            }
+
+            // Update video lesson
+            return prisma.videoLesson.update({
+                where: { lessonId },
+                data: {
+                    url: validatedData.url || validatedData.videoUrl || lesson.video.url,
+                    thumbnailUrl: validatedData.thumbnailUrl !== undefined ? validatedData.thumbnailUrl : lesson.video.thumbnailUrl,
+                    duration: validatedData.duration || lesson.video.duration
+                }
+            });
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                const errorMessage = error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+                throw ApiError.validationError(`Dữ liệu video không hợp lệ: ${errorMessage}`);
+            }
+            if (error instanceof ApiError) {
+                throw error;
+            }
+            throw PrismaErrorHandler.handle(error, 'VideoLesson');
+        }
+    }
+
+    // Get all topics
+    async getAllTopics(): Promise<Topic[]> {
+        try {
+            return prisma.topic.findMany();
+        } catch (error) {
+            throw PrismaErrorHandler.handle(error, 'Topic');
+        }
+    }
+
+    // Get topic by ID
+    async getTopicById(topicId: string): Promise<Topic | null> {
+        try {
+            const topic = await prisma.topic.findUnique({
+                where: { id: topicId }
+            });
+
+            if (!topic) {
+                throw ApiError.notFound(`Không tìm thấy chủ đề với ID ${topicId}`);
+            }
+
+            return topic;
+        } catch (error) {
+            if (error instanceof ApiError) {
+                throw error;
+            }
+            throw PrismaErrorHandler.handle(error, 'Topic');
+        }
+    }
+
+    // Get topics by instructor ID
+    async getTopicsByInstructor(instructorId: string): Promise<Topic[]> {
+        try {
+            // Check if instructor exists
+            const instructor = await this.findByUserId(instructorId);
+            
+            if (!instructor) {
+                throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+            }
+            
+            return prisma.topic.findMany({
+                where: {
+                    instructorUserId: instructorId
+                }
+            });
+        } catch (error) {
+            if (error instanceof ApiError) {
+                throw error;
+            }
+            throw PrismaErrorHandler.handle(error, 'Topic');
+        }
+    }
+
+    // Get topics with courses
+    async getTopicsWithCourses(): Promise<any[]> {
+        try {
+            return prisma.topic.findMany({
+                include: {
+                    courses: {
+                        include: {
+                            course: true
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            throw PrismaErrorHandler.handle(error, 'Topic');
+        }
+    }
+
+    // Update topic
+    async updateTopic(topicId: string, topicData: any): Promise<Topic> {
+        try {
+            // Validate topic data
+            const validatedData = topicUpdateSchema.parse(topicData);
+            
+            // Check if topic exists
+            const topic = await prisma.topic.findUnique({
+                where: { id: topicId }
+            });
+
+            if (!topic) {
+                throw ApiError.notFound(`Không tìm thấy chủ đề với ID ${topicId}`);
+            }
+
+            // Update topic
+            return prisma.topic.update({
+                where: { id: topicId },
+                data: {
+                    name: validatedData.name || topic.name,
+                    description: validatedData.description || topic.description,
+                    thumbnail: validatedData.thumbnail !== undefined ? validatedData.thumbnail : topic.thumbnail
+                }
+            });
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                const errorMessage = error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+                throw ApiError.validationError(`Dữ liệu chủ đề không hợp lệ: ${errorMessage}`);
+            }
+            if (error instanceof ApiError) {
+                throw error;
+            }
+            throw PrismaErrorHandler.handle(error, 'Topic');
+        }
     }
 }

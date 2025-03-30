@@ -4,6 +4,11 @@ import cors from 'cors';
 import authRouter from './modules/auth/routes/auth.routes';
 import userRouter from './modules/user/routes/user.routes';
 import instructorRouter from './modules/instructor/routes/instructor.route';
+import courseRouter from './modules/course/routes/course.routes';
+import topicRouter from './modules/topic/routes/topic.routes';
+import lessonRouter from './modules/lesson/routes/lesson.routes';
+import videoLessonRouter from './modules/videoLesson/routes/videoLesson.routes';
+import moduleRouter from './modules/module/routes/module.routes';
 import { setupSwagger } from './shared/config/swagger';
 
 const app = express();
@@ -18,6 +23,10 @@ setupSwagger(app);
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/instructors', instructorRouter);
-
+app.use('/api', courseRouter);
+app.use('/api', topicRouter);
+app.use('/api', lessonRouter);
+app.use('/api', videoLessonRouter);
+app.use('/api', moduleRouter);
 
 export default app;

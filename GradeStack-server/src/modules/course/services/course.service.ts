@@ -1,7 +1,6 @@
 import { CourseBaseService, CourseWithRelations } from '../../../shared/base/domain-services/course-base.service';
-import { Course, Prisma, Module, Lesson, LessonType, Question, Answer } from '@prisma/client';
-import { PrismaClient } from '@prisma/client';
-import { Role } from '@prisma/client';
+import { Course, Prisma, PrismaClient } from '@prisma/client';
+import { withTransaction } from '../../../shared/utils/transaction.utils';
 
 const prisma = new PrismaClient();
 
@@ -19,27 +18,213 @@ export class CourseService extends CourseBaseService<
     }
     
     // Course-specific business logic
-    async createCourse(instructorId: string, courseData: Omit<Prisma.CourseUncheckedCreateInput, 'instructorId'>): Promise<Course> {
-        // Verify instructor exists
+    async createCourse(instructorId: string, validatedData: any): Promise<Course> {
+        // 1. Verify instructor exists
+        const instructor = await this.verifyInstructorExists(instructorId);
+        
+        // 2. Extract and validate data
+        const { topicIds, modules, ...courseBasicData } = validatedData;
+        await this.validateTopics(topicIds);
+        
+        // 3. Prepare course data
+        const courseData: Prisma.CourseUncheckedCreateInput = {
+            ...courseBasicData,
+            instructorId: instructorId
+        };
+        
+        // 4. Create course and related entities in a transaction
+        return withTransaction(async (tx) => {
+            // Create the course
+            const course = await tx.course.create({ data: courseData });
+            
+            // Create topic connections
+            await this.createTopicConnections(tx, course.id, topicIds);
+            
+            // Create modules and lessons if provided
+            if (modules?.length > 0) {
+                await this.createModulesAndLessons(tx, course.id, modules);
+            }
+            return course;
+        });
+    }
+    
+    // Helper methods for createCourse
+    
+    private async verifyInstructorExists(instructorId: string) {
         const instructor = await prisma.instructor.findUnique({
             where: { userId: instructorId }
         });
         
         if (!instructor) {
-            throw new Error(`Instructor with id ${instructorId} not found`);
+            throw { status: 404, message: `Instructor with id ${instructorId} not found` };
         }
         
-        return this.create({
-            ...courseData,
-            instructor: {
-                connect: { userId: instructorId }
+        return instructor;
+    }
+    
+    private async validateTopics(topicIds: string[]) {
+        // Verify that topics are provided
+        if (!topicIds || topicIds.length === 0) {
+            throw { status: 400, message: 'Khóa học phải có ít nhất một chủ đề' };
+        }
+        
+        // Check if all topics exist
+        const topicsCount = await prisma.topic.count({
+            where: { id: { in: topicIds } }
+        });
+        
+        if (topicsCount !== topicIds.length) {
+            throw { status: 400, message: 'Một hoặc nhiều chủ đề không tồn tại' };
+        }
+    }
+    
+    private async createTopicConnections(tx: any, courseId: string, topicIds: string[]) {
+        if (!topicIds?.length) return;
+        
+        for (const topicId of topicIds) {
+            await tx.courseTopic.create({
+                data: {
+                    course: { connect: { id: courseId } },
+                    topic: { connect: { id: topicId } }
+                }
+            });
+        }
+    }
+    
+    private async createModulesAndLessons(tx: any, courseId: string, modules: any[]) {
+        for (const moduleData of modules) {
+            const { lessons, ...moduleRestData } = moduleData;
+            
+            // Create module
+            const createdModule = await tx.module.create({
+                data: {
+                    ...moduleRestData,
+                    course: { connect: { id: courseId } }
+                }
+            });
+            
+            // Create lessons if provided
+            if (lessons?.length > 0) {
+                await this.createLessons(tx, createdModule.id, lessons);
+            }
+        }
+    }
+    
+    private async createLessons(tx: any, moduleId: string, lessons: any[]) {
+        for (const lessonData of lessons) {
+            // Extract video information
+            const { videoUrl, thumbnailUrl, videoDuration } = this.extractVideoInfo(lessonData);
+            
+            // Prepare lesson data
+            const { videoData, videoUrl: _, thumbnailUrl: __, videoDuration: ___, 
+                    exerciseContent, solution, questions, ...lessonRestData } = lessonData;
+            
+            // Create the lesson
+            const createdLesson = await tx.lesson.create({
+                data: {
+                    ...lessonRestData,
+                    module: { connect: { id: moduleId } }
+                }
+            });
+            
+            // Create type-specific content based on lesson type
+            await this.createLessonContent(
+                tx, 
+                createdLesson.id, 
+                lessonData.lessonType, 
+                { videoUrl, thumbnailUrl, videoDuration, exerciseContent, solution, questions }
+            );
+        }
+    }
+    
+    private extractVideoInfo(lessonData: any) {
+        let videoUrl, thumbnailUrl, videoDuration;
+        
+        if (lessonData.videoData) {
+            // Extract from videoData object if provided
+            videoUrl = lessonData.videoData.videoUrl;
+            thumbnailUrl = lessonData.videoData.thumbnailUrl;
+            videoDuration = lessonData.videoData.duration;
+        } else {
+            // Use direct fields if videoData not provided
+            videoUrl = lessonData.videoUrl;
+            thumbnailUrl = lessonData.thumbnailUrl;
+            videoDuration = lessonData.videoDuration;
+        }
+        
+        return { videoUrl, thumbnailUrl, videoDuration };
+    }
+    
+    private async createLessonContent(
+        tx: any, 
+        lessonId: string, 
+        lessonType: string, 
+        content: { 
+            videoUrl?: string, 
+            thumbnailUrl?: string, 
+            videoDuration?: number,
+            exerciseContent?: string,
+            solution?: string,
+            questions?: any[]
+        }
+    ) {
+        const { videoUrl, thumbnailUrl, videoDuration, exerciseContent, solution, questions } = content;
+        
+        if (lessonType === 'VIDEO' && videoUrl) {
+            await this.createVideoLesson(tx, lessonId, videoUrl, thumbnailUrl, videoDuration);
+        } else if (lessonType === 'CODING' && exerciseContent) {
+            await this.createCodingExercise(tx, lessonId, exerciseContent, solution);
+        } else if (lessonType === 'FINAL_TEST' && questions) {
+            await this.createFinalTest(tx, lessonId, questions);
+        }
+    }
+    
+    private async createVideoLesson(tx: any, lessonId: string, videoUrl: string, thumbnailUrl?: string, videoDuration?: number) {
+        await tx.videoLesson.create({
+            data: {
+                url: videoUrl,
+                thumbnailUrl: thumbnailUrl || null,
+                duration: videoDuration || 0,
+                lesson: { connect: { id: lessonId } }
             }
         });
     }
     
+    private async createCodingExercise(tx: any, lessonId: string, exerciseContent: string, solution?: string) {
+        await tx.codingExercise.create({
+            data: {
+                problem: exerciseContent,
+                language: 'JAVA',
+                solution: solution || '',
+                lesson: { connect: { id: lessonId } }
+            }
+        });
+    }
+    
+    private async createFinalTest(tx: any, lessonId: string, questions: any[]) {
+        // Create the final test
+        const finalTest = await tx.finalTestLesson.create({
+            data: {
+                lesson: { connect: { id: lessonId } }
+            }
+        });
+        
+        // Create questions for the test if provided
+        if (Array.isArray(questions)) {
+            for (let i = 0; i < questions.length; i++) {
+                const questionData = questions[i];
+                await tx.question.create({
+                    data: {
+                        content: questionData.content,
+                        order: i + 1,
+                        test: { connect: { id: finalTest.id } }
+                    }
+                });
+            }
+        }
+    }
+    
     async publishCourse(courseId: string): Promise<Course> {
-        // Kiểm tra xem course có tồn tại không
-        // Kiểm tra xem course có đủ điều kiện publish không
         return this.update(courseId, { isPublished: true });
     }
     
@@ -47,348 +232,376 @@ export class CourseService extends CourseBaseService<
         return this.update(courseId, { isPublished: false });
     }
     
-    async addModule(courseId: string, moduleData: Omit<Prisma.ModuleCreateInput, 'course'>): Promise<Module> {
-        // Verify course exists
-        await this.findOneOrFail(courseId);
-        
-        // Get the current highest order value
-        const highestOrderModule = await prisma.module.findFirst({
-            where: { courseId },
-            orderBy: { order: 'desc' }
-        });
-        
-        const newOrder = highestOrderModule ? highestOrderModule.order + 1 : 1;
-        
-        return prisma.module.create({
-            data: {
-                ...moduleData,
-                order: newOrder,
-                course: {
-                    connect: { id: courseId }
+    async getCoursesByInstructor(instructorId: string) {
+        return prisma.course.findMany({
+            where: {
+                instructor: {
+                    userId: instructorId
+                }
+            },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                CourseTopic: {
+                    include: {
+                        topic: true
+                    }
+                },
+                instructor: {
+                    include: {
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                email: true,
+                            }
+                        }
+                    }
+                },
+                _count: {
+                    select: {
+                        EnrolledCourse: true
+                    }
                 }
             }
         });
     }
     
-    async updateModule(moduleId: string, moduleData: Omit<Prisma.ModuleUpdateInput, 'course'>): Promise<Module> {
-        return prisma.module.update({
-            where: { id: moduleId },
-            data: moduleData
-        });
-    }
-    
-    async deleteModule(moduleId: string): Promise<Module> {
-        // Kiểm tra xem module có tồn tại không
-        const module = await prisma.module.findUnique({
-            where: { id: moduleId },
-            include: { lessons: true }
-        });
-        
-        if (!module) {
-            throw new Error(`Module with id ${moduleId} not found`);
-        }
-        
-        // Xóa tất cả lesson và dữ liệu liên quan
-        if (module.lessons && module.lessons.length > 0) {
-            // Xóa các lesson liên quan
-            for (const lesson of module.lessons) {
-                await this.deleteLesson(lesson.id);
-            }
-        }
-        
-        // Xóa module
-        return prisma.module.delete({
-            where: { id: moduleId }
-        });
-    }
-    
-    async reorderModules(courseId: string, moduleOrders: { id: string, order: number }[]): Promise<Module[]> {
-        // Verify course exists
-        await this.findOneOrFail(courseId);
-        
-        // Update each module order in a transaction
-        const updates = moduleOrders.map(({ id, order }) => 
-            prisma.module.update({
-                where: { id },
-                data: { order }
-            })
-        );
-        
-        return prisma.$transaction(updates);
-    }
-    
-    async addLesson(moduleId: string, lessonData: Omit<Prisma.LessonCreateInput, 'module'>): Promise<Lesson> {
-        // Verify module exists
-        const module = await prisma.module.findUnique({
-            where: { id: moduleId }
-        });
-        
-        if (!module) {
-            throw new Error(`Module with id ${moduleId} not found`);
-        }
-        
-        return prisma.lesson.create({
-            data: {
-                ...lessonData,
-                module: {
-                    connect: { id: moduleId }
+    async getCourseById(courseId: string, instructorId: string) {
+        const course = await prisma.course.findFirst({
+            where: {
+                id: courseId,
+                instructor: {
+                    userId: instructorId
+                }
+            },
+            include: {
+                instructor: {
+                    include: {
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                email: true,
+                            }
+                        }
+                    }
+                },
+                CourseTopic: {
+                    include: {
+                        topic: true
+                    }
+                },
+                modules: {
+                    orderBy: {
+                        order: 'asc'
+                    },
+                    include: {
+                        lessons: {
+                            orderBy: {
+                                createdAt: 'asc'
+                            },
+                            include: {
+                                video: true,
+                                coding: true,
+                                finalTest: true,
+                                
+                            }
+                        }
+                    }
                 }
             }
         });
-    }
-    
-    async updateLesson(lessonId: string, lessonData: Omit<Prisma.LessonUpdateInput, 'module'>): Promise<Lesson> {
-        return prisma.lesson.update({
-            where: { id: lessonId },
-            data: lessonData
-        });
-    }
-    
-    async deleteLesson(lessonId: string): Promise<void> {
-        // Kiểm tra loại lesson để xóa dữ liệu liên quan
-        const lesson = await prisma.lesson.findUnique({
-            where: { id: lessonId }
-        });
         
-        if (!lesson) {
-            throw new Error(`Lesson with id ${lessonId} not found`);
+        if (!course) {
+            throw { status: 404, message: `Course with id ${courseId} not found or you don't have permission to access it` };
         }
         
-        // Xóa dữ liệu liên quan dựa trên loại lesson
-        switch (lesson.lessonType) {
-            case LessonType.VIDEO:
-                await prisma.videoLesson.delete({
-                    where: { lessonId }
+        return course;
+    }
+    
+    async updateCourse(instructorId: string, courseId: string, courseData: any) {
+        // Verify course exists and belongs to instructor
+        const course = await prisma.course.findFirst({
+            where: {
+                id: courseId,
+                instructor: {
+                    userId: instructorId
+                }
+            }
+        });
+        
+        if (!course) {
+            throw { status: 404, message: `Course with id ${courseId} not found or you don't have permission to update it` };
+        }
+        
+        // Extract topicIds data if provided
+        const { topicIds, ...restData } = courseData;
+        
+        // Update course with transaction if topicIds are provided
+        if (topicIds) {
+            // Verify that all topics exist
+            if (topicIds.length > 0) {
+                const topicsCount = await prisma.topic.count({
+                    where: {
+                        id: {
+                            in: topicIds
+                        }
+                    }
                 });
-                break;
                 
-            case LessonType.CODING:
-                // Xóa các bài nộp liên quan
-                await prisma.submittedCodingExercise.deleteMany({
-                    where: { codingExercise: { lessonId } }
+                if (topicsCount !== topicIds.length) {
+                    throw { status: 400, message: 'Một hoặc nhiều chủ đề không tồn tại' };
+                }
+            }
+            
+            return withTransaction(async (tx) => {
+                // Update course basic data
+                const updatedCourse = await tx.course.update({
+                    where: { id: courseId },
+                    data: restData
                 });
                 
-                // Xóa bài tập
-                await prisma.codingExercise.delete({
-                    where: { lessonId }
-                });
-                break;
-                
-            case LessonType.FINAL_TEST:
-                const finalTest = await prisma.finalTestLesson.findUnique({
-                    where: { lessonId },
-                    include: { questions: true }
+                // Delete existing topic connections
+                await tx.courseTopic.deleteMany({
+                    where: { courseId }
                 });
                 
-                if (finalTest) {
-                    // Xóa các bài nộp final test
-                    await prisma.submittedFinalTest.deleteMany({
-                        where: { finalTestId: finalTest.id }
-                    });
-                    
-                    // Xóa các câu trả lời và câu hỏi
-                    for (const question of finalTest.questions) {
-                        await prisma.answer.deleteMany({
-                            where: { questionId: question.id }
+                // Create new topic connections
+                if (topicIds.length > 0) {
+                    for (const topicId of topicIds) {
+                        await tx.courseTopic.create({
+                            data: {
+                                course: { connect: { id: courseId } },
+                                topic: { connect: { id: topicId } }
+                            }
                         });
                     }
-                    
-                    // Xóa các câu hỏi
-                    await prisma.question.deleteMany({
-                        where: { testId: finalTest.id }
-                    });
-                    
-                    // Xóa bài kiểm tra
-                    await prisma.finalTestLesson.delete({
-                        where: { lessonId }
-                    });
                 }
-                break;
-        }
-        
-        // Xóa các ghi chú liên quan đến bài học
-        await prisma.note.deleteMany({
-            where: { lessonId }
-        });
-        
-        // Xóa các bình luận liên quan đến bài học
-        await prisma.comment.deleteMany({
-            where: { lessonId }
-        });
-        
-        // Xóa bài học
-        await prisma.lesson.delete({
-            where: { id: lessonId }
-        });
-    }
-    
-    async addVideoLesson(moduleId: string, lessonData: Omit<Prisma.LessonCreateInput, 'module' | 'lessonType'>, videoData: Omit<Prisma.VideoLessonCreateInput, 'lesson'>): Promise<Lesson> {
-        // Create the lesson
-        const lesson = await this.addLesson(moduleId, {
-            ...lessonData,
-            lessonType: LessonType.VIDEO
-        });
-        
-        // Create the video lesson
-        await prisma.videoLesson.create({
-            data: {
-                ...videoData,
-                lesson: {
-                    connect: { id: lesson.id }
-                }
-            }
-        });
-        
-        return lesson;
-    }
-    
-    async updateVideoLesson(lessonId: string, lessonData: Omit<Prisma.LessonUpdateInput, 'module' | 'lessonType'>, videoData: Omit<Prisma.VideoLessonUpdateInput, 'lesson'>): Promise<Lesson> {
-        // Update the lesson
-        const lesson = await prisma.lesson.update({
-            where: { id: lessonId },
-            data: lessonData
-        });
-        
-        // Update the video lesson
-        await prisma.videoLesson.update({
-            where: { lessonId },
-            data: videoData
-        });
-        
-        return lesson;
-    }
-    
-    async addCodingExercise(moduleId: string, lessonData: Omit<Prisma.LessonCreateInput, 'module' | 'lessonType'>, codingData: Omit<Prisma.CodingExerciseCreateInput, 'lesson'>): Promise<Lesson> {
-        // Create the lesson
-        const lesson = await this.addLesson(moduleId, {
-            ...lessonData,
-            lessonType: LessonType.CODING
-        });
-        
-        // Create the coding exercise
-        await prisma.codingExercise.create({
-            data: {
-                ...codingData,
-                lesson: {
-                    connect: { id: lesson.id }
-                }
-            }
-        });
-        
-        return lesson;
-    }
-    
-    async updateCodingExercise(lessonId: string, lessonData: Omit<Prisma.LessonUpdateInput, 'module' | 'lessonType'>, codingData: Omit<Prisma.CodingExerciseUpdateInput, 'lesson'>): Promise<Lesson> {
-        // Update the lesson
-        const lesson = await prisma.lesson.update({
-            where: { id: lessonId },
-            data: lessonData
-        });
-        
-        // Update the coding exercise
-        await prisma.codingExercise.update({
-            where: { lessonId },
-            data: codingData
-        });
-        
-        return lesson;
-    }
-    
-    async addFinalTest(moduleId: string, lessonData: Omit<Prisma.LessonCreateInput, 'module' | 'lessonType'>, testData: Omit<Prisma.FinalTestLessonCreateInput, 'lesson'>): Promise<Lesson> {
-        // Create the lesson
-        const lesson = await this.addLesson(moduleId, {
-            ...lessonData,
-            lessonType: LessonType.FINAL_TEST
-        });
-        
-        // Create the final test
-        await prisma.finalTestLesson.create({
-            data: {
-                ...testData,
-                lesson: {
-                    connect: { id: lesson.id }
-                }
-            }
-        });
-        
-        return lesson;
-    }
-    
-    async updateFinalTest(lessonId: string, lessonData: Omit<Prisma.LessonUpdateInput, 'module' | 'lessonType'>, testData: Omit<Prisma.FinalTestLessonUpdateInput, 'lesson'>): Promise<Lesson> {
-        // Update the lesson
-        const lesson = await prisma.lesson.update({
-            where: { id: lessonId },
-            data: lessonData
-        });
-        
-        // Update the final test
-        await prisma.finalTestLesson.update({
-            where: { lessonId },
-            data: testData
-        });
-        
-        return lesson;
-    }
-    
-    async addQuestion(finalTestId: string, questionData: Omit<Prisma.QuestionCreateInput, 'test'>, answers: Omit<Prisma.AnswerCreateInput, 'question'>[]): Promise<Question> {
-        // Verify final test exists
-        const finalTest = await prisma.finalTestLesson.findUnique({
-            where: { id: finalTestId }
-        });
-        
-        if (!finalTest) {
-            throw new Error(`Final test with id ${finalTestId} not found`);
-        }
-        
-        // Get highest question order
-        const highestOrderQuestion = await prisma.question.findFirst({
-            where: { testId: finalTestId },
-            orderBy: { order: 'desc' }
-        });
-        
-        const newOrder = highestOrderQuestion ? highestOrderQuestion.order + 1 : 1;
-        
-        // Create question with its answers in a transaction
-        return prisma.$transaction(async (tx) => {
-            // Create the question
-            const question = await tx.question.create({
-                data: {
-                    ...questionData,
-                    order: newOrder,
-                    test: {
-                        connect: { id: finalTestId }
+                
+                // Return updated course with relations
+                return tx.course.findUnique({
+                    where: { id: courseId },
+                    include: {
+                        CourseTopic: {
+                            include: {
+                                topic: true
+                            }
+                        },
+                        modules: {
+                            orderBy: { order: 'asc' }
+                        }
+                    }
+                });
+            });
+        } else {
+            // Just update course without modifying topics
+            return prisma.course.update({
+                where: { id: courseId },
+                data: restData,
+                include: {
+                    CourseTopic: {
+                        include: {
+                            topic: true
+                        }
+                    },
+                    modules: {
+                        orderBy: { order: 'asc' }
                     }
                 }
             });
-            
-            // Create the answers
-            if (answers && answers.length > 0) {
-                for (const answerData of answers) {
-                    await tx.answer.create({
-                        data: {
-                            ...answerData,
-                            question: {
-                                connect: { id: question.id }
+        }
+    }
+    
+    async deleteCourse(instructorId: string, courseId: string) {
+        // Verify course exists and belongs to instructor
+        const course = await prisma.course.findFirst({
+            where: {
+                id: courseId,
+                instructor: {
+                    userId: instructorId
+                }
+            },
+            include: {
+                modules: {
+                    include: {
+                        lessons: {
+                            include: {
+                                video: true,
+                                coding: true,
+                                finalTest: {
+                                    include: {
+                                        questions: {
+                                            include: {
+                                                answers: true
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
-                    });
+                    }
                 }
             }
-            
-            return question;
         });
-    }
-    
-    async updateQuestion(questionId: string, questionData: Omit<Prisma.QuestionUpdateInput, 'test'>): Promise<Question> {
-        return prisma.question.update({
-            where: { id: questionId },
-            data: questionData
-        });
-    }
-    
-    async deleteQuestion(questionId: string): Promise<void> {
         
+        if (!course) {
+            throw { status: 404, message: `Course with id ${courseId} not found or you don't have permission to delete it` };
+        }
+        
+        // Delete all related data in a transaction
+        return withTransaction(async (tx) => {
+            // Cascade delete all related entities
+            for (const module of course.modules) {
+                for (const lesson of module.lessons) {
+                    // Delete comments and notes for the lesson
+                    await tx.comment.deleteMany({
+                        where: { lessonId: lesson.id }
+                    });
+                    
+                    await tx.note.deleteMany({
+                        where: { lessonId: lesson.id }
+                    });
+                    
+                    // Delete lesson-specific content
+                    if (lesson.video) {
+                        await tx.videoLesson.delete({
+                            where: { id: lesson.video.id }
+                        });
+                    }
+                    
+                    if (lesson.coding) {
+                        await tx.submittedCodingExercise.deleteMany({
+                            where: { codingExerciseId: lesson.coding.id }
+                        });
+                        
+                        await tx.codingExercise.delete({
+                            where: { id: lesson.coding.id }
+                        });
+                    }
+                    
+                    if (lesson.finalTest) {
+                        // Delete submitted tests
+                        await tx.submittedFinalTest.deleteMany({
+                            where: { finalTestId: lesson.finalTest.id }
+                        });
+                        
+                        // Delete answers and questions
+                        for (const question of lesson.finalTest.questions) {
+                            await tx.answer.deleteMany({
+                                where: { questionId: question.id }
+                            });
+                        }
+                        
+                        await tx.question.deleteMany({
+                            where: { testId: lesson.finalTest.id }
+                        });
+                        
+                        await tx.finalTestLesson.delete({
+                            where: { id: lesson.finalTest.id }
+                        });
+                    }
+                    
+                    // Delete the lesson
+                    await tx.lesson.delete({
+                        where: { id: lesson.id }
+                    });
+                }
+                
+                // Delete the module
+                await tx.module.delete({
+                    where: { id: module.id }
+                });
+            }
+            
+            // Delete course-topic connections
+            await tx.courseTopic.deleteMany({
+                where: { courseId }
+            });
+            
+            // Delete enrollments, bookmarks, feedback, certificates
+            await tx.enrolledCourse.deleteMany({
+                where: { courseId }
+            });
+            
+            await tx.bookmark.deleteMany({
+                where: { courseId }
+            });
+            
+            await tx.courseFeedback.deleteMany({
+                where: { courseId }
+            });
+            
+            await tx.certificate.deleteMany({
+                where: { courseId }
+            });
+            
+            await tx.purchaseHistory.deleteMany({
+                where: { courseId }
+            });
+            
+            // Finally delete the course
+            return tx.course.delete({
+                where: { id: courseId }
+            });
+        });
     }
     
-    
+    async getFullRelationCourses(instructorId: string) {
+        return prisma.course.findMany({
+            where: {
+                instructor: {
+                    userId: instructorId
+                }
+            },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                instructor: {
+                    include: {
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                email: true,
+                            }
+                        }
+                    }
+                },
+                CourseTopic: {
+                    include: {
+                        topic: true
+                    }
+                },
+                modules: {
+                    orderBy: {
+                        order: 'asc'
+                    },
+                    include: {
+                        lessons: {
+                            orderBy: {
+                                createdAt: 'desc'
+                            },
+                            include: {
+                                video: true,
+                                coding: true,
+                                finalTest: {
+                                    include: {
+                                        questions: {
+                                            include: {
+                                                answers: true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                _count: {
+                    select: {
+                        EnrolledCourse: true
+                    }
+                }
+            }
+        });
+    }
 }

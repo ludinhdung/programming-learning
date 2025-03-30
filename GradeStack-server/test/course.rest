@@ -1,0 +1,137 @@
+# GradeStack API - Course Endpoints
+# ===============================
+
+# Environment Variables
+@baseUrl = http://localhost:4000/api
+@instructorId = 1bc9424f-50cf-43ce-b034-f3edc36f2135
+@token = YOUR_JWT_TOKEN_HERE
+@topicId = 713bbb5f-cae1-4390-a722-c1b79b17b0e3
+@courseId = 9138f071-0728-4d95-8a93-158439346168 
+@moduleId = 9b6b9e70-b223-461e-bc94-177a0a4c6417
+@lessonId = 92403a52-e00b-4e10-a1d0-82eb83793729
+
+# ===============================
+# COURSE CRUD OPERATIONS
+# ===============================
+
+### Create a new course
+# Creates a complete course with modules and lessons
+# Trạng thái : Đã test chạy ok 
+
+POST {{baseUrl}}/instructors/{{instructorId}}/courses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "test 2",
+  "description": "A beginner-friendly course to learn programming fundamentals",
+  "price": 99.99,
+  "thumbnail": "https://example.com/course-thumbnail.jpg",
+  "topicIds": ["{{topicId}}"],
+  "isPublished": false,
+  "modules": [
+    {
+      "title": "Getting Started with Python",
+      "description": "Introduction to Python programming language",
+      "order": 1,
+      "videoUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/sample.mp4",
+      "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/sample-thumbnail.jpg",
+      "videoDuration": 120,
+      "lessons": [
+        {
+          "title": "Introduction to Python",
+          "description": "Overview of Python and its applications",
+          "lessonType": "VIDEO",
+          "isPreview": true,
+          "order": 1,
+          "videoUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/1743345642290-sample-video.mp4",
+          "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/1743345642290-thumbnail.jpg",
+          "videoDuration": 140
+        }
+      ]
+    }
+  ]
+}
+
+### Get all courses for an instructor full relation
+# Returns all courses created by a specific instructor
+# Trạng thái : Đã test
+GET {{baseUrl}}/instructors/{{instructorId}}/courses/full
+Authorization: Bearer {{token}}
+
+
+### Get all courses for an instructor
+# Returns all courses created by a specific instructor
+# Trạng thái : Đã test chạy ok  
+GET {{baseUrl}}/instructors/{{instructorId}}/courses
+Authorization: Bearer {{token}}
+
+### Get a specific course by ID
+# Returns detailed information about a specific course including modules and lessons
+# Trạng thái : Đã test chạy ok  
+GET {{baseUrl}}/instructors/{{instructorId}}/courses/{{courseId}}
+Authorization: Bearer {{token}}
+
+### Update a course
+# Updates an existing course's basic information
+# Trạng thái : Đã test chạy ok  
+PUT {{baseUrl}}/instructors/{{instructorId}}/courses/{{courseId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Test 2 đã update chưa test thay đổi module",
+  "description": "Learn advanced programming techniques and patterns",
+  "price": 149.99,
+  "thumbnail": "https://example.com/updated-thumbnail.jpg",
+  "isPublished": true
+}
+
+### Delete a course
+# Permanently removes a course and all its related content
+# Trạng thái : Đã test chạy ok  
+
+DELETE {{baseUrl}}/instructors/{{instructorId}}/courses/{{courseId}}
+Authorization: Bearer {{token}}
+
+### Publish a course
+# Changes a course's status to published, making it available to learners
+# Trạng thái : Chưa triển khai
+
+PATCH {{baseUrl}}/instructors/{{instructorId}}/courses/{{courseId}}/publish
+Authorization: Bearer {{token}}
+
+### Unpublish a course
+# Changes a course's status to unpublished, hiding it from learners
+# Trạng thái : Chưa triển khai
+
+PATCH {{baseUrl}}/instructors/{{instructorId}}/courses/{{courseId}}/unpublish
+Authorization: Bearer {{token}}
+
+### Get popular courses
+# Returns a list of the most popular courses based on enrollment counts
+# Trạng thái : Chưa triển khai
+GET {{baseUrl}}/instructors/{{instructorId}}/courses/popular
+Authorization: Bearer {{token}}
+
+### Search courses
+# Searches for courses based on provided query parameters
+# Trạng thái : Chưa triển khai
+GET {{baseUrl}}/instructors/{{instructorId}}/courses/search?query=python&topic=programming&minPrice=0&maxPrice=100
+Authorization: Bearer {{token}}
+
+### Upload course thumbnail
+# Uploads a thumbnail image for a course
+# Trạng thái : Chưa triển khai
+POST {{baseUrl}}/instructors/{{instructorId}}/courses/{{courseId}}/thumbnail
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="thumbnail"; filename="course-thumbnail.jpg"
+Content-Type: image/jpeg
+
+< ./course-thumbnail.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+

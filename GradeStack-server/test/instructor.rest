@@ -3,331 +3,152 @@
 
 # Environment Variables
 @baseUrl = http://localhost:4000/api
-@instructorId = cf29e577-dc82-49a3-b6e2-0a8f06496a28
-@topicId = dd32e0e5-3289-4a99-82ce-a798f9ff6543
+@instructorId = e6198855-6671-417a-88dc-6dca42bdb80b
 @token = YOUR_JWT_TOKEN_HERE
-@courseId = d1bdd98a-9591-47d5-8634-42314a1d1e3f
-@moduleId = 824b4e9f-18ac-4aaf-b9b9-5198a160bd0f
-@lessonId = d162fcc0-ce39-403a-80e4-c25efc0be5aa
-@videoLessonId = 0e9c8acd-1469-4be2-b1fa-bc45c060fa31
+@userId = 7c8a9b0d-1e2f-3g4h-5i6j-7k8l9m0n1o2p
+
+# ===============================
+# AUTHENTICATION
+# ===============================
+
+### Login to get token (Use this token for subsequent requests)
+# Authenticates an instructor and returns a JWT token for authorization
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "instructor@example.com",
+  "password": "securePassword123"
+}
+
 # ===============================
 # INSTRUCTOR MANAGEMENT
 # ===============================
 
 ### Create Instructor (Admin only)
-POST {{baseUrl}}/instructors/
+# Creates a new instructor account with associated user profile
+POST {{baseUrl}}/instructors
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "userData": {
-        "email": "instructor@example.com",
-        "password": "securePassword123",
-        "firstName": "John",
-        "lastName": "Doe"
-    },
-    "instructorData": {
-        "organization": "Example University",
-        "bio": "Experienced instructor with 10 years of teaching experience",
-        "avatar": "https://example.com/avatars/instructor.jpg",
-        "socials": [
-            "https://linkedin.com/in/johndoe",
-            "https://twitter.com/johndoe"
-        ]
-    }
+  "userData": {
+    "email": "new.1234instructor@example.com",
+    "password": "securePassword123",
+    "firstName": "Jane",
+    "lastName": "Smith"
+  },
+  "instructorData": {
+    "organization": "Tech University",
+    "bio": "Experienced software engineer with 8 years of teaching experience in web development and programming fundamentals",
+    "avatar": "https://example.com/avatars/jane-smith.jpg",
+    "socials": [
+      "https://linkedin.com/in/janesmith",
+      "https://github.com/janesmith",
+      "https://twitter.com/janesmith"
+    ]
+  }
 }
 
-### Get All Instructors
-GET {{baseUrl}}/instructors
-Content-Type: application/json
-
-### Get Instructor by ID
+### Get Instructor Profile
+# Returns detailed information about a specific instructor
 GET {{baseUrl}}/instructors/{{instructorId}}
-Content-Type: application/json
+Authorization: Bearer {{token}}
 
 ### Update Instructor Profile
-PUT {{baseUrl}}/instructors/{{instructorId}}/profile
+# Updates an instructor's profile information
+PUT {{baseUrl}}/instructors/{{instructorId}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "bio": "Updated bio with new information about my teaching experience",
-    "organization": "New University",
-    "socials": [
-        "https://linkedin.com/in/johndoe",
-        "https://github.com/johndoe"
-    ]
+  "organization": "Updated University",
+  "bio": "Updated bio with additional certifications and expertise in machine learning and AI",
+  "avatar": "https://example.com/avatars/updated-avatar.jpg",
+  "socials": [
+    "https://linkedin.com/in/updatedprofile",
+    "https://github.com/updatedprofile",
+    "https://twitter.com/updatedprofile",
+    "https://medium.com/@updatedprofile"
+  ]
 }
 
-### Update Instructor Avatar
-PUT {{baseUrl}}/instructors/{{instructorId}}/avatar
+### Get Instructor Statistics
+# Returns statistics about an instructor's courses, students, and revenue
+GET {{baseUrl}}/instructors/{{instructorId}}/statistics
 Authorization: Bearer {{token}}
-Content-Type: application/json
 
-{
-    "avatarUrl": "https://example.com/new-avatar.jpg"
-}
-
-# ===============================
-# COURSE MANAGEMENT
-# ===============================
-
-### Create Simple Course
-POST {{baseUrl}}/instructors/{{instructorId}}/courses
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "title": "Introduction to Programming",
-    "description": "A beginner-friendly course to learn programming fundamentals",
-    "price": 100000,
-    "duration": 12,
-    "isPublished": false
-}
-
-### Create Course with Full Structure (JSON approach)
-POST {{baseUrl}}/instructors/{{instructorId}}/courses
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "title": "Python for human 3",
-    "description": "lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    "price": 99.99,
-    "duration": 1800,
-    "isPublished": false,
-    "topicIds": ["{{topicId}}"],
-    "modules": [
-        {
-            "title": "Scaffolding",
-            "description": "lorem ipsum dolor sit amet, consectetur adipiscing elit",
-            "order": 1,
-            "lessons": [
-                {
-                    "title": "Lession 111",
-                    "description": "Hi, there. I'm excited to start this course with you. In this introductory video, we'll quickly review our objective, as well as the tools and technologies we'll be using.",
-                    "lessonType": "VIDEO",
-                    "isPreview": true,
-                    "videoData": {
-                        "url": "placeholder-url-to-be-updated-later"
-                    }
-                },
-                {
-                    "title": "Lession 222",
-                    "description": "Hi, there. I'm excited to start this course with you. In this introductory video, we'll quickly review our objective, as well as the tools and technologies we'll be using.",
-                    "lessonType": "VIDEO",
-                    "isPreview": true,
-                    "videoData": {
-                        "url": "placeholder-url-to-be-updated-later"
-                    }
-                }
-            ]
-        },
-        {
-            "title": "The Storefront",
-            "description": "lorem ipsum dolor sit amet, consectetur adipiscing elit",
-            "order": 2,
-            "lessons": [
-                {
-                    "title": "Lession 111",
-                    "description": "lorem ipsum dolor sit amet, consectetur adipiscing elit",
-                    "lessonType": "VIDEO",
-                    "isPreview": true,
-                    "videoData": {
-                        "url": "placeholder-url-to-be-updated-later"
-                    }
-                },
-                {
-                    "title": "Lession 222",
-                    "description": "lorem ipsum dolor sit amet, consectetur adipiscing elit",
-                    "lessonType": "VIDEO",
-                    "isPreview": true,
-                    "videoData": {
-                        "url": "placeholder-url-to-be-updated-later"
-                    }
-                }
-            ]
-        }
-    ]
-}
-
-# ===============================
-# COURSE CRUD OPERATIONS
-# ===============================
-
-### Get All Courses for an Instructor
+### Get Instructor Courses
+# Returns all courses created by a specific instructor
 GET {{baseUrl}}/instructors/{{instructorId}}/courses
 Authorization: Bearer {{token}}
 
-### Get Course by ID
-GET {{baseUrl}}/instructors/{{instructorId}}/courses/{{courseId}}
+### Get Instructor Topics
+# Returns all topics created by a specific instructor
+GET {{baseUrl}}/instructors/{{instructorId}}/topics
 Authorization: Bearer {{token}}
 
-### Update Course
-PUT {{baseUrl}}/instructors/{{instructorId}}/courses/{{courseId}}
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "title": "Updated Course Title",
-    "description": "Updated course description with more details",
-    "price": 129.99,
-    "isPublished": true,
-    "topicIds": ["{{topicId}}"]
-}
-
-### Delete Course
-DELETE {{baseUrl}}/instructors/{{instructorId}}/courses/{{courseId}}
+### Get Instructor Revenue
+# Returns revenue information for a specific instructor
+GET {{baseUrl}}/instructors/{{instructorId}}/revenue
 Authorization: Bearer {{token}}
 
-# ===============================
-# MODULE CRUD OPERATIONS
-# ===============================
-
-### Get All Courses Full Relation for an Instructor
-GET {{baseUrl}}/instructors/{{instructorId}}/courses-full-relation
+### Get Instructor Students
+# Returns all students enrolled in an instructor's courses
+GET {{baseUrl}}/instructors/{{instructorId}}/students
 Authorization: Bearer {{token}}
 
-
-### Get All Modules for a Course
-GET {{baseUrl}}/instructors/courses/{{courseId}}/modules
-Authorization: Bearer {{token}}
-
-### Get Module by ID
-GET {{baseUrl}}/instructors/modules/{{moduleId}}
-Authorization: Bearer {{token}}
-
-### Create New Module
-POST {{baseUrl}}/instructors/courses/{{courseId}}/modules
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "title": "Advanced Topics",
-    "description": "Explore advanced concepts and techniques",
-    "order": 2
-}
-
-### Update Module
-PUT {{baseUrl}}/instructors/modules/{{moduleId}}
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "title": "Updated Module Title",
-    "description": "Updated module description with more details",
-    "order": 1
-}
-
-### Delete Module
-DELETE {{baseUrl}}/instructors/modules/{{moduleId}}
-Authorization: Bearer {{token}}
-
-# ===============================
-# LESSON CRUD OPERATIONS
-# ===============================
-
-### Get All Lessons for a Module
-GET {{baseUrl}}/instructors/modules/{{moduleId}}/lessons
-Authorization: Bearer {{token}}
-
-### Get Lesson by ID
-GET {{baseUrl}}/instructors/lessons/{{lessonId}}
-Authorization: Bearer {{token}}
-
-### Update Lesson
-PUT {{baseUrl}}/instructors/lessons/{{lessonId}}
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "title": "Updated Lesson Title",
-    "description": "Updated lesson description with more details",
-    "duration": 25,
-    "isPreview": true
-}
-
-### Delete Lesson
-DELETE {{baseUrl}}/instructors/lessons/{{lessonId}}
-Authorization: Bearer {{token}}
-
-# ===============================
-# VIDEO UPLOADS
-# ===============================
-
-### Upload Video and Create Lesson Automatically (Duration is auto-calculated by the server)
-# Note: For actual testing, use Postman or curl as REST Client has limitations with file uploads
-# 
-# curl -X POST {{baseUrl}}/instructors/{{instructorId}}/upload-video \
-#   -H "Authorization: Bearer {{token}}" \
-#   -F "video=@/path/to/your/video.mp4" \
-#   -F "moduleId=b66b4ed8-6f00-42bc-8eb5-9afe68d353b5" \
-#   -F "lessonId=c77c5fd9-7f00-42bc-8eb5-9afe68d353b6" \
-#   -F "videoLessonId=d88d6fe0-8f00-42bc-8eb5-9afe68d353b7"
-#
-POST {{baseUrl}}/instructors/{{instructorId}}/upload-video
+### Upload Instructor Avatar
+# Uploads a profile image for an instructor
+POST {{baseUrl}}/instructors/{{instructorId}}/avatar
 Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="video"; filename="css.mp4"
-Content-Type: video/mp4
+Content-Disposition: form-data; name="avatar"; filename="instructor-avatar.jpg"
+Content-Type: image/jpeg
 
-< C:\Users\duong\Downloads\css.mp4
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="moduleId"
-
-{{moduleId}}
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="lessonId"
-
-{{lessonId}}
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="videoLessonId"
-
-{{videoLessonId}}
+< ./instructor-avatar.jpg
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
-# Response will include:
-# {
-#   "message": "Video uploaded and module updated successfully",
-#   "videoUrl": "https://example.com/videos/123456-sample.mp4",
-#   "thumbnailUrl": "https://example.com/videos/thumbnails/123456-thumbnail.jpg",
-#   "duration": 125.5,  // Duration in seconds, automatically extracted from the video
-#   "module": { ... }
-# }
 
-# Important Note: When creating a course with video modules, you should:
-# 1. First create the course structure with modules
-# 2. Then upload videos to specific modules using the upload-video endpoint above
-# 3. The server will automatically extract video duration and update the module with video information
-
-# ===============================
-# WORKSHOP MANAGEMENT
-# ===============================
-
-### Create Workshop
-POST {{baseUrl}}/instructors/{{instructorId}}/workshops
+### Convert User to Instructor
+# Converts an existing user account to an instructor account
+POST {{baseUrl}}/admin/users/{{userId}}/convert-to-instructor
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "title": "Advanced JavaScript Workshop",
-    "description": "An intensive workshop covering advanced JavaScript topics",
-    "scheduledAt": "2025-06-15T10:00:00Z",
-    "duration": 4
+  "organization": "New Tech Academy",
+  "bio": "Former student now teaching programming fundamentals",
+  "avatar": "https://example.com/avatars/new-instructor.jpg",
+  "socials": [
+    "https://linkedin.com/in/newinstructor",
+    "https://github.com/newinstructor"
+  ]
 }
 
-# ===============================
-# TOPIC MANAGEMENT
-# ===============================
+### Get Instructor Wallet
+# Returns wallet information for a specific instructor
+GET {{baseUrl}}/instructors/{{instructorId}}/wallet
+Authorization: Bearer {{token}}
 
-### Create Topic
-POST {{baseUrl}}/instructors/{{instructorId}}/topics
+### Request Withdrawal
+# Requests a withdrawal from an instructor's wallet
+POST {{baseUrl}}/instructors/{{instructorId}}/wallet/withdraw
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "name": "Introduction to PYTHON",
-    "description": "Learn the basics of PYTHON programming language",
-    "thumbnail": "https://example.com/thumbnail.jpg"
+  "amount": 500.00,
+  "bankDetails": {
+    "accountName": "Jane Smith",
+    "accountNumber": "1234567890",
+    "bankName": "Example Bank",
+    "swiftCode": "EXBKUS12"
+  }
 }
+
+### Get Withdrawal History
+# Returns the history of withdrawal requests for an instructor
+GET {{baseUrl}}/instructors/{{instructorId}}/wallet/withdrawals
+Authorization: Bearer {{token}}
