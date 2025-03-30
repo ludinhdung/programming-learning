@@ -5,8 +5,6 @@ import { CourseCreateDTO } from '../dto/CourseCreateDTO';
 import { r2StorageService, UploadedFile } from '../../../shared/services/r2-storage.service';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
-
 export class InstructorController {
     private instructorService: InstructorService;
 
@@ -128,7 +126,7 @@ export class InstructorController {
                             switch (lesson.lessonType) {
                                 case LessonType.VIDEO:
                                     if (
-                                        !lesson.videoData?.url
+                                        !lesson.videoData?.url && !lesson.videoData?.videoUrl
                                     ) {
                                         res.status(400).json({ message: 'Missing required video lesson fields' });
                                         return;
@@ -260,17 +258,9 @@ export class InstructorController {
      */
     public uploadVideo = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { id } = req.params; // Instructor ID
-            const { moduleId, lessonId, videoLessonId } = req.body;
-            
             // Check if file exists in the request
             if (!req.file) {
                 res.status(400).json({ message: 'No video file uploaded' });
-                return;
-            }
-
-            if (!moduleId) {
-                res.status(400).json({ message: 'Module ID is required' });
                 return;
             }
 
@@ -279,74 +269,17 @@ export class InstructorController {
             // Upload the video to Cloudflare R2
             const uploadResult = await r2StorageService.uploadVideo(file, 'course-videos');
             
-            // Find the module
-            const module = await prisma.module.findUnique({
-                where: { id: moduleId },
-                include: {
-                    course: true
-                }
-            });
-            
-            if (!module) {
-                res.status(404).json({ message: 'Module not found' });
-                return;
-            }
-            
-            // Verify that the instructor owns this module/course
-            if (module.course.instructorId !== id) {
-                res.status(403).json({ message: 'You do not have permission to update this module' });
-                return;
-            }
-            
-            let updatedModule, updatedLesson, updatedVideoLesson;
-            
-            // Update based on provided IDs
-            if (moduleId) {
-                updatedModule = await prisma.module.update({
-                    where: { id: moduleId },
-                    data: {
-                        videoUrl: uploadResult.videoUrl,
-                        thumbnailUrl: uploadResult.thumbnailUrl,
-                        videoDuration: Math.round(uploadResult.duration)
-                    }
-                });
-            }
-            
-            if (lessonId) {
-                updatedLesson = await prisma.lesson.update({
-                    where: { id: lessonId },
-                    data: {
-                        duration: Math.round(uploadResult.duration)
-                    }
-                });
-            }
-            
-            if (videoLessonId) {
-                updatedVideoLesson = await prisma.videoLesson.update({
-                    where: { id: videoLessonId },
-                    data: {
-                        url: uploadResult.videoUrl,
-                        thumbnailUrl: uploadResult.thumbnailUrl,
-                        duration: Math.round(uploadResult.duration)
-                    }
-                });
-            }
-            
-            // Return the URLs and updated entities
+            // Return only the video URL
             res.status(200).json({
-                message: 'Video uploaded and information updated successfully',
                 videoUrl: uploadResult.videoUrl,
                 thumbnailUrl: uploadResult.thumbnailUrl,
-                duration: uploadResult.duration,
-                module: updatedModule,
-                lesson: updatedLesson,
-                videoLesson: updatedVideoLesson
+                duration: Math.round(uploadResult.duration)
             });
         } catch (error) {
             this.handleError(res, error);
         }
     };
-
+    
     /**
      * Get all courses for an instructor
      */
@@ -551,8 +484,101 @@ export class InstructorController {
     public getCoursesFullrelation = async (req: Request, res: Response): Promise<void> => {
         try {
             const { id } = req.params; // Instructor ID
+            console.log(id);
             const courses = await this.instructorService.getFullRelationCourses(id);
             res.status(200).json(courses);
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
+
+    /**
+     * Update a video lesson
+     */
+    public updateVideoLesson = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { lessonId } = req.params;
+            const videoData = req.body;
+            
+            // Validate required fields
+            if (!videoData?.url && !videoData?.videoUrl) {
+                res.status(400).json({ message: 'Missing required video URL' });
+                return;
+            }
+
+            const videoLesson = await this.instructorService.updateVideoLesson(lessonId, videoData);
+            res.status(200).json(videoLesson);
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
+
+    /**
+     * Get all topics
+     */
+    public getAllTopics = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const topics = await this.instructorService.getAllTopics();
+            res.status(200).json(topics);
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
+
+    /**
+     * Get topic by ID
+     */
+    public getTopicById = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { topicId } = req.params;
+            const topic = await this.instructorService.getTopicById(topicId);
+            res.status(200).json(topic);
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
+
+    /**
+     * Get topics by instructor ID
+     */
+    public getTopicsByInstructor = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { id } = req.params;
+            const topics = await this.instructorService.getTopicsByInstructor(id);
+            res.status(200).json(topics);
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
+
+    /**
+     * Get topics with courses
+     */
+    public getTopicsWithCourses = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const topics = await this.instructorService.getTopicsWithCourses();
+            res.status(200).json(topics);
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
+
+    /**
+     * Update a topic
+     */
+    public updateTopic = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { topicId } = req.params;
+            const topicData = req.body;
+            
+            // Validate required fields
+            if (!topicData?.name) {
+                res.status(400).json({ message: 'Topic name is required' });
+                return;
+            }
+
+            const topic = await this.instructorService.updateTopic(topicId, topicData);
+            res.status(200).json(topic);
         } catch (error) {
             this.handleError(res, error);
         }

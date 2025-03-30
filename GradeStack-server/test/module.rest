@@ -1,0 +1,82 @@
+# GradeStack API - Module Endpoints
+# ===============================
+
+# Environment Variables
+@baseUrl = http://localhost:4000/api
+@token = YOUR_JWT_TOKEN_HERE
+@courseId = 9138f071-0728-4d95-8a93-158439346168 
+@moduleId = 0100da56-5a0c-4b95-8c25-2a8ff7147939
+
+# ===============================
+# MODULE CRUD OPERATIONS
+# ===============================
+
+### Get All Modules for a Course
+# Returns all modules associated with a specific course, ordered by their position
+# Trạng thái : Đã test chạy ok  
+GET {{baseUrl}}/courses/{{courseId}}/modules
+Authorization: Bearer {{token}}
+
+### Get Module by ID
+# Returns detailed information about a specific module including its lessons
+# Trạng thái : Đã test chạy ok  
+GET {{baseUrl}}/modules/{{moduleId}}
+Authorization: Bearer {{token}}
+
+### Create New Module
+# Creates a new module within a course
+# Trạng thái : Đã test chạy ok  
+POST {{baseUrl}}/courses/{{courseId}}/modules
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Getting Started with Python 2",
+  "description": "Learn the basics of Python programming language",
+  "order": 1,
+  "videoUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/intro-js.mp4",
+  "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/intro-js-thumbnail.jpg",
+  "videoDuration": 180
+}
+
+### Update Module
+# Updates an existing module's information
+# Trạng thái : Đã test chạy ok  
+PUT {{baseUrl}}/modules/{{moduleId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Advanced Python Concepts 2",
+  "description": "Deep dive into advanced Python features and patterns",
+  "order": 2,
+  "videoUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/advanced-js.mp4",
+  "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/advanced-js-thumbnail.jpg",
+  "videoDuration": 240
+}
+
+### Delete Module
+# Permanently removes a module and all its lessons
+DELETE {{baseUrl}}/modules/{{moduleId}}
+Authorization: Bearer {{token}}
+
+### Reorder Modules
+# Updates the order of modules within a course
+PATCH {{baseUrl}}/courses/{{courseId}}/modules/reorder
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "moduleOrders": [
+    {
+      "id": "{{moduleId}}",
+      "order": 2
+    },
+    {
+      "id": "another-module-id",
+      "order": 1
+    }
+  ]
+}
+
+

@@ -50,6 +50,7 @@ CREATE TABLE "Course" (
     "price" DECIMAL(65,30) NOT NULL DEFAULT 0.00,
     "duration" INTEGER NOT NULL DEFAULT 0,
     "isPublished" BOOLEAN NOT NULL DEFAULT false,
+    "thumbnail" TEXT,
     "instructorId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -64,6 +65,9 @@ CREATE TABLE "Module" (
     "description" TEXT NOT NULL,
     "order" INTEGER NOT NULL,
     "courseId" TEXT NOT NULL,
+    "videoUrl" TEXT,
+    "thumbnailUrl" TEXT,
+    "videoDuration" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -79,6 +83,7 @@ CREATE TABLE "Lesson" (
     "lessonType" "LessonType" NOT NULL,
     "duration" INTEGER,
     "isPreview" BOOLEAN NOT NULL DEFAULT false,
+    "order" INTEGER NOT NULL DEFAULT 1,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Lesson_pkey" PRIMARY KEY ("id")
@@ -113,6 +118,7 @@ CREATE TABLE "VideoLesson" (
     "id" TEXT NOT NULL,
     "lessonId" TEXT NOT NULL,
     "url" TEXT NOT NULL,
+    "thumbnailUrl" TEXT,
     "duration" INTEGER NOT NULL,
 
     CONSTRAINT "VideoLesson_pkey" PRIMARY KEY ("id")
@@ -231,6 +237,7 @@ CREATE TABLE "Topic" (
     "name" TEXT NOT NULL,
     "thumbnail" TEXT,
     "description" TEXT,
+    "instructorUserId" TEXT,
 
     CONSTRAINT "Topic_pkey" PRIMARY KEY ("id")
 );
@@ -250,6 +257,7 @@ CREATE TABLE "LearningPath" (
     "title" TEXT NOT NULL,
     "description" TEXT,
     "thumbnail" TEXT,
+    "instructorUserId" TEXT,
 
     CONSTRAINT "LearningPath_pkey" PRIMARY KEY ("id")
 );
@@ -439,10 +447,16 @@ ALTER TABLE "EnrolledCourse" ADD CONSTRAINT "EnrolledCourse_learnerId_fkey" FORE
 ALTER TABLE "EnrolledCourse" ADD CONSTRAINT "EnrolledCourse_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Topic" ADD CONSTRAINT "Topic_instructorUserId_fkey" FOREIGN KEY ("instructorUserId") REFERENCES "Instructor"("userId") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "CourseTopic" ADD CONSTRAINT "CourseTopic_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CourseTopic" ADD CONSTRAINT "CourseTopic_topicId_fkey" FOREIGN KEY ("topicId") REFERENCES "Topic"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "LearningPath" ADD CONSTRAINT "LearningPath_instructorUserId_fkey" FOREIGN KEY ("instructorUserId") REFERENCES "Instructor"("userId") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "LearningPathCourse" ADD CONSTRAINT "LearningPathCourse_learningPathId_fkey" FOREIGN KEY ("learningPathId") REFERENCES "LearningPath"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

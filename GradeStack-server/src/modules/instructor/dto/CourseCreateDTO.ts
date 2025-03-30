@@ -7,6 +7,7 @@ export interface CourseCreateDTO {
   price: Decimal | number;
   duration?: number;
   isPublished?: boolean;
+  thumbnail?: string;
   topicIds?: string[] | undefined;
   modules?: ModuleCreateDTO[];
 }
@@ -24,8 +25,11 @@ export interface LessonCreateDTO {
   lessonType: LessonType;
   duration?: number;
   isPreview?: boolean;
+  order?: number;
   videoData?: {
-    url: string;
+    url?: string;
+    videoUrl?: string;
+    thumbnailUrl?: string;
     duration: number;
   };
   codingData?: {

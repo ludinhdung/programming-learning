@@ -68,8 +68,9 @@ model Course {
   title       String
   description String
   price       Decimal @default(0.00)
-  duration    Int     @default(0) // Tổng thời gian (phút)
+  duration    Int     @default(0) 
   isPublished Boolean @default(false)
+  thumbnail   String?
 
   instructor   Instructor @relation(fields: [instructorId], references: [userId])
   instructorId String
@@ -121,8 +122,9 @@ model Lesson {
   title       String
   description String
   lessonType  LessonType
-  duration    Int? // Dành cho video hoặc estimated time
-  isPreview   Boolean    @default(false) // Instructor đánh dấu nội dung xem trước
+  duration    Int?                        // Dành cho video hoặc estimated time
+  isPreview   Boolean    @default(false)  // Instructor đánh dấu nội dung xem trước
+  order       Int        @default(1)      // Thứ tự bài học trong module
 
   video     VideoLesson?
   coding    CodingExercise?
@@ -200,6 +202,7 @@ model FinalTestLesson {
   lessonId String @unique
 
   estimatedDuration Int?
+  passingScore      Int  @default(70)
 
   questions          Question[]
   SubmittedFinalTest SubmittedFinalTest[]
