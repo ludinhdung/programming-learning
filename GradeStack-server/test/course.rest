@@ -39,14 +39,16 @@ Content-Type: application/json
       "videoDuration": 120,
       "lessons": [
         {
-          "title": "Your First Coding Exercise sfhjsgdfhjkg",
+          "title": "Your First Coding Exercise bbbb",
           "description": "Practice basic coding concepts with this exercise",
           "lessonType": "CODING",
           "language": "JAVA",
           "isPreview": false,
           "order": 2,
           "exerciseContent": "Write a function that prints 'Hello, World!' to the console.",
-          "solution": "function helloWorld() {\n  console.log('Hello, World!');\n}"
+          "solution": "function helloWorld() {\n  console.log('Hello, World!');\n}",
+          "hint": "Remember to use the console.log function to print to the console.",
+          "codeSnippet": "// Your code here\nfunction helloWorld() {\n  // Complete the function\n}"
         }
       ]
     }

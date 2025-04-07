@@ -117,7 +117,7 @@ export class CourseService extends CourseBaseService<
             
             // Prepare lesson data
             const { videoData, videoUrl: _, thumbnailUrl: __, videoDuration: ___, 
-                    exerciseContent, solution, questions, language, ...lessonRestData } = lessonData;
+                    exerciseContent, solution, language, hint, codeSnippet, questions, ...lessonRestData } = lessonData;
             
             // Create the lesson
             const createdLesson = await tx.lesson.create({
@@ -132,7 +132,17 @@ export class CourseService extends CourseBaseService<
                 tx, 
                 createdLesson.id, 
                 lessonData.lessonType, 
-                { videoUrl, thumbnailUrl, videoDuration, exerciseContent, solution, language, questions }
+                { 
+                    videoUrl, 
+                    thumbnailUrl, 
+                    videoDuration, 
+                    exerciseContent, 
+                    solution, 
+                    language: lessonData.language || language, 
+                    hint, 
+                    codeSnippet, 
+                    questions 
+                }
             );
         }
     }
@@ -166,15 +176,17 @@ export class CourseService extends CourseBaseService<
             exerciseContent?: string,
             solution?: string,
             language?: SupportedLanguage,
+            hint?: string,
+            codeSnippet?: string,
             questions?: any[]
         }
     ) {
-        const { videoUrl, thumbnailUrl, videoDuration, exerciseContent, solution, language, questions } = content;
+        const { videoUrl, thumbnailUrl, videoDuration, exerciseContent, solution, language, hint, codeSnippet, questions } = content;
         
         if (lessonType === 'VIDEO' && videoUrl) {
             await this.createVideoLesson(tx, lessonId, videoUrl, thumbnailUrl, videoDuration);
         } else if (lessonType === 'CODING' && exerciseContent) {
-            await this.createCodingExercise(tx, lessonId, exerciseContent, solution, language);
+            await this.createCodingExercise(tx, lessonId, exerciseContent, solution, language, hint, codeSnippet);
         } else if (lessonType === 'FINAL_TEST' && questions) {
             await this.createFinalTest(tx, lessonId, questions);
         }
@@ -191,7 +203,7 @@ export class CourseService extends CourseBaseService<
         });
     }
     
-    private async createCodingExercise(tx: any, lessonId: string, exerciseContent: string, solution?: string, language?: SupportedLanguage) {
+    private async createCodingExercise(tx: any, lessonId: string, exerciseContent: string, solution?: string, language?: SupportedLanguage, hint?: string, codeSnippet?: string) {
         if (!language) {
             // Set a default language if none provided
             language = 'PYTHON';
@@ -202,6 +214,8 @@ export class CourseService extends CourseBaseService<
                 problem: exerciseContent,
                 language: language,
                 solution: solution || '',
+                hint: hint || '',
+                codeSnippet: codeSnippet || '',
                 lesson: { connect: { id: lessonId } }
             }
         });
