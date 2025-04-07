@@ -23,30 +23,30 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "title": "test 2",
-  "description": "A beginner-friendly course to learn programming fundamentals",
+  "title": "Coding Course",
+  "description": "A comprehensive coding course to learn programming fundamentals",
   "price": 99.99,
   "thumbnail": "https://example.com/course-thumbnail.jpg",
   "topicIds": ["{{topicId}}"],
   "isPublished": false,
   "modules": [
     {
-      "title": "Getting Started with Python",
-      "description": "Introduction to Python programming language",
+      "title": "Getting Started with Coding",
+      "description": "Introduction to programming fundamentals",
       "order": 1,
       "videoUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/sample.mp4",
       "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/sample-thumbnail.jpg",
       "videoDuration": 120,
       "lessons": [
         {
-          "title": "Introduction to Python",
-          "description": "Overview of Python and its applications",
-          "lessonType": "VIDEO",
-          "isPreview": true,
-          "order": 1,
-          "videoUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/1743345642290-sample-video.mp4",
-          "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/1743345642290-thumbnail.jpg",
-          "videoDuration": 140
+          "title": "Your First Coding Exercise sfhjsgdfhjkg",
+          "description": "Practice basic coding concepts with this exercise",
+          "lessonType": "CODING",
+          "language": "JAVA",
+          "isPreview": false,
+          "order": 2,
+          "exerciseContent": "Write a function that prints 'Hello, World!' to the console.",
+          "solution": "function helloWorld() {\n  console.log('Hello, World!');\n}"
         }
       ]
     }
@@ -133,5 +133,3 @@ Content-Type: image/jpeg
 
 < ./course-thumbnail.jpg
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
-
-
