@@ -22,12 +22,18 @@ export class LessonService extends LessonBaseService {
             orderBy: { createdAt: 'asc' },
             include: {
                 video: true,
-                coding: true,
+                coding: {
+                    include: {
+                        question: true,
+                        answers: true
+                    }
+                },
                 finalTest: {
                     include: {
                         questions: {
                             orderBy: { order: 'asc' },
                             include: {
+                                question: true,
                                 answers: true
                             }
                         }

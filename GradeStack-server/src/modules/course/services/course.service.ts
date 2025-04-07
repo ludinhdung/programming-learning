@@ -1,5 +1,5 @@
 import { CourseBaseService, CourseWithRelations } from '../../../shared/base/domain-services/course-base.service';
-import { Course, Prisma, PrismaClient } from '@prisma/client';
+import { Course, Prisma, PrismaClient, SupportedLanguage } from '@prisma/client';
 import { withTransaction } from '../../../shared/utils/transaction.utils';
 
 const prisma = new PrismaClient();
@@ -117,7 +117,7 @@ export class CourseService extends CourseBaseService<
             
             // Prepare lesson data
             const { videoData, videoUrl: _, thumbnailUrl: __, videoDuration: ___, 
-                    exerciseContent, solution, questions, ...lessonRestData } = lessonData;
+                    exerciseContent, solution, questions, language, ...lessonRestData } = lessonData;
             
             // Create the lesson
             const createdLesson = await tx.lesson.create({
@@ -132,7 +132,7 @@ export class CourseService extends CourseBaseService<
                 tx, 
                 createdLesson.id, 
                 lessonData.lessonType, 
-                { videoUrl, thumbnailUrl, videoDuration, exerciseContent, solution, questions }
+                { videoUrl, thumbnailUrl, videoDuration, exerciseContent, solution, language, questions }
             );
         }
     }
@@ -165,15 +165,16 @@ export class CourseService extends CourseBaseService<
             videoDuration?: number,
             exerciseContent?: string,
             solution?: string,
+            language?: SupportedLanguage,
             questions?: any[]
         }
     ) {
-        const { videoUrl, thumbnailUrl, videoDuration, exerciseContent, solution, questions } = content;
+        const { videoUrl, thumbnailUrl, videoDuration, exerciseContent, solution, language, questions } = content;
         
         if (lessonType === 'VIDEO' && videoUrl) {
             await this.createVideoLesson(tx, lessonId, videoUrl, thumbnailUrl, videoDuration);
         } else if (lessonType === 'CODING' && exerciseContent) {
-            await this.createCodingExercise(tx, lessonId, exerciseContent, solution);
+            await this.createCodingExercise(tx, lessonId, exerciseContent, solution, language);
         } else if (lessonType === 'FINAL_TEST' && questions) {
             await this.createFinalTest(tx, lessonId, questions);
         }
@@ -190,11 +191,16 @@ export class CourseService extends CourseBaseService<
         });
     }
     
-    private async createCodingExercise(tx: any, lessonId: string, exerciseContent: string, solution?: string) {
+    private async createCodingExercise(tx: any, lessonId: string, exerciseContent: string, solution?: string, language?: SupportedLanguage) {
+        if (!language) {
+            // Set a default language if none provided
+            language = 'PYTHON';
+        }
+        
         await tx.codingExercise.create({
             data: {
                 problem: exerciseContent,
-                language: 'JAVA',
+                language: language,
                 solution: solution || '',
                 lesson: { connect: { id: lessonId } }
             }
