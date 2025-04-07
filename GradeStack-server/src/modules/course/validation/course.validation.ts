@@ -25,6 +25,9 @@ const lessonBaseSchema = z.object({
   // For coding exercise fields
   exerciseContent: z.string().optional(),
   solution: z.string().optional(),
+  language: z.enum(['PYTHON', 'JAVA', 'C']).optional(),
+  hint: z.string().optional(),
+  codeSnippet: z.string().optional(),
   // For final test fields
   questions: z.array(z.any()).optional(),
 });
