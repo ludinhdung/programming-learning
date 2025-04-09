@@ -387,11 +387,73 @@ export class LessonService extends LessonBaseService {
                 data: lessonData
             });
             
-            // Update the final test
+            // Get the final test ID
+            const finalTest = await tx.finalTestLesson.findUnique({
+                where: { lessonId },
+                select: { id: true }
+            });
+            
+            if (!finalTest) {
+                throw { status: 404, message: `Final test for lesson ${lessonId} not found` };
+            }
+            
+            // Extract questions from testData if they exist
+            const { questions, ...testDataWithoutQuestions } = testData as any;
+            
+            // Update the final test basic data
             await tx.finalTestLesson.update({
                 where: { lessonId },
-                data: testData
+                data: testDataWithoutQuestions
             });
+            
+            // Handle questions update if provided
+            if (questions && Array.isArray(questions)) {
+                // Delete existing questions and answers
+                const existingQuestions = await tx.question.findMany({
+                    where: { testId: finalTest.id },
+                    select: { id: true }
+                });
+                
+                // Delete all answers for existing questions
+                for (const question of existingQuestions) {
+                    await tx.answer.deleteMany({
+                        where: { questionId: question.id }
+                    });
+                }
+                
+                // Delete all existing questions
+                await tx.question.deleteMany({
+                    where: { testId: finalTest.id }
+                });
+                
+                // Create new questions and answers
+                for (const question of questions) {
+                    const newQuestion = await tx.question.create({
+                        data: {
+                            content: question.content,
+                            order: question.order,
+                            test: {
+                                connect: { id: finalTest.id }
+                            }
+                        }
+                    });
+                    
+                    // Create answers for this question
+                    if (question.answers && Array.isArray(question.answers)) {
+                        for (const answer of question.answers) {
+                            await tx.answer.create({
+                                data: {
+                                    content: answer.content,
+                                    isCorrect: answer.isCorrect,
+                                    question: {
+                                        connect: { id: newQuestion.id }
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            }
             
             return updatedLesson;
         });

@@ -1,0 +1,163 @@
+# GradeStack API - Final Test Tests
+# ===============================
+
+# Environment Variables
+@baseUrl = http://localhost:4000/api
+@moduleId = cdf9a48a-239a-487f-a31b-09bdbf9506c9
+@lessonId = 083c3254-eaf2-4392-8cb2-e96083beff68
+
+### Create a Final Test with estimatedDuration and questions
+# @name createFinalTest
+POST {{baseUrl}}/modules/{{moduleId}}/final-tests
+Content-Type: application/json
+
+{
+  "lessonData": {
+    "title": "Final Test: JavaScript Fundamentals",
+    "description": "Test your knowledge of JavaScript fundamentals",
+    "duration": 60,
+    "isPreview": false,
+    "order": 5
+  },
+  "testData": {
+    "estimatedDuration": 45,
+    "passingScore": 80,
+    "questions": [
+      {
+        "content": "What is JavaScript?",
+        "order": 1,
+        "answers": [
+          {
+            "content": "A programming language for the web",
+            "isCorrect": true
+          },
+          {
+            "content": "A markup language",
+            "isCorrect": false
+          },
+          {
+            "content": "A database query language",
+            "isCorrect": false
+          },
+          {
+            "content": "An operating system",
+            "isCorrect": false
+          }
+        ]
+      },
+      {
+        "content": "Which of the following is NOT a JavaScript data type?",
+        "order": 2,
+        "answers": [
+          {
+            "content": "String",
+            "isCorrect": false
+          },
+          {
+            "content": "Boolean",
+            "isCorrect": false
+          },
+          {
+            "content": "Integer",
+            "isCorrect": true
+          },
+          {
+            "content": "Object",
+            "isCorrect": false
+          }
+        ]
+      },
+      {
+        "content": "What does the '===' operator do in JavaScript?",
+        "order": 3,
+        "answers": [
+          {
+            "content": "Compares values only",
+            "isCorrect": false
+          },
+          {
+            "content": "Compares values and types",
+            "isCorrect": true
+          },
+          {
+            "content": "Assigns a value",
+            "isCorrect": false
+          },
+          {
+            "content": "Checks if a value exists",
+            "isCorrect": false
+          }
+        ]
+      }
+    ]
+  }
+}
+
+### Get a Final Test by ID
+# @name getFinalTest
+GET {{baseUrl}}/lessons/{{lessonId}}/final-test
+Content-Type: application/json
+
+### Update a Final Test
+# @name updateFinalTest
+PUT {{baseUrl}}/lessons/{{lessonId}}/final-test
+Content-Type: application/json
+
+{
+  "lessonData": {
+    "title": "Updated 8Final Test: JavaScript Fundamentals",
+    "description": "Updated test for JavaScript fundamentals",
+    "duration": 75,
+    "isPreview": false
+  },
+  "testData": {
+    "estimatedDuration": 60,
+    "passingScore": 85,
+    "questions": [
+      {
+        "content": "What is JavaScript?",
+        "order": 1,
+        "answers": [
+          {
+            "content": "A programming language for the web",
+            "isCorrect": true
+          },
+          {
+            "content": "A markup language",
+            "isCorrect": false
+          },
+          {
+            "content": "A database query language",
+            "isCorrect": false
+          },
+          {
+            "content": "An operating system",
+            "isCorrect": false
+          }
+        ]
+      },
+      {
+        "content": "Which method is used to add an element at the end of an array in JavaScript?",
+        "order": 2,
+        "answers": [
+          {
+            "content": "push()",
+            "isCorrect": true
+          },
+          {
+            "content": "pop()",
+            "isCorrect": false
+          },
+          {
+            "content": "unshift()",
+            "isCorrect": false
+          },
+          {
+            "content": "shift()",
+            "isCorrect": false
+          }
+        ]
+      }
+    ]
+  }
+}

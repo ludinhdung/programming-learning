@@ -21,7 +21,7 @@ export class LessonController {
         const message = error.message || 'Internal server error';
         res.status(status).json({ message });
     }
-
+    
     /**
      * Get all lessons for a module
      */
@@ -213,6 +213,43 @@ export class LessonController {
                 res.status(400).json({ message: 'Missing required final test fields' });
                 return;
             }
+
+            // Ensure estimatedDuration is included if provided
+            if (testData.estimatedDuration !== undefined && 
+                (isNaN(testData.estimatedDuration) || testData.estimatedDuration <= 0)) {
+                res.status(400).json({ message: 'Estimated duration must be a positive number' });
+                return;
+            }
+
+            // Validate questions array if provided
+            if (testData.questions && !Array.isArray(testData.questions)) {
+                res.status(400).json({ message: 'Questions must be an array' });
+                return;
+            }
+
+            // Validate each question in the array
+            if (testData.questions && testData.questions.length > 0) {
+                for (let i = 0; i < testData.questions.length; i++) {
+                    const question = testData.questions[i];
+                    
+                    if (!question.content) {
+                        res.status(400).json({ message: `Question at index ${i} is missing content` });
+                        return;
+                    }
+                    
+                    if (!question.answers || !Array.isArray(question.answers) || question.answers.length === 0) {
+                        res.status(400).json({ message: `Question at index ${i} must have at least one answer` });
+                        return;
+                    }
+                    
+                    // Check if at least one answer is marked as correct
+                    const hasCorrectAnswer = question.answers.some((answer: { isCorrect: boolean }) => answer.isCorrect);
+                    if (!hasCorrectAnswer) {
+                        res.status(400).json({ message: `Question at index ${i} must have at least one correct answer` });
+                        return;
+                    }
+                }
+            }
             
             const lesson = await this.lessonService.createFinalTest(moduleId, lessonData, testData);
             res.status(201).json(lesson);
@@ -239,10 +276,98 @@ export class LessonController {
                 res.status(400).json({ message: 'Missing required final test fields' });
                 return;
             }
+
+            // Ensure estimatedDuration is included if provided
+            if (testData.estimatedDuration !== undefined && 
+                (isNaN(testData.estimatedDuration) || testData.estimatedDuration <= 0)) {
+                res.status(400).json({ message: 'Estimated duration must be a positive number' });
+                return;
+            }
+
+            // Validate questions array if provided
+            if (testData.questions && !Array.isArray(testData.questions)) {
+                res.status(400).json({ message: 'Questions must be an array' });
+                return;
+            }
+
+            // Validate each question in the array
+            if (testData.questions && testData.questions.length > 0) {
+                for (let i = 0; i < testData.questions.length; i++) {
+                    const question = testData.questions[i];
+                    
+                    if (!question.content) {
+                        res.status(400).json({ message: `Question at index ${i} is missing content` });
+                        return;
+                    }
+                    
+                    if (!question.answers || !Array.isArray(question.answers) || question.answers.length === 0) {
+                        res.status(400).json({ message: `Question at index ${i} must have at least one answer` });
+                        return;
+                    }
+                    
+                    // Check if at least one answer is marked as correct
+                    const hasCorrectAnswer = question.answers.some((answer: { isCorrect: boolean }) => answer.isCorrect);
+                    if (!hasCorrectAnswer) {
+                        res.status(400).json({ message: `Question at index ${i} must have at least one correct answer` });
+                        return;
+                    }
+                }
+            }
             
             const lesson = await this.lessonService.updateFinalTest(lessonId, lessonData, testData);
             res.status(200).json(lesson);
         } catch (error) {
+            this.handleError(res, error);
+        }
+    };
+
+    /**
+     * Get a final test by lesson ID
+     */
+    public getFinalTest = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { lessonId } = req.params;
+            
+            console.log(`Getting final test for lesson ID: ${lessonId}`);
+            
+            // First check if the lesson exists
+            const lessonExists = await this.lessonService.findOne(lessonId);
+            
+            if (!lessonExists) {
+                console.log(`Lesson with ID ${lessonId} not found`);
+                res.status(404).json({ message: `Lesson with id ${lessonId} not found` });
+                return;
+            }
+            
+            console.log(`Lesson found with type: ${lessonExists.lessonType}`);
+            
+            // Check if it's a final test
+            if (lessonExists.lessonType !== 'FINAL_TEST') {
+                console.log(`Lesson with ID ${lessonId} is not a final test (type: ${lessonExists.lessonType})`);
+                res.status(400).json({ message: `Lesson with id ${lessonId} is not a final test` });
+                return;
+            }
+            
+            // Get the lesson with final test data using findWithRelatedContent instead
+            const lesson = await this.lessonService.findWithRelatedContent(lessonId);
+            
+            if (!lesson) {
+                console.log(`Lesson with ID ${lessonId} not found in second query`);
+                res.status(404).json({ message: `Lesson with id ${lessonId} not found` });
+                return;
+            }
+            
+            console.log(`Final test data: ${lesson.finalTest ? 'Found' : 'Not found'}`);
+            
+            if (!lesson.finalTest) {
+                console.log(`Final test for lesson ${lessonId} not found`);
+                res.status(404).json({ message: `Final test for lesson ${lessonId} not found` });
+                return;
+            }
+            
+            res.status(200).json(lesson);
+        } catch (error) {
+            console.error('Error in getFinalTest:', error);
             this.handleError(res, error);
         }
     };

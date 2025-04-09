@@ -6,7 +6,7 @@
 @instructorId = 1bc9424f-50cf-43ce-b034-f3edc36f2135
 @token = YOUR_JWT_TOKEN_HERE
 @topicId = 713bbb5f-cae1-4390-a722-c1b79b17b0e3
-@courseId = 9138f071-0728-4d95-8a93-158439346168 
+@courseId = 6d2d6fb8-c785-40ca-a685-b2397ca2743e
 @moduleId = 9b6b9e70-b223-461e-bc94-177a0a4c6417
 @lessonId = 92403a52-e00b-4e10-a1d0-82eb83793729
 
@@ -23,7 +23,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "title": "Coding Course",
+  "title": "Coding Course tssstt",
   "description": "A comprehensive coding course to learn programming fundamentals",
   "price": 99.99,
   "thumbnail": "https://example.com/course-thumbnail.jpg",

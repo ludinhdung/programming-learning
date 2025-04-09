@@ -26,6 +26,10 @@ export interface VideoUploadResult {
   duration: number; // Duration in seconds
 }
 
+export interface ImageUploadResult {
+  imageUrl: string;
+}
+
 export class R2StorageService {
   private s3Client: S3Client;
   private bucketName: string;
@@ -137,6 +141,46 @@ export class R2StorageService {
     } catch (error) {
       console.error('Error uploading video to R2:', error);
       throw new Error(`Failed to upload video: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Uploads an image file to Cloudflare R2 storage
+   * @param file The image file to upload
+   * @param folder Optional folder path within the bucket
+   * @returns Object containing the URL for the image
+   */
+  async uploadImage(file: UploadedFile, folder: string = 'images'): Promise<ImageUploadResult> {
+    try {
+      if (!file || !file.buffer) {
+        throw new Error('Invalid file provided');
+      }
+
+      // Generate a unique filename
+      const timestamp = Date.now();
+      const fileExtension = file.originalname.split('.').pop();
+      const fileName = `${timestamp}-${file.originalname.replace(/\s+/g, '-')}`;
+      
+      // Path for the image in R2
+      const imageKey = `${folder}/${fileName}`;
+      
+      // Upload image to R2
+      await this.s3Client.send(
+        new PutObjectCommand({
+          Bucket: this.bucketName,
+          Key: imageKey,
+          Body: file.buffer,
+          ContentType: file.mimetype,
+        })
+      );
+
+      // Return the URL for the image
+      return {
+        imageUrl: `${this.publicBaseUrl}/${imageKey}`
+      };
+    } catch (error) {
+      console.error('Error uploading image to R2:', error);
+      throw new Error(`Failed to upload image: ${(error as Error).message}`);
     }
   }
 
