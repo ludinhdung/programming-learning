@@ -37,7 +37,7 @@ export abstract class BaseService<T, C = any, U = any> {
     async findOne(id: string, include?: any): Promise<T | null> {
         return this.model.findUnique({
             where: { id },
-            
+            include
         });
     }
 

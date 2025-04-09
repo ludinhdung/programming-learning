@@ -20,6 +20,7 @@ router.put('/lessons/:lessonId/coding',  lessonController.updateCodingExercise);
 
 // Các route liên quan đến bài kiểm tra cuối cùng
 router.post('/modules/:moduleId/final-tests',  lessonController.createFinalTest);
+router.get('/lessons/:lessonId/final-test',  lessonController.getFinalTest);
 router.put('/lessons/:lessonId/final-test',  lessonController.updateFinalTest);
 
 export default router;

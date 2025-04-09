@@ -1,0 +1,46 @@
+# GradeStack API - Image Upload Tests
+# ===============================
+
+# Environment Variables
+@baseUrl = http://localhost:4000/api
+
+### Upload a single image
+# @name uploadSingleImage
+POST {{baseUrl}}/images/upload
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="bikini-miami.png"
+Content-Type: image/png
+
+< C:\Users\duong\Downloads\bikini-miami.png
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Upload multiple images
+# @name uploadMultipleImages
+POST {{baseUrl}}/images/upload-multiple
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="images"; filename="test-image1.jpg"
+Content-Type: image/jpeg
+
+< ./test-files/test-image1.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="images"; filename="test-image2.jpg"
+Content-Type: image/jpeg
+
+< ./test-files/test-image2.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Upload image to a specific folder
+# @name uploadImageToFolder
+POST {{baseUrl}}/images/upload?folder=course-thumbnails
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="course-thumbnail.jpg"
+Content-Type: image/jpeg
+
+< ./test-files/course-thumbnail.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
