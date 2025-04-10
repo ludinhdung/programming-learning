@@ -23,10 +23,10 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "title": "Coding Course tssstt",
+  "title": "Leaning path test 5",
   "description": "A comprehensive coding course to learn programming fundamentals",
   "price": 99.99,
-  "thumbnail": "https://example.com/course-thumbnail.jpg",
+  "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/sample-thumbnail.jpg",
   "topicIds": ["{{topicId}}"],
   "isPublished": false,
   "modules": [
@@ -42,7 +42,7 @@ Content-Type: application/json
           "title": "Your First Coding Exercise bbbb",
           "description": "Practice basic coding concepts with this exercise",
           "lessonType": "CODING",
-          "language": "JAVA",
+          "language": "PYTHON",
           "isPreview": false,
           "order": 2,
           "exerciseContent": "Write a function that prints 'Hello, World!' to the console.",

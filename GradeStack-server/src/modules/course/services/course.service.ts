@@ -23,12 +23,13 @@ export class CourseService extends CourseBaseService<
         const instructor = await this.verifyInstructorExists(instructorId);
         
         // 2. Extract and validate data
-        const { topicIds, modules, ...courseBasicData } = validatedData;
+        const { topicIds, modules, thumbnailUrl, ...courseBasicData } = validatedData;
         await this.validateTopics(topicIds);
         
         // 3. Prepare course data
         const courseData: Prisma.CourseUncheckedCreateInput = {
             ...courseBasicData,
+            thumbnail: thumbnailUrl,
             instructorId: instructorId
         };
         
