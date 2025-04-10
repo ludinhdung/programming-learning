@@ -651,4 +651,156 @@ export class LessonService extends LessonBaseService {
         
         return lesson;
     }
+    
+    /**
+     * Reorder lessons within a module
+     */
+    async reorderLessons(moduleId: string, lessonOrders: { id: string, order: number }[]): Promise<void> {
+        // Verify module exists
+        const module = await prisma.module.findUnique({
+            where: { id: moduleId }
+        });
+        
+        if (!module) {
+            throw { status: 404, message: `Module with id ${moduleId} not found` };
+        }
+        
+        // Verify all lessons exist and belong to the module
+        const lessonIds = lessonOrders.map(item => item.id);
+        const lessons = await prisma.lesson.findMany({
+            where: {
+                id: { in: lessonIds },
+                moduleId
+            }
+        });
+        
+        if (lessons.length !== lessonIds.length) {
+            throw { status: 400, message: 'One or more lessons do not exist or do not belong to the specified module' };
+        }
+        
+        // Update lesson orders in a transaction
+        await withTransaction(async (tx) => {
+            for (const { id, order } of lessonOrders) {
+                await tx.lesson.update({
+                    where: { id },
+                    data: { order }
+                });
+            }
+        });
+    }
+    
+    /**
+     * Toggle lesson preview status
+     */
+    async toggleLessonPreviewStatus(lessonId: string): Promise<Lesson> {
+        // Verify lesson exists
+        const lesson = await this.findOne(lessonId);
+        
+        if (!lesson) {
+            throw { status: 404, message: `Lesson with id ${lessonId} not found` };
+        }
+        
+        return withTransaction(async (tx) => {
+            return tx.lesson.update({
+                where: { id: lessonId },
+                data: { isPreview: !lesson.isPreview }
+            });
+        });
+    }
+    
+    /**
+     * Get comments for a lesson
+     */
+    async getLessonComments(lessonId: string): Promise<any[]> {
+        // Verify lesson exists
+        await this.findOneOrFail(lessonId);
+        
+        return prisma.comment.findMany({
+            where: { lessonId },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        email: true,
+                        firstName: true,
+                        lastName: true
+                    }
+                }
+            }
+        });
+    }
+    
+    /**
+     * Add a comment to a lesson
+     */
+    async addCommentToLesson(lessonId: string, userId: string, content: string): Promise<any> {
+        // Verify lesson exists
+        await this.findOneOrFail(lessonId);
+        
+        // Verify user exists
+        const user = await prisma.user.findUnique({
+            where: { id: userId }
+        });
+        
+        if (!user) {
+            throw { status: 404, message: `User with id ${userId} not found` };
+        }
+        
+        return withTransaction(async (tx) => {
+            return tx.comment.create({
+                data: {
+                    content,
+                    lesson: {
+                        connect: { id: lessonId }
+                    },
+                    user: {
+                        connect: { id: userId }
+                    }
+                },
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            email: true,
+                            firstName: true,
+                            lastName: true
+                        }
+                    }
+                }
+            });
+        });
+    }
+    
+    /**
+     * Add a note to a lesson
+     */
+    async addNoteToLesson(lessonId: string, userId: string, content: string, timestamp: number): Promise<any> {
+        // Verify lesson exists
+        await this.findOneOrFail(lessonId);
+        
+        // Verify user exists
+        const user = await prisma.user.findUnique({
+            where: { id: userId }
+        });
+        
+        if (!user) {
+            throw { status: 404, message: `User with id ${userId} not found` };
+        }
+        
+        return withTransaction(async (tx) => {
+            return tx.note.create({
+                data: {
+                    content,
+                    timestamp,
+                    lesson: {
+                        connect: { id: lessonId }
+                    },
+                    user: {
+                        connect: { id: userId }
+                    }
+                }
+            });
+        });
+    }
 }

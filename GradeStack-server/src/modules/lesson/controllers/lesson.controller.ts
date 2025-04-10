@@ -371,4 +371,100 @@ export class LessonController {
             this.handleError(res, error);
         }
     };
+
+    /**
+     * Reorder lessons within a module
+     */
+    public reorderLessons = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { moduleId } = req.params;
+            const { lessonOrders } = req.body;
+            
+            // Validate required fields
+            if (!lessonOrders || !Array.isArray(lessonOrders) || lessonOrders.length === 0) {
+                res.status(400).json({ message: 'Missing or invalid lesson orders' });
+                return;
+            }
+
+            await this.lessonService.reorderLessons(moduleId, lessonOrders);
+            res.status(200).json({ message: 'Lessons reordered successfully' });
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
+
+    /**
+     * Toggle lesson preview status
+     */
+    public toggleLessonPreview = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { lessonId } = req.params;
+            const lesson = await this.lessonService.toggleLessonPreviewStatus(lessonId);
+            res.status(200).json(lesson);
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
+
+    /**
+     * Get comments for a lesson
+     */
+    public getLessonComments = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { lessonId } = req.params;
+            const comments = await this.lessonService.getLessonComments(lessonId);
+            res.status(200).json(comments);
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
+
+    /**
+     * Add a comment to a lesson
+     */
+    public addCommentToLesson = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { lessonId } = req.params;
+            const { content } = req.body;
+            const userId = (req as any).user.id; // Assuming user ID is available from auth middleware
+            
+            // Validate required fields
+            if (!content) {
+                res.status(400).json({ message: 'Comment content is required' });
+                return;
+            }
+
+            const comment = await this.lessonService.addCommentToLesson(lessonId, userId, content);
+            res.status(201).json(comment);
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
+
+    /**
+     * Add a note to a lesson
+     */
+    public addNoteToLesson = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { lessonId } = req.params;
+            const { content, timestamp } = req.body;
+            const userId = (req as any).user.id; // Assuming user ID is available from auth middleware
+            
+            // Validate required fields
+            if (!content) {
+                res.status(400).json({ message: 'Note content is required' });
+                return;
+            }
+
+            if (timestamp === undefined || timestamp === null) {
+                res.status(400).json({ message: 'Timestamp is required' });
+                return;
+            }
+
+            const note = await this.lessonService.addNoteToLesson(lessonId, userId, content, timestamp);
+            res.status(201).json(note);
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
 }
