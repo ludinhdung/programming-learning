@@ -347,8 +347,18 @@ export class CourseService extends CourseBaseService<
                             include: {
                                 video: true,
                                 coding: true,
-                                finalTest: true,
-                                
+                                finalTest: {
+                                    include: {
+                                        questions: {
+                                            orderBy: {
+                                                order: 'asc'
+                                            },
+                                            include: {
+                                                answers: true
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
