@@ -30,6 +30,8 @@ const lessonBaseSchema = z.object({
   codeSnippet: z.string().optional(),
   // For final test fields
   questions: z.array(z.any()).optional(),
+  passingScore: z.number().int().min(1, 'Điểm đạt phải là số dương').optional(),
+  estimatedDuration: z.number().int().positive('Thời gian làm bài phải là số dương').optional(),
 });
 
 // Define module schema

@@ -118,7 +118,8 @@ export class CourseService extends CourseBaseService<
             
             // Prepare lesson data
             const { videoData, videoUrl: _, thumbnailUrl: __, videoDuration: ___, 
-                    exerciseContent, solution, language, hint, codeSnippet, questions, ...lessonRestData } = lessonData;
+                    exerciseContent, solution, language, hint, codeSnippet, questions, 
+                    estimatedDuration, passingScore, ...lessonRestData } = lessonData;
             
             // Create the lesson
             const createdLesson = await tx.lesson.create({
