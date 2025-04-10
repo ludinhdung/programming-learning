@@ -9,6 +9,8 @@ import topicRouter from './modules/topic/routes/topic.routes';
 import lessonRouter from './modules/lesson/routes/lesson.routes';
 import videoLessonRouter from './modules/videoLesson/routes/videoLesson.routes';
 import moduleRouter from './modules/module/routes/module.routes';
+import learningPathRouter from './modules/learningPath/routes/learningPath.routes';
+import certificateRouter from './modules/certificate/routes/certificate.routes';
 import imageUploadRouter from './shared/routes/image-upload.routes';
 import { setupSwagger } from './shared/config/swagger';
 
@@ -29,6 +31,8 @@ app.use('/api', topicRouter);
 app.use('/api', lessonRouter);
 app.use('/api', videoLessonRouter);
 app.use('/api', moduleRouter);
+app.use('/api', learningPathRouter);
+app.use('/api', certificateRouter);
 app.use('/api/images', imageUploadRouter);
 
 export default app;

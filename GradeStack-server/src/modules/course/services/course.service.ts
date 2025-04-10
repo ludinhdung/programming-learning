@@ -142,7 +142,9 @@ export class CourseService extends CourseBaseService<
                     language: lessonData.language || language, 
                     hint, 
                     codeSnippet, 
-                    questions 
+                    questions, 
+                    estimatedDuration: lessonData.estimatedDuration, 
+                    passingScore: lessonData.passingScore 
                 }
             );
         }
@@ -179,17 +181,19 @@ export class CourseService extends CourseBaseService<
             language?: SupportedLanguage,
             hint?: string,
             codeSnippet?: string,
-            questions?: any[]
+            questions?: any[],
+            estimatedDuration?: number,
+            passingScore?: number
         }
     ) {
-        const { videoUrl, thumbnailUrl, videoDuration, exerciseContent, solution, language, hint, codeSnippet, questions } = content;
+        const { videoUrl, thumbnailUrl, videoDuration, exerciseContent, solution, language, hint, codeSnippet, questions, estimatedDuration, passingScore } = content;
         
         if (lessonType === 'VIDEO' && videoUrl) {
             await this.createVideoLesson(tx, lessonId, videoUrl, thumbnailUrl, videoDuration);
         } else if (lessonType === 'CODING' && exerciseContent) {
             await this.createCodingExercise(tx, lessonId, exerciseContent, solution, language, hint, codeSnippet);
         } else if (lessonType === 'FINAL_TEST' && questions) {
-            await this.createFinalTest(tx, lessonId, questions);
+            await this.createFinalTest(tx, lessonId, questions, estimatedDuration, passingScore);
         }
     }
     
@@ -222,10 +226,12 @@ export class CourseService extends CourseBaseService<
         });
     }
     
-    private async createFinalTest(tx: any, lessonId: string, questions: any[]) {
+    private async createFinalTest(tx: any, lessonId: string, questions: any[], estimatedDuration?: number, passingScore?: number) {
         // Create the final test
         const finalTest = await tx.finalTestLesson.create({
             data: {
+                estimatedDuration: estimatedDuration || 30,
+                passingScore: passingScore || 70,
                 lesson: { connect: { id: lessonId } }
             }
         });
@@ -234,13 +240,29 @@ export class CourseService extends CourseBaseService<
         if (Array.isArray(questions)) {
             for (let i = 0; i < questions.length; i++) {
                 const questionData = questions[i];
-                await tx.question.create({
+                const order = questionData.order || i + 1;
+                
+                // Create the question
+                const question = await tx.question.create({
                     data: {
                         content: questionData.content,
-                        order: i + 1,
+                        order: order,
                         test: { connect: { id: finalTest.id } }
                     }
                 });
+                
+                // Create answers for the question if provided
+                if (Array.isArray(questionData.answers)) {
+                    for (const answerData of questionData.answers) {
+                        await tx.answer.create({
+                            data: {
+                                content: answerData.content,
+                                isCorrect: answerData.isCorrect || false,
+                                question: { connect: { id: question.id } }
+                            }
+                        });
+                    }
+                }
             }
         }
     }
