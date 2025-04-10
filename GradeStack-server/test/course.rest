@@ -6,7 +6,7 @@
 @instructorId = 1bc9424f-50cf-43ce-b034-f3edc36f2135
 @token = YOUR_JWT_TOKEN_HERE
 @topicId = 713bbb5f-cae1-4390-a722-c1b79b17b0e3
-@courseId = 6d2d6fb8-c785-40ca-a685-b2397ca2743e
+@courseId = b1b9cc45-179b-43c3-bac4-aa30f5bd2760
 @moduleId = 9b6b9e70-b223-461e-bc94-177a0a4c6417
 @lessonId = 92403a52-e00b-4e10-a1d0-82eb83793729
 
@@ -23,105 +23,201 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "title": "finaltest - test create course api",
-  "description": "A comprehensive coding course to learn programming fundamentals",
+  "title": "Complete Programming Course - All Lesson Types",
+  "description": "A comprehensive coding course featuring all lesson types: VIDEO, CODING, and FINAL_TEST",
   "price": 99.99,
   "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/sample-thumbnail.jpg",
   "topicIds": ["{{topicId}}"],
   "isPublished": false,
   "modules": [
     {
-      "title": "Getting Started with Coding",
-      "description": "Introduction to programming fundamentals",
+      "title": "Module 1: Introduction to Programming",
+      "description": "Introduction to programming fundamentals with video lessons",
       "order": 1,
-      "videoUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/sample.mp4",
-      "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/sample-thumbnail.jpg",
-      "videoDuration": 120,
+      "videoUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/intro.mp4",
+      "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/intro-thumbnail.jpg",
+      "videoDuration": 180,
       "lessons": [
         {
-          "title": "Your First Coding Exercise bbbb",
+          "title": "Welcome to Programming",
+          "description": "An introduction to the course and programming concepts",
+          "lessonType": "VIDEO",
+          "isPreview": true,
+          "order": 1,
+          "videoUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/welcome.mp4",
+          "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/welcome-thumbnail.jpg",
+          "duration": 300
+        },
+        {
+          "title": "Your First Coding Exercise",
           "description": "Practice basic coding concepts with this exercise",
           "lessonType": "CODING",
           "language": "PYTHON",
           "isPreview": false,
           "order": 2,
           "exerciseContent": "Write a function that prints 'Hello, World!' to the console.",
-          "solution": "function helloWorld() {\n  console.log('Hello, World!');\n}",
-          "hint": "Remember to use the console.log function to print to the console.",
-          "codeSnippet": "// Your code here\nfunction helloWorld() {\n  // Complete the function\n}"
+          "solution": "def hello_world():\n  print('Hello, World!')",
+          "hint": "Remember to use the print function to output text to the console.",
+          "codeSnippet": "# Your code here\ndef hello_world():\n  # Complete the function\n  pass"
+        }
+      ]
+    },
+    {
+      "title": "Module 2: JavaScript Fundamentals",
+      "description": "Learn the basics of JavaScript programming",
+      "order": 2,
+      "videoUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/javascript-intro.mp4",
+      "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/javascript-thumbnail.jpg",
+      "videoDuration": 240,
+      "lessons": [
+        {
+          "title": "JavaScript Basics",
+          "description": "Introduction to JavaScript syntax and concepts",
+          "lessonType": "VIDEO",
+          "isPreview": false,
+          "order": 1,
+          "videoUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/js-basics.mp4",
+          "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/js-basics-thumbnail.jpg",
+          "duration": 420
         },
         {
-          "title": "Final Test: JavaScript Fundamentals",
-          "description": "Test your knowledge of JavaScript fundamentals",
-          "lessonType": "FINAL_TEST",
-          "duration": 60,
+          "title": "JavaScript Functions Exercise",
+          "description": "Practice creating and using JavaScript functions",
+          "lessonType": "CODING",
+          "language": "JAVA",
           "isPreview": false,
-          "order": 5,
-          "estimatedDuration": 45,
-          "passingScore": 80,
+          "order": 2,
+          "exerciseContent": "Create a function that calculates the factorial of a number.",
+          "solution": "function factorial(n) {\n  if (n === 0 || n === 1) {\n    return 1;\n  }\n  return n * factorial(n - 1);\n}",
+          "hint": "Remember that factorial can be calculated recursively or using a loop.",
+          "codeSnippet": "// Your code here\nfunction factorial(n) {\n  // Complete the function\n}"
+        }
+      ]
+    },
+    {
+      "title": "Module 3: Advanced Concepts",
+      "description": "Advanced programming concepts and techniques",
+      "order": 3,
+      "videoUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/advanced.mp4",
+      "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/advanced-thumbnail.jpg",
+      "videoDuration": 300,
+      "lessons": [
+        {
+          "title": "Data Structures Overview",
+          "description": "Learn about common data structures in programming",
+          "lessonType": "VIDEO",
+          "isPreview": false,
+          "order": 1,
+          "videoUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/data-structures.mp4",
+          "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/data-structures-thumbnail.jpg",
+          "duration": 540
+        },
+        {
+          "title": "Algorithm Challenge",
+          "description": "Solve a complex algorithm problem",
+          "lessonType": "CODING",
+          "language": "JAVA",
+          "isPreview": false,
+          "order": 2,
+          "exerciseContent": "Implement a function to find the longest substring without repeating characters.",
+          "solution": "function longestSubstring(s) {\n  let maxLength = 0;\n  let start = 0;\n  const charMap = {};\n  \n  for (let i = 0; i < s.length; i++) {\n    const char = s[i];\n    if (charMap[char] >= start) {\n      start = charMap[char] + 1;\n    }\n    charMap[char] = i;\n    maxLength = Math.max(maxLength, i - start + 1);\n  }\n  \n  return maxLength;\n}",
+          "hint": "Consider using a sliding window approach with a hash map to track character positions.",
+          "codeSnippet": "// Your code here\nfunction longestSubstring(s) {\n  // Complete the function\n}"
+        },
+        {
+          "title": "Final Assessment",
+          "description": "Test your knowledge of all programming concepts covered in the course",
+          "lessonType": "FINAL_TEST",
+          "duration": 90,
+          "isPreview": false,
+          "order": 3,
+          "estimatedDuration": 95,
+          "passingScore": 75,
           "questions": [
             {
-              "content": "What is JavaScript?",
+              "content": "Which data structure operates on a LIFO (Last In, First Out) principle?",
               "order": 1,
               "answers": [
                 {
-                  "content": "A programming language for the web",
+                  "content": "Queue",
+                  "isCorrect": false
+                },
+                {
+                  "content": "Stack",
                   "isCorrect": true
                 },
                 {
-                  "content": "A markup language",
+                  "content": "Linked List",
                   "isCorrect": false
                 },
                 {
-                  "content": "A database query language",
-                  "isCorrect": false
-                },
-                {
-                  "content": "An operating system",
+                  "content": "Binary Tree",
                   "isCorrect": false
                 }
               ]
             },
             {
-              "content": "Which of the following is NOT a JavaScript data type?",
+              "content": "What is the time complexity of binary search?",
               "order": 2,
+              "answers": [
+                {
+                  "content": "O(1)",
+                  "isCorrect": false
+                },
+                {
+                  "content": "O(n)",
+                  "isCorrect": false
+                },
+                {
+                  "content": "O(log n)",
+                  "isCorrect": true
+                },
+                {
+                  "content": "O(n²)",
+                  "isCorrect": false
+                }
+              ]
+            },
+            {
+              "content": "Which of the following is NOT a JavaScript primitive type?",
+              "order": 3,
               "answers": [
                 {
                   "content": "String",
                   "isCorrect": false
                 },
                 {
-                  "content": "Boolean",
+                  "content": "Number",
                   "isCorrect": false
                 },
                 {
-                  "content": "Integer",
+                  "content": "Array",
                   "isCorrect": true
                 },
                 {
-                  "content": "Object",
+                  "content": "Boolean",
                   "isCorrect": false
                 }
               ]
             },
             {
-              "content": "What does the '===' operator do in JavaScript?",
-              "order": 3,
+              "content": "What does the Python 'self' parameter represent in a class method?",
+              "order": 4,
               "answers": [
                 {
-                  "content": "Compares values only",
+                  "content": "The class itself",
                   "isCorrect": false
                 },
                 {
-                  "content": "Compares values and types",
+                  "content": "The instance of the class",
                   "isCorrect": true
                 },
                 {
-                  "content": "Assigns a value",
+                  "content": "The parent class",
                   "isCorrect": false
                 },
                 {
-                  "content": "Checks if a value exists",
+                  "content": "The module containing the class",
                   "isCorrect": false
                 }
               ]
