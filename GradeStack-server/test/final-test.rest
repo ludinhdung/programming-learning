@@ -3,7 +3,7 @@
 
 # Environment Variables
 @baseUrl = http://localhost:4000/api
-@moduleId = cdf9a48a-239a-487f-a31b-09bdbf9506c9
+@moduleId = a1353f96-84c8-4a69-85ed-5e7976c3cc5f
 @lessonId = 083c3254-eaf2-4392-8cb2-e96083beff68
 
 ### Create a Final Test with estimatedDuration and questions
