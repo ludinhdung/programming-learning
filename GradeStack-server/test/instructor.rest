@@ -5,7 +5,7 @@
 @baseUrl = http://localhost:4000/api
 @instructorId = e6198855-6671-417a-88dc-6dca42bdb80b
 @token = YOUR_JWT_TOKEN_HERE
-@userId = 7c8a9b0d-1e2f-3g4h-5i6j-7k8l9m0n1o2p
+@userId = 1f041ae3-e8bb-443a-8790-94abd18d48a5
 
 # ===============================
 # AUTHENTICATION
@@ -33,13 +33,13 @@ Content-Type: application/json
 
 {
   "userData": {
-    "email": "new.1234instructor@example.com",
+    "email": "DuongThanhPhuLearner@example.com",
     "password": "securePassword123",
-    "firstName": "Jane",
-    "lastName": "Smith"
+    "firstName": "Duong",
+    "lastName": "Thanh Phu"
   },
   "instructorData": {
-    "organization": "Tech University",
+    "organization": "FPT University",
     "bio": "Experienced software engineer with 8 years of teaching experience in web development and programming fundamentals",
     "avatar": "https://example.com/avatars/jane-smith.jpg",
     "socials": [

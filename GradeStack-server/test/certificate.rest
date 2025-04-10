@@ -1,0 +1,77 @@
+# GradeStack API - Certificate Endpoints
+# ===============================
+
+# Environment Variables
+@baseUrl = http://localhost:4000/api
+@learnerId = 9fadc8d2-759e-458b-8bbc-dbdee3b6eae0
+@courseId = 1d4ee7f2-f58b-47d5-a437-84c79edebd57
+@certificateId = 9a8b7c6d-5e4f-3g2h-1i0j-9k8l7m6n5o4p
+@token = YOUR_JWT_TOKEN_HERE
+
+# ===============================
+# CERTIFICATE MANAGEMENT
+# ===============================
+
+### Create Certificate
+# Creates a new certificate for a learner who completed a course
+POST {{baseUrl}}/certificates
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "learnerId": "{{learnerId}}",
+  "courseId": "{{courseId}}",
+  "certificateUrl": "https://example.com/certificates/course123-learner456.pdf"
+}
+
+### Get All Certificates
+# Retrieves all certificates in the system
+GET {{baseUrl}}/certificates
+Authorization: Bearer {{token}}
+
+### Get Certificate by ID
+# Retrieves a specific certificate by its ID
+GET {{baseUrl}}/certificates/{{certificateId}}
+Authorization: Bearer {{token}}
+
+### Update Certificate
+# Updates an existing certificate (e.g., update the certificate URL)
+PUT {{baseUrl}}/certificates/{{certificateId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "certificateUrl": "https://example.com/certificates/updated-certificate.pdf"
+}
+
+### Delete Certificate
+# Deletes a certificate from the system
+DELETE {{baseUrl}}/certificates/{{certificateId}}
+Authorization: Bearer {{token}}
+
+# ===============================
+# LEARNER-SPECIFIC CERTIFICATES
+# ===============================
+
+### Get Certificates by Learner ID
+# Retrieves all certificates for a specific learner
+GET {{baseUrl}}/learners/{{learnerId}}/certificates
+Authorization: Bearer {{token}}
+
+# ===============================
+# COURSE-SPECIFIC CERTIFICATES
+# ===============================
+
+### Get Certificates by Course ID
+# Retrieves all certificates issued for a specific course
+GET {{baseUrl}}/courses/{{courseId}}/certificates
+Authorization: Bearer {{token}}
+
+# ===============================
+# COMBINED QUERIES
+# ===============================
+
+### Get Certificate by Learner and Course
+# Retrieves a specific certificate for a learner and course combination
+GET {{baseUrl}}/learners/{{learnerId}}/courses/{{courseId}}/certificate
+Authorization: Bearer {{token}}
