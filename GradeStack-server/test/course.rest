@@ -23,7 +23,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "title": "Leaning path test 5",
+  "title": "finaltest - test create course api",
   "description": "A comprehensive coding course to learn programming fundamentals",
   "price": 99.99,
   "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/sample-thumbnail.jpg",
@@ -49,6 +49,84 @@ Content-Type: application/json
           "solution": "function helloWorld() {\n  console.log('Hello, World!');\n}",
           "hint": "Remember to use the console.log function to print to the console.",
           "codeSnippet": "// Your code here\nfunction helloWorld() {\n  // Complete the function\n}"
+        },
+        {
+          "title": "Final Test: JavaScript Fundamentals",
+          "description": "Test your knowledge of JavaScript fundamentals",
+          "lessonType": "FINAL_TEST",
+          "duration": 60,
+          "isPreview": false,
+          "order": 5,
+          "estimatedDuration": 45,
+          "passingScore": 80,
+          "questions": [
+            {
+              "content": "What is JavaScript?",
+              "order": 1,
+              "answers": [
+                {
+                  "content": "A programming language for the web",
+                  "isCorrect": true
+                },
+                {
+                  "content": "A markup language",
+                  "isCorrect": false
+                },
+                {
+                  "content": "A database query language",
+                  "isCorrect": false
+                },
+                {
+                  "content": "An operating system",
+                  "isCorrect": false
+                }
+              ]
+            },
+            {
+              "content": "Which of the following is NOT a JavaScript data type?",
+              "order": 2,
+              "answers": [
+                {
+                  "content": "String",
+                  "isCorrect": false
+                },
+                {
+                  "content": "Boolean",
+                  "isCorrect": false
+                },
+                {
+                  "content": "Integer",
+                  "isCorrect": true
+                },
+                {
+                  "content": "Object",
+                  "isCorrect": false
+                }
+              ]
+            },
+            {
+              "content": "What does the '===' operator do in JavaScript?",
+              "order": 3,
+              "answers": [
+                {
+                  "content": "Compares values only",
+                  "isCorrect": false
+                },
+                {
+                  "content": "Compares values and types",
+                  "isCorrect": true
+                },
+                {
+                  "content": "Assigns a value",
+                  "isCorrect": false
+                },
+                {
+                  "content": "Checks if a value exists",
+                  "isCorrect": false
+                }
+              ]
+            }
+          ]
         }
       ]
     }
