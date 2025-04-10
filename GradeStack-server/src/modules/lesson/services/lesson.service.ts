@@ -101,7 +101,8 @@ export class LessonService extends LessonBaseService {
      */
     async deleteLesson(lessonId: string): Promise<void> {
         // Find the lesson to determine its type
-        const lesson = await this.findOne(lessonId, {
+        const lesson = await prisma.lesson.findUnique({
+            where: { id: lessonId },
             include: {
                 video: true,
                 coding: true,
@@ -126,36 +127,36 @@ export class LessonService extends LessonBaseService {
             // Delete type-specific content
             switch (lesson.lessonType) {
                 case LessonType.VIDEO:
-                    if (lesson.videoLesson) {
+                    if (lesson.video) {
                         await tx.videoLesson.delete({
-                            where: { id: lesson.videoLesson.id }
+                            where: { id: lesson.video.id }
                         });
                     }
                     break;
                     
                 case LessonType.CODING:
-                    if (lesson.codingExercise) {
+                    if (lesson.coding) {
                         // Delete submitted exercises
                         await tx.submittedCodingExercise.deleteMany({
-                            where: { codingExerciseId: lesson.codingExercise.id }
+                            where: { codingExerciseId: lesson.coding.id }
                         });
                         
                         // Delete coding exercise
                         await tx.codingExercise.delete({
-                            where: { id: lesson.codingExercise.id }
+                            where: { id: lesson.coding.id }
                         });
                     }
                     break;
                     
                 case LessonType.FINAL_TEST:
-                    if (lesson.finalTestLesson) {
+                    if (lesson.finalTest) {
                         // Delete submitted tests
                         await tx.submittedFinalTest.deleteMany({
-                            where: { finalTestId: lesson.finalTestLesson.id }
+                            where: { finalTestId: lesson.finalTest.id }
                         });
                         
                         // Delete answers for all questions
-                        for (const question of lesson.finalTestLesson.questions || []) {
+                        for (const question of lesson.finalTest.questions || []) {
                             await tx.answer.deleteMany({
                                 where: { questionId: question.id }
                             });
@@ -163,12 +164,12 @@ export class LessonService extends LessonBaseService {
                         
                         // Delete questions
                         await tx.question.deleteMany({
-                            where: { testId: lesson.finalTestLesson.id }
+                            where: { testId: lesson.finalTest.id }
                         });
                         
                         // Delete final test
                         await tx.finalTestLesson.delete({
-                            where: { id: lesson.finalTestLesson.id }
+                            where: { id: lesson.finalTest.id }
                         });
                     }
                     break;
