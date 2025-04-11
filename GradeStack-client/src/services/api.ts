@@ -1,3 +1,4 @@
+import { RcFile } from 'antd/es/upload';
 import axios from 'axios';
 
 
@@ -91,6 +92,11 @@ export const supporterService = {
 }
 
 export const instructorService = {
+  async getInstructorById(instructorId: string) {
+    const respone = await api.get(`/instructors/${instructorId}`)
+    return respone.data
+  },
+
   async uploadVideo(file: RcFile) {
     const formData = new FormData();
     formData.append("video", file);
@@ -298,6 +304,7 @@ export const instructorService = {
     return response.data;
   },
 };
+
 export const learnerService = {
   async getAllInstructor() {
     const respone = await api.get("/supporter/instructors");
