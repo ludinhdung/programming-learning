@@ -16,6 +16,7 @@ import Course from "./components/InstructorManagementComponents/Contents/Course"
 import Checkout from "./pages/Checkout/Checkout";
 import PracticeCode from "./pages/PracticeCode/PracticeCode";
 import Profile from "./pages/Profile/Profile";
+import UserDashboard from "./pages/UserDashboard/UserDashboard";
 
 const App: React.FC = () => {
   return (
@@ -29,6 +30,7 @@ const App: React.FC = () => {
           <Route path="*" element={<NotFound />} />
           <Route path="/course-study" element={<CourseStudy />} />
           <Route path="/profile" element={< Profile />} />
+          <Route path="/dashboard" element={<UserDashboard />} />
           <Route
             path="/instructor-management"
             element={<InstructorManagement />}
@@ -36,6 +38,7 @@ const App: React.FC = () => {
             <Route index element={<Overview />} />
             <Route path="course" element={<Course />} />
           </Route>
+
         </Routes>
       </Router>
     </MantineProvider>

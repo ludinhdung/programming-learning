@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { CourseService } from '../services/course.service';
 
 export class CourseController {
@@ -8,7 +8,7 @@ export class CourseController {
         this.courseService = new CourseService();
     }
 
-    async getCourses(req: Request, res: Response): Promise<void> {
+    async getCourses(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const {
                 topicId,
@@ -34,10 +34,17 @@ export class CourseController {
 
             res.status(200).json(courses);
         } catch (error) {
-            res.status(500).json({
-                message: 'Failed to retrieve courses',
-                error: (error as Error).message
-            });
+            next(error)
         }
     }
+
+    getCourseById = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { courseId } = req.params;
+            const course = await this.courseService.getCourseById(courseId);
+            res.status(200).json(course);
+        } catch (error) {
+            next(error);
+        }
+    };
 } 
