@@ -8,4 +8,8 @@ router.get('/', courseController.getCourses.bind(courseController));
 
 router.get('/:courseId', courseController.getCourseById);
 
+router.get('/course/:courseId', courseController.getCoursebyCourseId);
+
+router.get('/all', courseController.getAllCourses);
+
 export default router; 
