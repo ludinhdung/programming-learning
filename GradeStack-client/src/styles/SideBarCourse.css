@@ -1,0 +1,67 @@
+/* Tùy chỉnh menu items */
+.custom-sidebar-menu.ant-menu {
+  background: #111111   !important;;
+}
+
+/* Style cho mudules (submenu) */
+.custom-sidebar-menu.ant-menu-dark .ant-menu-submenu-title {
+  height: auto !important;
+  line-height: 1 !important;
+  padding: 15px 13px 15px 13px !important;
+  margin: 4px 0 !important;
+}
+
+/* Style cho content items */
+.custom-sidebar-menu.ant-menu-dark .ant-menu-item {
+  height: auto !important;
+  line-height: 1 !important;
+  padding: 1px 12px 2px 32px !important; /* Tăng padding-left để indent */
+  margin: 1px 0 !important;
+}
+/* Icon alignment */
+.custom-sidebar-menu .ant-menu-item .anticon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+/* Hover effects */
+.custom-sidebar-menu.ant-menu-dark .ant-menu-item:hover {
+  background-color: #262a30   !important;
+}
+
+/* Selected state */
+.custom-sidebar-menu.ant-menu-dark .ant-menu-item-selected {
+  background-color: #3007d7  !important;
+}
+.custom-sidebar-menu .custom-selected {
+  background-color: #412d8f !important; /* Màu nền cho item được chọn */
+  color: white !important; /* Màu chữ nổi bật */
+  border-radius: 4px; /* Thêm bo góc nếu cần */
+}
+/* Submenu content background */
+.custom-sidebar-menu.ant-menu-dark .ant-menu-sub {
+  background: transparent !important;
+}
+
+/* Fix spacing between items */
+.custom-sidebar-menu .ant-menu-item + .ant-menu-item {
+  margin-top: 2px !important;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;  /* width of the entire scrollbar */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #1F2937;  /* color of the tracking area */
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #111214;  /* color of the scroll thumb */
+  border-radius: 3px;  /* roundness of the scroll thumb */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #412d8f;  /* color when hovering */
+}
