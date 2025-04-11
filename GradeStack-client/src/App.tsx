@@ -8,12 +8,6 @@ import {
   Route,
   Outlet,
 } from "react-router-dom";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Outlet,
-} from "react-router-dom";
 import Home from "./pages/HomePage/Home";
 import NotFound from "./pages/NotFound";
 // Learner
@@ -21,17 +15,18 @@ import CourseStudy from "./pages/CourseStudyPage/CourseStudy";
 // Instructor
 import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
 import CourseList from "./pages/CourseList/CourseList";
-import CourseDetail from "./pages/CourseDetail/CourseDetail";
+// import CourseDetail from "./pages/CourseDetail/CourseDetail";
 import Topics from "./pages/Topics/Topics";
 import LearningPaths from "./pages/LearningPaths/LearningPaths";
 import Checkout from "./pages/Checkout/Checkout";
 import Profile from "./pages/Profile/Profile";
-import CreateCourse from "./pages/CreateCourse/CreateCourse";
+// import CreateCourse from "./pages/CreateCourse/CreateCourse";
 // Instructor Dashboard
 import InstructorManagement from "./pages/InstructorDashboard/InstructorDashboard";
 import Overview from "./components/InstructorManagement/Contents/Overview";
 import InstructorCourseList from "./components/InstructorManagement/Contents/Course/CourseList";
 import InstructorCreateCourse from "./components/InstructorManagement/Contents/Course/CreateCourse";
+import InstructorCourseDetail from "./components/InstructorManagement/Contents/Course/CourseDetail"
 // Supporter Dashboard
 import SupporterDashboard from "./pages/SupporterDashboard/SupporterDashboard";
 import SupporterOverview from "./components/SupporterManagement/Contents/Overview";
@@ -47,9 +42,9 @@ const App: React.FC = () => {
           <Route path="/" element={<Home />} />
           <Route path="/course-study" element={<CourseStudy />} />
           <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/create-course" element={<CreateCourse />} />
+          {/* <Route path="/create-course" element={<CreateCourse />} /> */}
           <Route path="/courses" element={<CourseList />} />
-          <Route path="/courses/:id" element={<CourseDetail />} />
+          {/* <Route path="/courses/:id" element={<CourseDetail />} /> */}
           <Route path="/topics" element={<Topics />} />
           <Route path="/topics/:id" element={<CourseList />} />
           <Route path="/learning-paths" element={<LearningPaths />} />
@@ -74,9 +69,14 @@ const App: React.FC = () => {
             element={<InstructorManagement />}
           >
             <Route index element={<Overview />} />
+            
             <Route path="course" element={<Outlet />}>
               <Route index element={<InstructorCourseList />} />
               <Route path="create" element={<InstructorCreateCourse />} />
+              <Route
+                path="detail/:courseId"
+                element={<InstructorCourseDetail />}
+              />
             </Route>
           </Route>
           {/* Supporter Dashboard*/}
@@ -90,14 +90,7 @@ const App: React.FC = () => {
               <Route index element={<SupporterManageLearner />}></Route>
               <Route path="comment/:learnerId" element={<SupporterManageLearnerComments />} />
             </Route>
-            <Route path="course" element={<Outlet />}>
-              <Route index element={<InstructorCourseList />} />
-              <Route path="create" element={<InstructorCreateCourse />} />
-              <Route
-                path="detail/:courseId"
-                element={<InstructorCourseDetail />}
-              />
-            </Route>
+            
           </Route>
 
           <Route path="*" element={<NotFound />} />
