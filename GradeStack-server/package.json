@@ -4,6 +4,7 @@
   "description": "",
   "main": "src/server.ts",
   "scripts": {
+    "seed": "ts-node prisma/seed.ts",
     "dev": "nodemon src/server.ts"
   },
   "license": "MIT",

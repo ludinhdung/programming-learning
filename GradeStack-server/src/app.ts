@@ -6,6 +6,10 @@ import userRouter from './modules/user/routes/user.routes';
 import { errorHandler } from './shared/middleware/error.middleware';
 import courseRoutes from './modules/course/routes/course.routes';
 import practiceCodeRoutes from './modules/practice-code/routes/coding-exercise.routes';
+import bodyParser from 'body-parser';
+import checkoutRoutes from './modules/checkout/routes/checkout.routes';
+import noteRoutes from './modules/note/note.route'; // Import note routes
+import { commentRoutes } from './modules/comment'; // Import comment routes
 
 const app = express();
 
@@ -13,18 +17,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
+app.use(bodyParser.json());
 
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/courses', courseRoutes);
 app.use('/api/practice-code', practiceCodeRoutes);
+app.use('/api/checkout', checkoutRoutes);
+app.use('/api', noteRoutes); // Register note routes under /api base path
+app.use('/api/comments', commentRoutes); // Register comment routes
 
 app.use(errorHandler);
-
-// Basic error handling
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error(err.stack);
-    res.status(500).json({ message: 'Something went wrong!', error: err.message });
-});
 
 export default app;

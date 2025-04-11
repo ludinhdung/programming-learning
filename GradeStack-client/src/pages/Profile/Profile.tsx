@@ -1,101 +1,147 @@
-import { FC, useState } from 'react';
-import { Layout, Menu, Input, Button, message } from 'antd';
-import {
-  UserOutlined,
-  SettingOutlined,
-  BellOutlined,
-  CreditCardOutlined,
-  StarOutlined,
-  CheckCircleOutlined,
-  AppstoreOutlined,
-  BookOutlined
-} from '@ant-design/icons';
+import { FC, useState, useEffect } from 'react';
+import { Layout, Menu, Button, message, Spin, Alert, Form, Input, Tabs, Card, Tag, Avatar } from 'antd';
+import { UserOutlined, CreditCardOutlined, StarOutlined, BookOutlined, CheckCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import Header from '../../components/Header/Header';
-import styled from 'styled-components';
+import userService from '../../services/user.service';
+import type {
+  UserProfile,
+  EnrollmentRecord,
+  BookmarkRecord,
+  PurchaseRecord
+} from '../../services/user.service';
 
 const { Sider, Content } = Layout;
 
-const StyledInput = styled(Input)`
-  .ant-input {
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-  }
-  .ant-input::placeholder {
-    color: #717780 !important;
-    font-weight: 500;
-  }
-`;
-
 const Profile: FC = () => {
   const [selectedKey, setSelectedKey] = useState('profile');
-  const [fullName, setFullName] = useState('John Doe');
-  const [website, setWebsite] = useState('http://example.com');
-  const [shortBio, setShortBio] = useState("I'm a software developer who loves to build things with Laravel.");
-  const [twitterUsername, setTwitterUsername] = useState('');
-  const [githubUsername, setGithubUsername] = useState('');
-  const [placeOfEmployment, setPlaceOfEmployment] = useState('Laracasts Inc.');
-  const [jobTitle, setJobTitle] = useState('Software Engineer');
-  const [hometown, setHometown] = useState('Springfield, Illinois');
+  const [profileData, setProfileData] = useState<UserProfile | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [errorProfile, setErrorProfile] = useState<string | null>(null);
+  const [editableProfile, setEditableProfile] = useState<Partial<UserProfile>>({});
+  const [enrolledCourses, setEnrolledCourses] = useState<EnrollmentRecord[]>([]);
+  const [loadingEnrolled, setLoadingEnrolled] = useState(false);
+  const [errorEnrolled, setErrorEnrolled] = useState<string | null>(null);
+  const [bookmarks, setBookmarks] = useState<BookmarkRecord[]>([]);
+  const [loadingBookmarks, setLoadingBookmarks] = useState(false);
+  const [errorBookmarks, setErrorBookmarks] = useState<string | null>(null);
+  const [purchases, setPurchases] = useState<PurchaseRecord[]>([]);
+  const [loadingPurchases, setLoadingPurchases] = useState(false);
+  const [errorPurchases, setErrorPurchases] = useState<string | null>(null);
+  const [loadingChangePassword, setLoadingChangePassword] = useState(false);
+  const [changePasswordError, setChangePasswordError] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
 
-  // Mock enrolled courses data
-  const enrolledCourses = [
-    {
-      id: '1',
-      title: 'Laravel Fundamentals',
-      progress: 60,
-      lastAccessed: '2024-03-15'
-    },
-    {
-      id: '2',
-      title: 'Vue.js 3 Mastery',
-      progress: 30,
-      lastAccessed: '2024-03-14'
-    },
-    {
-      id: '3',
-      title: 'React Complete Guide',
-      progress: 85,
-      lastAccessed: '2024-03-13'
+  // Fetch profile data
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const userDataStr = localStorage.getItem('user');
+      if (!userDataStr) {
+        setErrorProfile("User data not found in local storage.");
+        setLoadingProfile(false);
+        return;
+      }
+
+      try {
+        const userData = JSON.parse(userDataStr);
+        if (!userData?.id) {
+          setErrorProfile("Invalid user data format in local storage.");
+          setLoadingProfile(false);
+          return;
+        }
+
+        setLoadingProfile(true);
+        const data = await userService.getMyProfile(userData.id);
+        setProfileData(data);
+        setEditableProfile({
+          firstName: data.firstName,
+          lastName: data.lastName,
+        });
+      } catch (err) {
+        message.error('Failed to load profile data.');
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  // Fetch enrolled courses when selected
+  useEffect(() => {
+    const fetchEnrolledCourses = async () => {
+      if (selectedKey === 'enrolled' && profileData?.id) {
+        setLoadingEnrolled(true);
+        try {
+          const data = await userService.getMyEnrolledCourses(profileData.id);
+          setEnrolledCourses(data);
+        } catch (err) {
+          message.error('Failed to load enrolled courses.');
+        } finally {
+          setLoadingEnrolled(false);
+        }
+      }
+    };
+    fetchEnrolledCourses();
+  }, [selectedKey, profileData]);
+
+  // Fetch bookmarks when selected
+  useEffect(() => {
+    const fetchBookmarks = async () => {
+      if (selectedKey === 'bookmarks' && profileData?.id) {
+        setLoadingBookmarks(true);
+        try {
+          const data = await userService.getMyBookmarks(profileData.id);
+          setBookmarks(data);
+        } catch (err) {
+          message.error('Failed to load bookmarks.');
+        } finally {
+          setLoadingBookmarks(false);
+        }
+      }
+    };
+    fetchBookmarks();
+  }, [selectedKey, profileData]);
+
+  // Fetch purchases when selected
+  useEffect(() => {
+    const fetchPurchases = async () => {
+      if (selectedKey === 'purchases' && profileData?.id) {
+        setLoadingPurchases(true);
+        try {
+          const data = await userService.getMyPurchaseHistory(profileData.id);
+          setPurchases(data);
+        } catch (err) {
+          message.error('Failed to load purchase history.');
+        } finally {
+          setLoadingPurchases(false);
+        }
+      }
+    };
+    fetchPurchases();
+  }, [selectedKey, profileData]);
+
+  const handleChangePassword = async () => {
+    setLoadingChangePassword(true);
+    setChangePasswordError(null);
+    try {
+      const response = await userService.changePassword({ oldPassword, newPassword });
+      message.success(response.message);
+      setOldPassword('');
+      setNewPassword('');
+    } catch (error) {
+      message.error('Failed to change password.');
+    } finally {
+      setLoadingChangePassword(false);
     }
-  ];
-
-  const menuItems = [
-    {
-      key: 'learning',
-      label: 'MY LEARNING',
-      type: 'group' as const,
-      children: [
-        { key: 'enrolled', icon: <BookOutlined />, label: 'Enrolled Courses' },
-        { key: 'completed', icon: <CheckCircleOutlined />, label: 'Completed Courses' },
-      ]
-    },
-    {
-      key: 'account',
-      label: 'ACCOUNT',
-      type: 'group' as const,
-      children: [
-        { key: 'credentials', icon: <UserOutlined />, label: 'Account Credentials' },
-        { key: 'profile', icon: <UserOutlined />, label: 'Account Profile' },
-        { key: 'preferences', icon: <SettingOutlined />, label: 'Site Preferences' },
-        { key: 'notifications', icon: <BellOutlined />, label: 'Notifications' },
-      ]
-    },
-    {
-      key: 'billing',
-      label: 'BILLING',
-      type: 'group' as const,
-      children: [
-        { key: 'subscription', icon: <CreditCardOutlined />, label: 'Manage Subscription' },
-        { key: 'lifetime', icon: <StarOutlined />, label: 'Get Lifetime Access' },
-        { key: 'invoices', icon: <CheckCircleOutlined />, label: 'Invoices' },
-      ]
-    },
-
-  ];
-
-  const handleUpdateProfile = () => {
-    message.success('Profile updated successfully');
   };
+
+  // Section title component
+  const SectionTitle = ({ title }: { title: string }) => (
+    <div className="flex items-center mb-6">
+      <div className="text-[#3b82f6] mr-2 text-xl">//</div>
+      <h2 className="text-lg uppercase tracking-wider text-white font-mono">{title}</h2>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#0a1321]">
@@ -103,189 +149,334 @@ const Profile: FC = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           <Layout className="bg-transparent">
-            <Sider
-              width={250}
-              className="bg-[#0a1321] p-6"
-              style={{ minHeight: 'calc(100vh - 64px)', overflowY: 'auto' }}
-            >
-              <div className="mt-10">
-                <Menu
-                  mode="inline"
-                  selectedKeys={[selectedKey]}
-                  items={menuItems}
-                  className="bg-transparent border-none [&_.ant-menu-item]:text-[#94a3b8] [&_.ant-menu-item:hover]:text-[#3b82f6] [&_.ant-menu-item-selected]:bg-[#1e293b] [&_.ant-menu-item-selected]:text-[#3b82f6] [&_.ant-menu-item-group-title]:text-[#94a3b8] [&_.ant-menu-item-group-title]:text-xs [&_.ant-menu-item-group-title]:tracking-wider [&_.ant-menu-item-group]:mt-5 [&_.ant-menu-item]:rounded-none [&_.ant-menu-item-selected]:rounded-none"
-                  onSelect={({ key }) => setSelectedKey(key)}
-                  style={{
-                    color: '#fff',
-                    backgroundColor: 'transparent'
-                  }}
-                  theme="dark"
-                />
-              </div>
+            <Sider width={250} className="bg-[#0a1321] p-6 border-r border-[#1e2736]">
+              <Menu
+                mode="inline"
+                selectedKeys={[selectedKey]}
+                items={[
+                  {
+                    key: 'learning',
+                    label: 'MY LEARNING',
+                    type: 'group',
+                    children: [
+                      { key: 'enrolled', icon: <BookOutlined />, label: 'Enrolled Courses' },
+                      { key: 'bookmarks', icon: <StarOutlined />, label: 'My Bookmarks' },
+                    ]
+                  },
+                  {
+                    key: 'account',
+                    label: 'ACCOUNT',
+                    type: 'group',
+                    children: [
+                      { key: 'profile', icon: <UserOutlined />, label: 'Account Profile' },
+                    ]
+                  },
+                  {
+                    key: 'billing',
+                    label: 'BILLING',
+                    type: 'group',
+                    children: [
+                      { key: 'purchases', icon: <CreditCardOutlined />, label: 'Purchase History' },
+                    ]
+                  },
+                ]}
+                onSelect={({ key }) => setSelectedKey(key)}
+                theme="dark"
+                className="border-0"
+              />
             </Sider>
 
             <Content>
-              <div className="px-4">
-                {selectedKey === 'enrolled' ? (
+              <div className="px-6 py-4">
+                {selectedKey === 'profile' && (
                   <>
-                    <div className="flex justify-between items-center mb-8 border border-blue-500 border-opacity-15 p-4">
-                      <h1 className="text-[#bad9fc] text-xl font-semibold">My Enrolled Courses</h1>
-                    </div>
-                    <div className="grid grid-cols-1 gap-4">
-                      {enrolledCourses.map(course => (
-                        <div key={course.id} className="bg-[#14202e] p-6 cursor-pointer hover:bg-[#1c2936] transition-colors">
-                          <h3 className="text-[#bad9fc] text-lg font-semibold mb-4">{course.title}</h3>
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="w-full bg-[#1c2936] h-1 mr-4">
-                              <div
-                                className="bg-[#3b82f6] h-1"
-                                style={{ width: `${course.progress}%` }}
-                              />
-                            </div>
-                            <span className="text-[#94a3b8] text-sm whitespace-nowrap">{course.progress}% Complete</span>
-                          </div>
-                          <p className="text-[#94a3b8] text-sm">
-                            Last accessed: {new Date(course.lastAccessed).toLocaleDateString()}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+                    <SectionTitle title="ACCOUNT PROFILE" />
+                    <Tabs
+                      defaultActiveKey="profile"
+                      items={[
+                        {
+                          key: 'profile',
+                          label: <span className="text-[#bad9fc]">Profile Information</span>,
+                          children: (
+                            <Card className="bg-[#13151f] border-0 shadow-md mb-6 rounded-lg overflow-hidden">
+                              <Form layout="vertical">
+                                <Form.Item 
+                                  label={<span className="text-[#bad9fc]">First Name</span>}
+                                  className="mb-6"
+                                >
+                                  <Input
+                                    value={editableProfile.firstName}
+                                    onChange={(e) => setEditableProfile({ ...editableProfile, firstName: e.target.value })}
+                                    className="rounded-none bg-[#1c2936] border-none text-white hover:bg-[#243447] p-1 mb-4 w-full"
+                                  />
+                                </Form.Item>
+                                <Form.Item 
+                                  label={<span className="text-[#bad9fc]">Last Name</span>}
+                                  className="mb-6"
+                                >
+                                  <Input
+                                    value={editableProfile.lastName}
+                                    onChange={(e) => setEditableProfile({ ...editableProfile, lastName: e.target.value })}
+                                    className="rounded-none bg-[#1c2936] border-none text-white hover:bg-[#243447] p-1 mb-4 w-full"
+                                  />
+                                </Form.Item>
+                                <div className="flex justify-end">
+                                  <Button 
+                                    type="primary"
+                                    className="mr-2 bg-[#3b82f6] hover:bg-[#2563eb] border-0"
+                                  >
+                                    Update Profile
+                                  </Button>
+                                  <Button 
+                                    onClick={() => setEditableProfile({})}
+                                    className="border-[#3b4452] text-[#bad9fc] hover:text-white hover:border-[#5e7597] bg-transparent"
+                                  >
+                                    Reset
+                                  </Button>
+                                </div>
+                              </Form>
+                            </Card>
+                          ),
+                        },
+                        {
+                          key: 'password',
+                          label: <span className="text-[#bad9fc]">Change Password</span>,
+                          children: (
+                            <Card className="bg-[#13151f] border-0 shadow-md rounded-lg overflow-hidden">
+                              <Form layout="vertical" onFinish={handleChangePassword}>
+                                <Form.Item 
+                                  label={<span className="text-[#bad9fc]">Current Password</span>}
+                                  required
+                                  name="oldPassword"
+                                  rules={[{ required: true, message: 'Please input your current password!' }]}
+                                  className="mb-6"
+                                >
+                                  <Input.Password
+                                    value={oldPassword}
+                                    onChange={(e) => setOldPassword(e.target.value)}
+                                    className="rounded-none bg-[#1c2936] border-none text-white hover:bg-[#243447] p-1 mb-4 w-full"
+                                  />
+                                </Form.Item>
+                                <Form.Item 
+                                  label={<span className="text-[#bad9fc]">New Password</span>}
+                                  required
+                                  name="newPassword"
+                                  rules={[{ required: true, message: 'Please input your new password!' }]}
+                                  className="mb-6"
+                                >
+                                  <Input.Password
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className="rounded-none bg-[#1c2936] border-none text-white hover:bg-[#243447] p-1 mb-4 w-full"
+                                  />
+                                </Form.Item>
+                                <Form.Item>
+                                  <Button 
+                                    type="primary" 
+                                    htmlType="submit" 
+                                    loading={loadingChangePassword}
+                                    className="bg-[#3b82f6] hover:bg-[#2563eb] border-0"
+                                  >
+                                    Change Password
+                                  </Button>
+                                </Form.Item>
+                                {changePasswordError && (
+                                  <Alert message={changePasswordError} type="error" showIcon className="mt-4" />
+                                )}
+                              </Form>
+                            </Card>
+                          ),
+                        },
+                      ]}
+                      className="profile-tabs"
+                    />
                   </>
-                ) : selectedKey === 'profile' && (
+                )}
+
+                {selectedKey === 'enrolled' && (
                   <>
-                    <div className="flex justify-between items-center mb-8 border border-blue-500 border-opacity-15 p-4">
-                      <h1 className="text-[#bad9fc] text-xl font-semibold">Account Profile</h1>
-                      <Button
-                        type="text"
-                        className="bg-[#29324a] text-[#fff] text-base font-medium rounded-none hover:border-[#1b55ac] hover:bg-[#1c2e48]"
-                      >
-                        View My Profile
-                      </Button>
-                    </div>
-
-                    <div className="mb-8">
-                      <div className="grid grid-cols-12 gap-8">
-                        {/* Profile Image */}
-                        <div className="col-span-3">
-                          <div className="bg-[#14202e] p-4">
-                            <img
-                              src="/path-to-your-avatar.png"
-                              alt="Profile"
-                              className="w-full aspect-square object-cover mb-4"
-                            />
-                            <Button
-                              type="text"
-                              className="text-[#3b82f6] hover:text-[#60a5fa] w-full flex items-center justify-center"
-                            >
-                              Need to Edit Your Avatar?
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Profile Form */}
-                        <div className="col-span-9">
-                          <div className="space-y-6 bg-[#14202e] p-6">
-                            <div>
-                              <label className="block text-[#bad9fc] mb-2 text-sm font-semibold">Full Name</label>
-                              <StyledInput
-                                value={fullName}
-                                onChange={(e) => setFullName(e.target.value)}
-                                className="bg-[#1c2936] border-none text-white hover:bg-[#243447] p-2"
-                                size="large"
-                                variant="borderless"
-                              />
+                    <SectionTitle title="ENROLLED COURSES" />
+                    {loadingEnrolled && <div className="text-center py-8"><Spin size="large" /></div>}
+                    {errorEnrolled && <Alert message="Error" description={errorEnrolled} type="error" showIcon className="mb-4" />}
+                    {!loadingEnrolled && !errorEnrolled && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {enrolledCourses.length === 0 ? (
+                          <p className="text-[#94a3b8] text-center py-4 col-span-full">You haven't enrolled in any courses yet.</p>
+                        ) : (
+                          enrolledCourses.map((enrollment) => (
+                            <div key={enrollment.enrolledAt} className="bg-[#13151f] rounded-lg hover:bg-[#1a1f2e] transition-colors overflow-hidden shadow-md">
+                              <div className="flex gap-4 p-4">
+                                <div className="w-20 h-20 bg-[#1e2736] rounded-lg flex items-center justify-center shrink-0">
+                                  <BookOutlined className="text-2xl text-[#3b82f6]" />
+                                </div>
+                                <div className="flex-1">
+                                  <h3 className="text-white text-lg font-semibold mb-1">{enrollment.course.title}</h3>
+                                  <div className="flex items-center text-[#94a3b8] mb-3">
+                                    <Avatar size="small" className="mr-2 bg-[#3b82f6]">
+                                      {enrollment.course.instructor.user.firstName.charAt(0)}
+                                    </Avatar>
+                                    <span>
+                                      {enrollment.course.instructor.user.firstName} {enrollment.course.instructor.user.lastName}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between items-center mt-2">
+                                    <div className="text-[#94a3b8] text-sm w-full">
+                                      <div className="flex items-center gap-2 w-full">
+                                        <span>Progress:</span>
+                                        <div className="w-full bg-[#1e2736] h-2 rounded-full overflow-hidden">
+                                          <div 
+                                            className="bg-[#3b82f6] h-full rounded-full" 
+                                            style={{ width: `${Number(enrollment.progress)}%` }}
+                                          />
+                                        </div>
+                                        <span className="text-[#bad9fc]">{Number(enrollment.progress)}%</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="bg-[#1e2736] py-2 px-4 flex justify-end">
+                                <Button 
+                                  type="text" 
+                                  className="text-[#3b82f6] hover:text-[#60a5fa] hover:bg-[#1a1f2e]"
+                                  href={`/course/${enrollment.course.id}`}
+                                >
+                                  Continue Learning
+                                </Button>
+                              </div>
                             </div>
-
-                            <div>
-                              <label className="block text-[#bad9fc] mb-2 text-sm font-semibold">Website</label>
-                              <StyledInput
-                                value={website}
-                                onChange={(e) => setWebsite(e.target.value)}
-                                className="bg-[#1c2936] border-none text-white hover:bg-[#243447] p-2"
-                                size="large"
-                                variant="borderless"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="block text-[#bad9fc] mb-2 text-sm font-semibold">Short Bio</label>
-                              <Input.TextArea
-                                value={shortBio}
-                                onChange={(e) => setShortBio(e.target.value)}
-                                className="bg-[#1c2936] border-none text-white hover:bg-[#243447] p-2"
-                                rows={4}
-                                size="large"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="block text-[#bad9fc] mb-2 text-sm font-semibold">Twitter Username</label>
-                              <StyledInput
-                                value={twitterUsername}
-                                onChange={(e) => setTwitterUsername(e.target.value)}
-                                placeholder="Enter Twitter Username"
-                                className="bg-[#1c2936] border-none text-white hover:bg-[#243447] p-2"
-                                size="large"
-                                variant="borderless"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="block text-[#bad9fc] mb-2 text-sm font-semibold">GitHub Username</label>
-                              <StyledInput
-                                value={githubUsername}
-                                onChange={(e) => setGithubUsername(e.target.value)}
-                                placeholder="Enter GitHub Username"
-                                className="bg-[#1c2936] border-none text-white hover:bg-[#243447] p-2"
-                                size="large"
-                                variant="borderless"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="block text-[#bad9fc] mb-2 text-sm font-semibold">Place of Employment</label>
-                              <StyledInput
-                                value={placeOfEmployment}
-                                onChange={(e) => setPlaceOfEmployment(e.target.value)}
-                                className="bg-[#1c2936] border-none text-white hover:bg-[#243447] p-2"
-                                size="large"
-                                variant="borderless"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="block text-[#bad9fc] mb-2 text-sm font-semibold">Job Title</label>
-                              <StyledInput
-                                value={jobTitle}
-                                onChange={(e) => setJobTitle(e.target.value)}
-                                className="bg-[#1c2936] border-none text-white hover:bg-[#243447] p-2"
-                                size="large"
-                                variant="borderless"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="block text-[#bad9fc] mb-2 text-sm font-semibold">Hometown</label>
-                              <StyledInput
-                                value={hometown}
-                                onChange={(e) => setHometown(e.target.value)}
-                                className="bg-[#1c2936] border-none text-white hover:bg-[#243447] p-2"
-                                size="large"
-                                variant="borderless"
-                              />
-                            </div>
-
-                            <Button
-                              type="text"
-                              onClick={handleUpdateProfile}
-                              className="bg-[#29324a] text-[#fff] text-base font-medium rounded-none hover:border-[#1b55ac] hover:bg-[#1c2e48]"
-                            >
-                              Update Profile
-                            </Button>
-                          </div>
-                        </div>
+                          ))
+                        )}
                       </div>
-                    </div>
+                    )}
+                  </>
+                )}
+
+                {selectedKey === 'bookmarks' && (
+                  <>
+                    <SectionTitle title="MY BOOKMARKS" />
+                    {loadingBookmarks && <div className="text-center py-8"><Spin size="large" /></div>}
+                    {errorBookmarks && <Alert message="Error" description={errorBookmarks} type="error" showIcon className="mb-4" />}
+                    {!loadingBookmarks && !errorBookmarks && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {bookmarks.length === 0 ? (
+                          <p className="text-[#94a3b8] text-center py-4 col-span-full">You haven't bookmarked any courses yet.</p>
+                        ) : (
+                          bookmarks.map((bookmark) => (
+                            <div key={bookmark.id} className="bg-[#13151f] rounded-lg hover:bg-[#1a1f2e] transition-colors overflow-hidden shadow-md">
+                              <div className="flex gap-4 p-4">
+                                <div className="w-20 h-20 bg-[#1e2736] rounded-lg flex items-center justify-center shrink-0">
+                                  <StarOutlined className="text-2xl text-[#f59e0b]" />
+                                </div>
+                                <div className="flex-1">
+                                  <h3 className="text-white text-lg font-semibold mb-1">{bookmark.course.title}</h3>
+                                  <div className="flex items-center text-[#94a3b8] mb-2">
+                                    <Avatar size="small" className="mr-2 bg-[#f59e0b]">
+                                      {bookmark.course.instructor.user.firstName.charAt(0)}
+                                    </Avatar>
+                                    <span>
+                                      {bookmark.course.instructor.user.firstName} {bookmark.course.instructor.user.lastName}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="bg-[#1e2736] py-2 px-4 flex justify-end">
+                                <Button 
+                                  type="text" 
+                                  className="text-[#f59e0b] hover:text-[#fbbf4c] hover:bg-[#1a1f2e]"
+                                  href={`/course/${bookmark.course.id}`}
+                                >
+                                  View Course
+                                </Button>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {selectedKey === 'purchases' && (
+                  <>
+                    <SectionTitle title="PURCHASE HISTORY" />
+                    {loadingPurchases && <div className="text-center py-8"><Spin size="large" /></div>}
+                    {errorPurchases && <Alert message="Error" description={errorPurchases} type="error" showIcon className="mb-4" />}
+                    {!loadingPurchases && !errorPurchases && (
+                      <div className="grid grid-cols-1 gap-6">
+                        {purchases.length === 0 ? (
+                          <p className="text-[#94a3b8] text-center py-4">You haven't made any purchases yet.</p>
+                        ) : (
+                          purchases.map((purchase) => (
+                            <div 
+                              key={purchase.id}
+                              className="bg-[#13151f] rounded-lg overflow-hidden shadow-md border border-[#1e2736]"
+                            >
+                              <div className="p-5">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between">
+                                  <div className="flex gap-4 mb-4 md:mb-0">
+                                    <div className="w-16 h-16 bg-[#1e2736] rounded-lg flex items-center justify-center shrink-0">
+                                      <CreditCardOutlined className="text-2xl text-[#3b82f6]" />
+                                    </div>
+                                    <div>
+                                      <h3 className="text-white text-lg font-semibold mb-2">{purchase.course.title}</h3>
+                                      <div className="flex flex-wrap gap-2">
+                                        <Tag className="rounded-full px-3 py-1 border-0 bg-[#1e293f] text-[#3b82f6] font-medium">
+                                          ${purchase.price.toLocaleString()}
+                                        </Tag>
+                                        {purchase.status && (
+                                          <Tag 
+                                            className={`rounded-full px-3 py-1 border-0 font-medium
+                                              ${purchase.status === 'completed' 
+                                                ? 'bg-[#0f2d1e] text-[#10b981]' 
+                                                : purchase.status === 'pending'
+                                                  ? 'bg-[#3f2f10] text-[#f59e0b]'
+                                                  : 'bg-[#2c1216] text-[#ef4444]'
+                                              }`}
+                                          >
+                                            <div className="flex items-center gap-1">
+                                              {purchase.status === 'completed' && <CheckCircleOutlined />}
+                                              {purchase.status === 'pending' && <SyncOutlined spin />}
+                                              {purchase.status}
+                                            </div>
+                                          </Tag>
+                                        )}
+                                        <Tag className="rounded-full px-3 py-1 border-0 bg-[#1e2736] text-[#94a3b8]">
+                                          {new Date(purchase.purchasedAt || Date.now()).toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric'
+                                          })}
+                                        </Tag>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="bg-[#1e2736] py-3 px-5 flex flex-wrap gap-3 justify-end">
+                                <Button 
+                                  type="primary" 
+                                  size="middle"
+                                  href={`/course/${purchase.course.id}`}
+                                  className="bg-[#3b82f6] hover:bg-[#2563eb] border-0 shadow-sm"
+                                  icon={<BookOutlined />}
+                                >
+                                  Go to Course
+                                </Button>
+                                <Button 
+                                  size="middle"
+                                  href={`/receipts/${purchase.id}`}
+                                  className="border-[#3b4452] text-[#bad9fc] hover:text-white hover:border-[#5e7597] bg-transparent"
+                                  icon={<CreditCardOutlined />}
+                                >
+                                  View Receipt
+                                </Button>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -297,4 +488,4 @@ const Profile: FC = () => {
   );
 };
 
-export default Profile; 
+export default Profile;
