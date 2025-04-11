@@ -47,4 +47,21 @@ export class CourseController {
             next(error);
         }
     };
+    getCoursebyCourseId = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { courseId } = req.params;
+            const course = await this.courseService.getCoursebyCourseId(courseId);
+            res.status(200).json(course);
+        } catch (error) {
+            next(error);
+        }
+    }
+    getAllCourses = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const courses = await this.courseService.getAllCourses();
+            res.status(200).json(courses);
+        } catch (error) {
+            next(error);
+        }
+    }
 } 

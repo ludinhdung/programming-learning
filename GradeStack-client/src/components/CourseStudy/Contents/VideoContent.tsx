@@ -297,6 +297,22 @@ const VideoContent: React.FC<VideoContentProps> = ({
   const playerRef = useRef<PlayerReference>(null);
   const markersRef = useRef<{ [key: string]: HTMLDivElement }>({});
 
+  // Added: Use a key state to force remount of the Player component when video changes
+  const [playerKey, setPlayerKey] = useState<string>(video || "default-key");
+
+  // Update the player key when video URL changes
+  useEffect(() => {
+    if (video) {
+      setPlayerKey(video);
+      // Reset player state when video changes
+      setCurrentTime(0);
+      setPlayerState({
+        currentTime: 0,
+        duration: 0,
+      });
+    }
+  }, [video]);
+
   const getExistingNoteAtTime = (time: number) => {
     return notes.find((note) => Math.abs(note.timestamp - time) < 1);
   };
@@ -309,7 +325,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
         setPlayerState(state);
       });
     }
-  }, []);
+  }, [playerKey]); // Re-subscribe when player key changes
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -484,7 +500,12 @@ const VideoContent: React.FC<VideoContentProps> = ({
 
   return (
     <VideoContainer>
-      <Player ref={playerRef} fluid={true} playsInline>
+      <Player
+        ref={playerRef}
+        fluid={true}
+        playsInline
+        key={playerKey} // Use the key to force remount
+      >
         <source src={video} />
       </Player>
 

@@ -4,7 +4,7 @@ import { Tabs } from "antd";
 import type { TabsProps } from "antd";
 import { Input, Select, Button, Tooltip } from "antd";
 import styled from "styled-components";
-import "../../styles/TabStudyCourseStyles.css"
+import "../../styles/TabStudyCourseStyles.css";
 import {
   EditOutlined,
   DeleteOutlined,
@@ -213,8 +213,6 @@ const onChange = (key: string) => {
   console.log(key);
 };
 
-
-
 const formatDuration = (durationInMinutes: number) => {
   const hour = Math.floor(durationInMinutes / 60);
   const minutes = durationInMinutes % 60;
@@ -362,8 +360,11 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
         <div className="flex items-stretch pt-6">
           <div className="flex-shrink-0 w-40 h-full">
             <img
-              src="https://images.laracasts.com/instructors/24345.jpeg?tr=w-630"
-              className="w-full h-full object-cover"
+              src={
+                course.instructor?.avatar ||
+                course.instructor?.user?.avatarUrl
+              }
+              className="w-full h-[200px] object-cover"
               alt="Author"
             />
           </div>
@@ -372,7 +373,9 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
               <div>
                 <p className="text-2xl text-gray-200 font-bold">Author</p>
                 <span className="text-blue-400/90 font-medium">
-                  Your Instructor
+                  {course.instructor?.user
+                    ? `${course.instructor.user.firstName} ${course.instructor.user.lastName}`
+                    : "Your Instructor"}
                 </span>
               </div>
               <div className="flex items-center space-x-4">
@@ -414,9 +417,8 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
               </div>
             </div>
             <p className="mt-8 text-gray-300 font-semibold">
-              Hi, I'm Jeffrey. I'm the creator of Laracasts and spend most of my
-              days building the site and thinking of new ways to teach confusing
-              concepts. I live in Orlando, Florida with my wife and two kids.
+              {course.instructor?.bio ||
+                `Hi, ${course.instructor?.user?.firstName || "Instructor"}. I'm the creator of GradeStacks and spend most of my days building the site and thinking of new ways to teach confusing concepts. I live in Orlando, Florida with my wife and two kids.`}
             </p>
           </div>
         </div>
@@ -528,231 +530,231 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
       </div>
     </div>
   );
-  
-const NotesSection: React.FC<NotesSectionProps> = ({
-  currentTime,
-  notes,
-  setNotes,
-  lectureTitle,
-  onJumpToTimestamp,
-  onPlayVideo,
-  onPauseVideo,
-  formatTime,
-}) => {
-  const [noteText, setNoteText] = useState<string>("");
-  const [filter, setFilter] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("recent");
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
 
-  const getExistingNoteAtTime = (time: number) => {
-    return notes.find((note) => Math.abs(note.timestamp - time) < 1);
-  };
+  const NotesSection: React.FC<NotesSectionProps> = ({
+    currentTime,
+    notes,
+    setNotes,
+    lectureTitle,
+    onJumpToTimestamp,
+    onPlayVideo,
+    onPauseVideo,
+    formatTime,
+  }) => {
+    const [noteText, setNoteText] = useState<string>("");
+    const [filter, setFilter] = useState<string>("all");
+    const [sortBy, setSortBy] = useState<string>("recent");
+    const [isEditing, setIsEditing] = useState<boolean>(false);
+    const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
 
-  const handleStartEditing = () => {
-    const existingNote = getExistingNoteAtTime(currentTime);
-    if (existingNote) {
-      setEditingNoteId(existingNote.id);
-      setNoteText(existingNote.text);
-    } else {
-      setEditingNoteId(null);
-      setNoteText("");
-    }
-    onPauseVideo();
-    setIsEditing(true);
-  };
+    const getExistingNoteAtTime = (time: number) => {
+      return notes.find((note) => Math.abs(note.timestamp - time) < 1);
+    };
 
-  const handleCancelEditing = () => {
-    setIsEditing(false);
-    setNoteText("");
-    setEditingNoteId(null);
-  };
-
-  const handleSaveNote = () => {
-    if (noteText.trim()) {
-      if (editingNoteId) {
-        setNotes((prev) =>
-          prev.map((note) =>
-            note.id === editingNoteId
-              ? { ...note, text: noteText.trim() }
-              : note
-          )
-        );
+    const handleStartEditing = () => {
+      const existingNote = getExistingNoteAtTime(currentTime);
+      if (existingNote) {
+        setEditingNoteId(existingNote.id);
+        setNoteText(existingNote.text);
       } else {
-        const newNote: Note = {
-          id: Date.now().toString(),
-          timestamp: currentTime,
-          lectureTitle,
-          text: noteText.trim(),
-        };
-        setNotes((prev) => [...prev, newNote]);
+        setEditingNoteId(null);
+        setNoteText("");
       }
+      onPauseVideo();
+      setIsEditing(true);
+    };
+
+    const handleCancelEditing = () => {
       setIsEditing(false);
       setNoteText("");
       setEditingNoteId(null);
-    }
-  };
+    };
 
-  const handleSaveAndPlay = () => {
-    handleSaveNote();
-    onPlayVideo();
-  };
+    const handleSaveNote = () => {
+      if (noteText.trim()) {
+        if (editingNoteId) {
+          setNotes((prev) =>
+            prev.map((note) =>
+              note.id === editingNoteId
+                ? { ...note, text: noteText.trim() }
+                : note
+            )
+          );
+        } else {
+          const newNote: Note = {
+            id: Date.now().toString(),
+            timestamp: currentTime,
+            lectureTitle,
+            text: noteText.trim(),
+          };
+          setNotes((prev) => [...prev, newNote]);
+        }
+        setIsEditing(false);
+        setNoteText("");
+        setEditingNoteId(null);
+      }
+    };
 
-  const handleDeleteNote = (id: string) => {
-    setNotes((prev) => prev.filter((note) => note.id !== id));
-  };
+    const handleSaveAndPlay = () => {
+      handleSaveNote();
+      onPlayVideo();
+    };
 
-  return (
-    <NotesContainer>
-      {isEditing ? (
-        <EditorContainer>
-          <EditorToolbar>
-            <div className="toolbar-left">
-              <Tooltip title="Bold">
-                <BoldOutlined className="toolbar-btn" />
-              </Tooltip>
-              <Tooltip title="Italic">
-                <ItalicOutlined className="toolbar-btn" />
-              </Tooltip>
-              <Tooltip title="Ordered List">
-                <OrderedListOutlined className="toolbar-btn" />
-              </Tooltip>
-              <Tooltip title="Unordered List">
-                <UnorderedListOutlined className="toolbar-btn" />
-              </Tooltip>
-              <Tooltip title="Code">
-                <CodeOutlined className="toolbar-btn" />
-              </Tooltip>
-            </div>
-            <div className="toolbar-right">
-              <Button
-                type="text"
-                onClick={handleCancelEditing}
-                style={{ color: "#6b7280" }}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="primary"
-                onClick={handleSaveNote}
-                style={{ background: "#3b82f6", marginRight: "8px" }}
-              >
-                Save
-              </Button>
-              <Button
-                type="primary"
-                icon={<PlayCircleOutlined />}
-                onClick={handleSaveAndPlay}
-                style={{ background: "#10b981" }}
-              >
-                Save & Play
-              </Button>
-            </div>
-          </EditorToolbar>
-          <EditorContent>
-            <textarea
-              placeholder="Type your note here..."
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value)}
-              autoFocus
-            />
-          </EditorContent>
-        </EditorContainer>
-      ) : (
-        <CreateNoteInput>
-          <Input
-            placeholder={
-              getExistingNoteAtTime(currentTime)
-                ? `Edit note at ${formatTime(currentTime)}`
-                : `Create a new note at ${formatTime(currentTime)}`
-            }
-            onClick={handleStartEditing}
-            readOnly
-          />
-          <Tooltip
-            title={
-              getExistingNoteAtTime(currentTime) ? "Edit note" : "Add note"
-            }
-          >
-            <div
-              className="action-button"
+    const handleDeleteNote = (id: string) => {
+      setNotes((prev) => prev.filter((note) => note.id !== id));
+    };
+
+    return (
+      <NotesContainer>
+        {isEditing ? (
+          <EditorContainer>
+            <EditorToolbar>
+              <div className="toolbar-left">
+                <Tooltip title="Bold">
+                  <BoldOutlined className="toolbar-btn" />
+                </Tooltip>
+                <Tooltip title="Italic">
+                  <ItalicOutlined className="toolbar-btn" />
+                </Tooltip>
+                <Tooltip title="Ordered List">
+                  <OrderedListOutlined className="toolbar-btn" />
+                </Tooltip>
+                <Tooltip title="Unordered List">
+                  <UnorderedListOutlined className="toolbar-btn" />
+                </Tooltip>
+                <Tooltip title="Code">
+                  <CodeOutlined className="toolbar-btn" />
+                </Tooltip>
+              </div>
+              <div className="toolbar-right">
+                <Button
+                  type="text"
+                  onClick={handleCancelEditing}
+                  style={{ color: "#6b7280" }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={handleSaveNote}
+                  style={{ background: "#3b82f6", marginRight: "8px" }}
+                >
+                  Save
+                </Button>
+                <Button
+                  type="primary"
+                  icon={<PlayCircleOutlined />}
+                  onClick={handleSaveAndPlay}
+                  style={{ background: "#10b981" }}
+                >
+                  Save & Play
+                </Button>
+              </div>
+            </EditorToolbar>
+            <EditorContent>
+              <textarea
+                placeholder="Type your note here..."
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                autoFocus
+              />
+            </EditorContent>
+          </EditorContainer>
+        ) : (
+          <CreateNoteInput>
+            <Input
+              placeholder={
+                getExistingNoteAtTime(currentTime)
+                  ? `Edit note at ${formatTime(currentTime)}`
+                  : `Create a new note at ${formatTime(currentTime)}`
+              }
               onClick={handleStartEditing}
-              style={{
-                color: getExistingNoteAtTime(currentTime)
-                  ? "#ffd60a"
-                  : "#3b82f6",
-              }}
+              readOnly
+            />
+            <Tooltip
+              title={
+                getExistingNoteAtTime(currentTime) ? "Edit note" : "Add note"
+              }
             >
-              {getExistingNoteAtTime(currentTime) ? (
-                <EditOutlined />
-              ) : (
-                <PlusOutlined />
-              )}
-            </div>
-          </Tooltip>
-        </CreateNoteInput>
-      )}
-
-      <FilterContainer>
-        <Select defaultValue="all" onChange={setFilter}>
-          <Option value="all">All lectures</Option>
-          <Option value="current">Current lecture</Option>
-        </Select>
-        <Select defaultValue="recent" onChange={setSortBy}>
-          <Option value="recent">Sort by most recent</Option>
-          <Option value="oldest">Sort by oldest</Option>
-          <Option value="timestamp">Sort by timestamp</Option>
-        </Select>
-      </FilterContainer>
-
-      {notes
-        .sort((a, b) => {
-          switch (sortBy) {
-            case "oldest":
-              return parseInt(a.id) - parseInt(b.id);
-            case "timestamp":
-              return a.timestamp - b.timestamp;
-            default:
-              return parseInt(b.id) - parseInt(a.id);
-          }
-        })
-        .filter(
-          (note) => filter === "all" || note.lectureTitle === lectureTitle
-        )
-        .map((note) => (
-          <NoteItem key={note.id}>
-            <div
-              className="timestamp"
-              onClick={() => onJumpToTimestamp(note.timestamp)}
-            >
-              {formatTime(note.timestamp)}
-            </div>
-            <div className="lecture-info">
-              <div className="lecture-title">{note.lectureTitle}</div>
-              <div className="note-text">{note.text}</div>
-            </div>
-            <div className="actions">
-              <EditOutlined
-                className="action-btn"
-                onClick={() => {
-                  setEditingNoteId(note.id);
-                  setNoteText(note.text);
-                  setIsEditing(true);
-                  onPauseVideo();
-                  onJumpToTimestamp(note.timestamp);
+              <div
+                className="action-button"
+                onClick={handleStartEditing}
+                style={{
+                  color: getExistingNoteAtTime(currentTime)
+                    ? "#ffd60a"
+                    : "#3b82f6",
                 }}
-              />
-              <DeleteOutlined
-                className="action-btn delete"
-                onClick={() => handleDeleteNote(note.id)}
-              />
-            </div>
-          </NoteItem>
-        ))}
-    </NotesContainer>
-  );
-};
-  
+              >
+                {getExistingNoteAtTime(currentTime) ? (
+                  <EditOutlined />
+                ) : (
+                  <PlusOutlined />
+                )}
+              </div>
+            </Tooltip>
+          </CreateNoteInput>
+        )}
+
+        <FilterContainer>
+          <Select defaultValue="all" onChange={setFilter}>
+            <Option value="all">All lectures</Option>
+            <Option value="current">Current lecture</Option>
+          </Select>
+          <Select defaultValue="recent" onChange={setSortBy}>
+            <Option value="recent">Sort by most recent</Option>
+            <Option value="oldest">Sort by oldest</Option>
+            <Option value="timestamp">Sort by timestamp</Option>
+          </Select>
+        </FilterContainer>
+
+        {notes
+          .sort((a, b) => {
+            switch (sortBy) {
+              case "oldest":
+                return parseInt(a.id) - parseInt(b.id);
+              case "timestamp":
+                return a.timestamp - b.timestamp;
+              default:
+                return parseInt(b.id) - parseInt(a.id);
+            }
+          })
+          .filter(
+            (note) => filter === "all" || note.lectureTitle === lectureTitle
+          )
+          .map((note) => (
+            <NoteItem key={note.id}>
+              <div
+                className="timestamp"
+                onClick={() => onJumpToTimestamp(note.timestamp)}
+              >
+                {formatTime(note.timestamp)}
+              </div>
+              <div className="lecture-info">
+                <div className="lecture-title">{note.lectureTitle}</div>
+                <div className="note-text">{note.text}</div>
+              </div>
+              <div className="actions">
+                <EditOutlined
+                  className="action-btn"
+                  onClick={() => {
+                    setEditingNoteId(note.id);
+                    setNoteText(note.text);
+                    setIsEditing(true);
+                    onPauseVideo();
+                    onJumpToTimestamp(note.timestamp);
+                  }}
+                />
+                <DeleteOutlined
+                  className="action-btn delete"
+                  onClick={() => handleDeleteNote(note.id)}
+                />
+              </div>
+            </NoteItem>
+          ))}
+      </NotesContainer>
+    );
+  };
+
   const items: TabsProps["items"] = [
     {
       key: "1",
