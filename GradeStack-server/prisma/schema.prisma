@@ -58,9 +58,11 @@ model Instructor {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Course   Course[]
-  Wallet   Wallet?
-  Workshop Workshop[]
+  Course       Course[]
+  Wallet       Wallet?
+  Workshop     Workshop[]
+  Topic        Topic[]
+  LearningPath LearningPath[]
 }
 
 model Course {
@@ -68,9 +70,9 @@ model Course {
   title       String
   description String
   price       Decimal @default(0.00)
-  duration    Int     @default(0) // Tổng thời gian (phút)
-  thumbnail   String
+  duration    Int     @default(0) 
   isPublished Boolean @default(false)
+  thumbnail   String?
 
   instructor   Instructor @relation(fields: [instructorId], references: [userId])
   instructorId String
@@ -99,6 +101,11 @@ model Module {
   courseId    String
   lessons     Lesson[]
 
+  // Video information fields
+  videoUrl      String?
+  thumbnailUrl  String?
+  videoDuration Int?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -117,8 +124,9 @@ model Lesson {
   title       String
   description String
   lessonType  LessonType
-  duration    Int? // Dành cho video hoặc estimated time
-  isPreview   Boolean    @default(false) // Instructor đánh dấu nội dung xem trước
+  duration    Int?                        // Dành cho video hoặc estimated time
+  isPreview   Boolean    @default(false)  // Instructor đánh dấu nội dung xem trước
+  order       Int        @default(1)      // Thứ tự bài học trong module
 
   video     VideoLesson?
   coding    CodingExercise?
@@ -167,6 +175,7 @@ model VideoLesson {
   lesson   Lesson @relation(fields: [lessonId], references: [id])
   lessonId String @unique
   url      String
+  thumbnailUrl String?
   duration Int
 }
 
@@ -195,6 +204,7 @@ model FinalTestLesson {
   lessonId String @unique
 
   estimatedDuration Int?
+  passingScore      Int  @default(70)
 
   questions          Question[]
   SubmittedFinalTest SubmittedFinalTest[]
@@ -307,6 +317,9 @@ model Topic {
   description String?
 
   courses CourseTopic[]
+
+  Instructor       Instructor? @relation(fields: [instructorUserId], references: [userId])
+  instructorUserId String?
 }
 
 model CourseTopic {
@@ -320,11 +333,13 @@ model CourseTopic {
 }
 
 model LearningPath {
-  id          String               @id @default(uuid())
-  title       String
-  description String?
-  thumbnail   String?
-  courses     LearningPathCourse[]
+  id               String               @id @default(uuid())
+  title            String
+  description      String?
+  thumbnail        String?
+  courses          LearningPathCourse[]
+  Instructor       Instructor?          @relation(fields: [instructorUserId], references: [userId])
+  instructorUserId String?
 }
 
 model LearningPathCourse {
