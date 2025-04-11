@@ -4,7 +4,7 @@ import cors from 'cors';
 import authRouter from './modules/auth/routes/auth.routes';
 import userRouter from './modules/user/routes/user.routes';
 import { errorHandler } from './shared/middleware/error.middleware';
-import courseRoutes from './modules/courses_old/routes/course.routes';
+import courseRoutes from './modules/courses/routes/course.routes';
 import practiceCodeRoutes from './modules/practice-code/routes/coding-exercise.routes';
 import bodyParser from 'body-parser';
 import checkoutRoutes from './modules/checkout/routes/checkout.routes';
