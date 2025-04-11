@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Drawer, Input, Button, Form } from "antd";
 
 interface CreateModuleDrawerProps {
@@ -15,6 +15,16 @@ const CreateModuleDrawer: React.FC<CreateModuleDrawerProps> = ({
   currentModulesCount,
 }) => {
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (open) {
+      form.setFieldsValue({
+        title: "",
+        description: "",
+        order: currentModulesCount + 1,
+      });
+    }
+  }, [open, currentModulesCount, form]);
 
   const handleSubmit = async () => {
     try {

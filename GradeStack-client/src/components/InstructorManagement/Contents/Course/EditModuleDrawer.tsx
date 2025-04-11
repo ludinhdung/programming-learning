@@ -10,6 +10,8 @@ import {
   Upload,
   UploadFile,
   UploadProps,
+  Popconfirm,
+  Radio,
 } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -111,30 +113,30 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
     return file ? handleUploadVideo(file) : message.error("No file found");
   };
 
-    const handleUploadVideo = async (file: RcFile) => {
-      try {
-        if (!file) {
-          message.error("No file selected");
-          return null;
-        }
-        setUploading(true);
-        const response = await instructorService.uploadVideo(file);
-        console.log("Upload response:", response);
-        if (response?.videoUrl && response?.duration) {
-          setVideoInfo({
-            videoUrl: response.videoUrl,
-            thumbnailUrl: response.thumbnailUrl,
-            duration: response.duration,
-          })
-        }
-      } catch (error) {
-        console.error("Error uploading video:", error);
-        message.error("Failed to upload video");
+  const handleUploadVideo = async (file: RcFile) => {
+    try {
+      if (!file) {
+        message.error("No file selected");
         return null;
-      } finally {
-        setUploading(false);
       }
-    };
+      setUploading(true);
+      const response = await instructorService.uploadVideo(file);
+      if (response?.videoUrl && response?.duration) {
+        setVideoInfo({
+          videoUrl: response.videoUrl,
+          thumbnailUrl: response.thumbnailUrl,
+          duration: response.duration,
+        });
+      }
+      message.success("Video uploaded successfully");
+    } catch (error) {
+      console.error("Error uploading video:", error);
+      message.error("Failed to upload video");
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
   //state editingModule sẽ được cập nhật tương ứng khi chon Module khac
   useEffect(() => {
     setEditingModule(module);
@@ -170,7 +172,7 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
     message.success("Module updated successfully");
     onClose();
   };
-
+  // Delete module
   const handleConfirmDelete = () => {
     if (module.id && onDelete) {
       onDelete(module.id);
@@ -178,9 +180,7 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
       onClose();
     }
   };
-
-
-
+  //Create lesson
   const handleCreateLessonSubmit = async (values: any) => {
     try {
       const lessonData = {
@@ -201,47 +201,94 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
               duration: videoInfo?.duration || 0,
             }
           );
+          // Format response cho video lesson
+          response = {
+            ...response,
+            content: {
+              video: {
+                url: videoInfo?.videoUrl || "",
+                duration: videoInfo?.duration || 0,
+              },
+            },
+          };
           break;
         case "CODING":
-          response = await instructorService.createNewCodingLesson(
-            editingModule.id,
-            lessonData,
-            {
-              language: values.language,
-              problem: values.problem,
-              hint: values.hint,
-              solution: values.solution,
-              codeSnippet: values.codeSnippet,
-            }
-          );
+          {
+            response = await instructorService.createNewCodingLesson(
+              editingModule.id,
+              lessonData,
+              {
+                language: values.language,
+                problem: values.problem,
+                hint: values.hint,
+                solution: values.solution,
+                codeSnippet: values.codeSnippet,
+              }
+            );
+            // Format response cho coding lesson
+            response = {
+              ...response,
+              content: {
+                coding: {
+                  language: values.language,
+                  problem: values.problem,
+                  hint: values.hint,
+                  solution: values.solution,
+                  codeSnippet: values.codeSnippet,
+                },
+              },
+            };
+          }
           break;
         case "FINAL_TEST":
-          response = await instructorService.createNewFinalTestLesson(
-            editingModule.id,
-            lessonData,
-            {
-              passingScore: values.passingScore,
-              estimatedDuration: values.estimatedDuration,
-              questions: values.questions.map((q: any, index: number) => ({
-                content: q.content,
-                order: index + 1,
-                answers: q.answers.map((a: any) => ({
-                  content: a.content,
-                  isCorrect: a.isCorrect,
+          {
+            response = await instructorService.createNewFinalTestLesson(
+              editingModule.id,
+              lessonData,
+              {
+                passingScore: Number(values.passingScore),
+                estimatedDuration: Number(values.estimatedDuration),
+                questions: values.questions.map((q: any, index: number) => ({
+                  content: q.content,
+                  order: index + 1,
+                  answers: q.answers.map((a: any) => ({
+                    content: a.content,
+                    isCorrect: a.isCorrect,
+                  })),
                 })),
-              })),
-            }
-          );
+              }
+            );
+            response = {
+              ...response,
+              content: {
+                finalTest: {
+                  questions: values.questions.map((q: any, index: number) => ({
+                    content: q.content,
+                    order: index + 1,
+                    answers: q.answers.map((a: any) => ({
+                      content: a.content,
+                      isCorrect: a.isCorrect,
+                    })),
+                  })),
+                },
+              },
+            };
+          }
           break;
-        default:
+        default: {
           throw new Error("Invalid lesson type");
+        }
       }
 
       // Cập nhật state sau khi tạo lesson thành công
-      setEditingModule((prev) => ({
-        ...prev,
-        lessons: [...prev.lessons, response],
-      }));
+      const updatedModule = {
+        ...editingModule,
+        lessons: [...editingModule.lessons, response],
+      };
+      setEditingModule(updatedModule);
+
+      // Gọi onSave để cập nhật state ở CourseDetail
+      onSave(updatedModule);
 
       message.success("Lesson created successfully");
       form.resetFields();
@@ -254,6 +301,11 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
     }
   };
 
+  // Delete lesson
+  const confirm = () =>
+    new Promise((resolve) => {
+      setTimeout(() => resolve(null), 3000);
+    });
   const handleDeleteLesson = async (lessonId: string, lessonIndex: number) => {
     try {
       await instructorService.deleteLesson(lessonId);
@@ -264,6 +316,19 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
         lessons: prev.lessons.filter((_, index) => index !== lessonIndex),
       }));
 
+      // Cập nhật state local sau khi xóa thành công
+      const updatedModule = {
+        ...editingModule,
+        lessons: editingModule.lessons.filter(
+          (_, index) => index !== lessonIndex
+        ),
+      };
+
+      // Cập nhật state local
+      setEditingModule(updatedModule);
+
+      // Thông báo cho component cha biết về sự thay đổi
+      onSave(updatedModule);
       message.success("Lesson deleted successfully");
     } catch (error) {
       console.error("Error deleting lesson:", error);
@@ -305,33 +370,36 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
             />
             <span className="ml-1">Preview</span>
           </div>
-          <span
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDeleteLesson(lesson.id, index);
-            }}
+          <Popconfirm
+            title="Are you sure to delete this lesson?"
+            onConfirm={() => handleDeleteLesson(lesson.id, index)}
+            onCancel={(e) => e?.stopPropagation()}
+            okText="Yes"
+            cancelText="No"
             className="cursor-pointer text-red-500 hover:text-red-700"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 20 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="icon icon-tabler icons-tabler-outline icon-tabler-trash"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M4 7l16 0" />
-              <path d="M10 11l0 6" />
-              <path d="M14 11l0 6" />
-              <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-              <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-            </svg>
-          </span>
+            <div onClick={(e) => e.stopPropagation()}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 20 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="icon icon-tabler icons-tabler-outline icon-tabler-trash"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M4 7l16 0" />
+                <path d="M10 11l0 6" />
+                <path d="M14 11l0 6" />
+                <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+              </svg>
+            </div>
+          </Popconfirm>
         </div>
       </div>
     ),
@@ -702,7 +770,7 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
                           )}
                         </Upload>
 
-                        {fileList.length > 0 && (
+                        {fileList.length > 0 && !videoInfo && (
                           <Button
                             onClick={handleUploadClick}
                             loading={uploading}
@@ -711,7 +779,28 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
                             {uploading ? "Uploading" : "Start Upload"}
                           </Button>
                         )}
-
+                        {videoInfo && videoInfo?.videoUrl && (
+                          <div className="w-full mt-4 space-y-4">
+                            <div className="flex justify-center">
+                              <iframe
+                                src={videoInfo.videoUrl}
+                                className="w-full aspect-video rounded-lg"
+                                allowFullScreen
+                              ></iframe>
+                            </div>
+                            <div className="flex justify-center">
+                              <button
+                                className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                                onClick={() => {
+                                  setVideoInfo(null);
+                                  setFileList([]);
+                                }}
+                              >
+                                Remove Video
+                              </button>
+                            </div>
+                          </div>
+                        )}
                         {/* Form Item ẩn để lưu videoUrl */}
                         <Form.Item name="videoUrl" hidden>
                           <Input />
@@ -784,7 +873,23 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
                       >
                         <Input type="number" className="w-32" />
                       </Form.Item>
-
+                      <Form.Item
+                        name="passingScore"
+                        label="Passing Score(%)"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please input passing score!",
+                          },
+                        ]}
+                      >
+                        <Input
+                          type="number"
+                          min={0}
+                          max={100}
+                          className="w-32"
+                        />
+                      </Form.Item>
                       <Form.List
                         name="questions"
                         initialValue={[
@@ -870,9 +975,36 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
                                               ]}
                                               valuePropName="checked"
                                             >
-                                              <input
-                                                type="radio"
+                                              <Radio
+                                                name={`question-${field.name}`}
                                                 className="text-indigo-600"
+                                                onChange={(e) => {
+                                                  const answers =
+                                                    form.getFieldValue([
+                                                      "questions",
+                                                      field.name,
+                                                      "answers",
+                                                    ]);
+                                                  const updatedAnswers =
+                                                    answers.map(
+                                                      (
+                                                        answer: any,
+                                                        idx: number
+                                                      ) => ({
+                                                        ...answer,
+                                                        isCorrect:
+                                                          idx === answerIndex,
+                                                      })
+                                                    );
+                                                  form.setFieldValue(
+                                                    [
+                                                      "questions",
+                                                      field.name,
+                                                      "answers",
+                                                    ],
+                                                    updatedAnswers
+                                                  );
+                                                }}
                                               />
                                             </Form.Item>
                                             <Form.Item

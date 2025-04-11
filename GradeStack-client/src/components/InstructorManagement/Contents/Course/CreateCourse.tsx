@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Stepper, Button, Group } from "@mantine/core";
 import { Breadcrumb, Collapse, CollapseProps, message, Popover } from "antd";
 import {
@@ -1563,7 +1564,7 @@ const CourseReview: React.FC<CourseReviewProps> = ({
                   <iframe
                     src={lesson.content.video?.url}
                     className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   />
                 </div>
@@ -1746,6 +1747,7 @@ const CourseReview: React.FC<CourseReviewProps> = ({
 };
 
 const CreateCourse: React.FC = () => {
+  const navigate = useNavigate();
   const [active, setActive] = useState(0);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -2030,9 +2032,13 @@ const CreateCourse: React.FC = () => {
       );
       console.log("Course created:", response);
 
-      message.success("Course created successfully!");
+      message.success(
+        "Course created successfully. Please wait while we review it!"
+      );
       // Có thể thêm navigation sau khi tạo thành công
-      // navigate('/instructor-management/course');
+      setTimeout(() => {
+        navigate("/instructor-management/course");
+      }, 4000);
     } catch (err) {
       console.error("Error creating course:", err);
       setError(err instanceof Error ? err.message : "Failed to create course");
@@ -2043,9 +2049,54 @@ const CreateCourse: React.FC = () => {
   };
 
   const handleNextStep = () => {
-    if (active === 1 && !courseInfo.thumbnail) {
-      message.error("Please upload a course thumbnail before proceeding");
-      return;
+    if (active === 1) {
+      if (!courseInfo?.title?.trim()) {
+        message.error("Please enter course title");
+        return;
+      }
+      if (!courseInfo?.description?.trim()) {
+        message.error("Please enter course description");
+        return;
+      }
+      if (!courseInfo?.thumbnail) {
+        message.error("Please upload course thumbnail");
+        return;
+      }
+      if (!courseInfo?.price || courseInfo.price <= 0) {
+        message.error("Please enter a valid course price");
+        return;
+      }
+    }
+
+    if (active === 2) {
+      // Kiểm tra số lượng module
+      if (modules.length < 3) {
+        message.error("You need at least 3 modules");
+        return;
+      }
+
+      // Đếm tổng số lesson và kiểm tra final test
+      let totalLessons = 0;
+      let hasFinalTest = false;
+
+      modules.forEach((module) => {
+        totalLessons += module.lessons.length;
+        module.lessons.forEach((lesson) => {
+          if (lesson.lessonType === "FINAL_TEST") {
+            hasFinalTest = true;
+          }
+        });
+      });
+
+      if (totalLessons < 4) {
+        message.error("You need at least 4 lessons in total");
+        return;
+      }
+
+      if (!hasFinalTest) {
+        message.error("You need at least 1 final test");
+        return;
+      }
     }
 
     if (active === 3) {
