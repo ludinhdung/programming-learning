@@ -331,6 +331,20 @@ CREATE TABLE "Certificate" (
     CONSTRAINT "Certificate_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Order" (
+    "orderCode" INTEGER NOT NULL,
+    "courseId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "instructorId" TEXT NOT NULL,
+    "amount" DECIMAL(65,30) NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'PENDING',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Order_pkey" PRIMARY KEY ("orderCode")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -375,6 +389,9 @@ CREATE UNIQUE INDEX "SubmittedFinalTest_learnerId_finalTestId_key" ON "Submitted
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Certificate_learnerId_courseId_key" ON "Certificate"("learnerId", "courseId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Order_orderCode_key" ON "Order"("orderCode");
 
 -- AddForeignKey
 ALTER TABLE "Instructor" ADD CONSTRAINT "Instructor_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
