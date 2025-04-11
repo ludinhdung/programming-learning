@@ -1,0 +1,212 @@
+# GradeStack API - Lesson Endpoints
+# ===============================
+
+# Environment Variables
+@baseUrl = http://localhost:3000/api
+@token = YOUR_JWT_TOKEN_HERE
+@moduleId = 2b87c8a1-f7ad-41a8-b4e1-975acb6c44a4
+@lessonId = eb86b40d-1cb4-4da7-9009-85ba4ed236e0
+@videoLessonId = dcc2f141-dd8e-4811-bc31-ef0cd517af98
+@codingExerciseId = 6a4b3c2d-1e0f-9a8b-7c6d-5e4f3a2b1c0d
+
+# ===============================
+# LESSON CRUD OPERATIONS
+# ===============================
+
+### Get all lessons for a module
+# Returns all lessons associated with a specific module, ordered by their position
+# Trạng thái : Đã test chạy ok
+GET {{baseUrl}}/modules/{{moduleId}}/lessons
+Authorization: Bearer {{token}}
+
+### Get a specific lesson by ID
+# Returns detailed information about a specific lesson including its content
+# Trạng thái : Đã test chạy ok
+GET {{baseUrl}}/lessons/{{lessonId}}
+Authorization: Bearer {{token}}
+
+### Create a new video lesson
+# Creates a new video lesson within a module
+# Trạng thái : Đã test chạy ok
+POST {{baseUrl}}/modules/{{moduleId}}/video-lessons
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "lessonData": {
+    "title": "test video lesson ",
+    "description": "Learn how to create and use functions in JavaScript",
+    "isPreview": true
+  },
+  "videoData": {
+    "url": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/js-functions.mp4",
+    "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/js-functions-thumbnail.jpg",
+    "duration": 720
+  }
+}
+
+### Create a new coding exercise lesson
+# Creates a new coding exercise lesson within a module
+# Trạng thái : Đã test chạy ok
+POST {{baseUrl}}/modules/{{moduleId}}/coding-exercises
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "lessonData": {
+    "title": "test coding exercise lesson ",
+    "description": "Practice creating JavaScript functions",
+    "isPreview": false
+  },
+  "codingData": {
+    "language": "JAVA",
+    "problem": "Create a function called 'calculateArea' that takes the radius of a circle as input and returns the area of the circle.",
+    "hint": "The formula for the area of a circle is: π × r²",
+    "solution": "function calculateArea(radius) {\n  return Math.PI * radius * radius;\n}",
+    "codeSnippet": "function calculateArea(radius) {\n  // Your code here\n}"
+  }
+}
+
+### Create a new final test lesson
+# Creates a new final test lesson within a module
+
+POST {{baseUrl}}/modules/{{moduleId}}/final-tests
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "lessonData": {
+    "title": "test final test lesson",
+    "description": "Test your knowledge of JavaScript functions",
+    "order": 3,
+    "isPreview": false
+  },
+  "testData": {
+    "passingScore": 70,
+    "estimatedDuration": 20,
+    "questions": [
+      {
+        "content": "Which of the following correctly defines a function in JavaScript?",
+        "order": 1,
+        "answers": [
+          {
+            "content": "function myFunction() {}",
+            "isCorrect": true
+          },
+          {
+            "content": "def myFunction() {}",
+            "isCorrect": false
+          },
+          {
+            "content": "function: myFunction() {}",
+            "isCorrect": false
+          },
+          {
+            "content": "myFunction: function() {}",
+            "isCorrect": false
+          }
+        ]
+      },
+      {
+        "content": "What does the 'return' keyword do in a function?",
+        "order": 2,
+        "answers": [
+          {
+            "content": "Specifies the value to be returned by the function",
+            "isCorrect": true
+          },
+          {
+            "content": "Ends the execution of the program",
+            "isCorrect": false
+          },
+          {
+            "content": "Prints a value to the console",
+            "isCorrect": false
+          },
+          {
+            "content": "Creates a new variable",
+            "isCorrect": false
+          }
+        ]
+      }
+    ]
+  }
+}
+
+### Update a lesson
+# Updates an existing lesson's information
+# Trạng thái : Chưa fix lỗi relation 
+
+PUT {{baseUrl}}/lessons/{{lessonId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Updated JavaScript Functions",
+  "description": "Updated description for JavaScript functions lesson",
+  "isPreview": true
+}
+
+### Delete a lesson
+# Permanently removes a lesson and its associated content
+DELETE {{baseUrl}}/lessons/{{lessonId}}
+Authorization: Bearer {{token}}
+
+### Reorder lessons
+# Updates the order of lessons within a module
+# Trạng thái : Chưa triển khai
+
+PATCH {{baseUrl}}/modules/{{moduleId}}/lessons/reorder
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "lessonOrders": [
+    {
+      "id": "{{lessonId}}",
+      "order": 2
+    },
+    {
+      "id": "another-lesson-id",
+      "order": 1
+    }
+  ]
+}
+
+### Toggle lesson preview status
+# Changes whether a lesson is available for preview\
+# Trạng thái : Chưa triển khai
+
+PATCH {{baseUrl}}/lessons/{{lessonId}}/toggle-preview
+Authorization: Bearer {{token}}
+
+### Get lesson comments
+# Returns all comments associated with a specific lesson
+# Trạng thái : Chưa triển khai
+
+GET {{baseUrl}}/lessons/{{lessonId}}/comments
+Authorization: Bearer {{token}}
+
+### Add comment to lesson
+# Adds a new comment to a lesson
+# Trạng thái : Chưa triển khai
+
+POST {{baseUrl}}/lessons/{{lessonId}}/comments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "content": "This was a very helpful lesson! I learned a lot about JavaScript functions."
+}
+
+### Add note to lesson
+# Adds a personal note to a lesson (only visible to the user who created it)
+# Trạng thái : Chưa triển khai
+POST {{baseUrl}}/lessons/{{lessonId}}/notes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "content": "Remember to review the arrow function syntax",
+  "timestamp": 320
+}
