@@ -1,9 +1,13 @@
-import React, { useState } from "react";
-import SideBar from "./Sidebar";
+import React, { useState, useEffect } from "react";
+import SideBar from "./SideBar";
 import CourseDescription from "./CourseDescription";
 import VideoContent from "./Contents/VideoContent";
-import CodingContent from "./Contents/CodingContent";
+// import CodingContent from "./Contents/CodingContent";
 import FinalQuizContent from "./Contents/FinalQuizContent";
+import { useParams } from "react-router-dom";
+import { learnerService } from "../../services/api";
+import { Spin } from "antd";
+import PracticeCode from "../../pages/PracticeCode/PracticeCode";
 export interface Course {
   id: string;
   title: string;
@@ -14,6 +18,20 @@ export interface Course {
 
   isPublished: boolean;
   instructorId: string;
+  instructor?: {
+    id?: string;
+    userId?: string;
+    user?: {
+      firstName: string;
+      lastName: string;
+      email?: string;
+      avatarUrl?: string;
+    };
+    organization?: string;
+    avatar?: string;
+    bio?: string;
+    socials?: string[];
+  };
   createdAt: Date;
   updatedAt: Date;
   modules: Module[];
@@ -33,6 +51,7 @@ export interface Module {
 }
 
 export interface Lesson {
+  id: string;
   title: string;
   description: string;
   lessonType: LessonType;
@@ -99,158 +118,7 @@ export interface Comment {
   createdAt: Date;
   replies: Reply[];
 }
-const course: Course = {
-  id: "39766ee6-47c3-4f06-8c08-ddd6860e625d",
-  title: "Advanced TypeScript Programming",
-  description:
-    "Master TypeScript with advanced concepts, design patterns, and real-world applications",
-  price: 99.99,
-  duration: 1900,
-  thumbnail:
-    "https://images.laracasts.com/series/thumbnails/svg/eloquent-performance-patterns.svg?tr=w-244",
-  isPublished: false,
-  instructorId: "ff6a31d4-5012-4399-98e3-601f715305f2",
-  createdAt: new Date("2025-03-17T16:22:34.532Z"),
-  updatedAt: new Date("2025-03-17T16:22:34.532Z"),
-  modules: [
-    {
-      order: 1,
-      title: "TypeScript Fundamentals TypeScript Fundamentals",
-      description: "Learn the core concepts of TypeScript",
-      lessons: [
-        {
-          title: "Introduction to TypeScript",
-          description: "Overview of TypeScript and its benefits",
-          lessonType: LessonType.VIDEO,
-          duration: 15,
-          isPreview: true,
-          createdAt: new Date("2025-03-17T16:22:34.539Z"),
-          content: {
-            video: {
-              url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-              duration: 900,
-            },
-            coding: null,
-            finalTest: null,
-          },
-        },
-        {
-          title: "TypeScript Types and Interfaces",
-          description: "Understanding TypeScript's type system",
-          lessonType: LessonType.VIDEO,
-          duration: 20,
-          isPreview: false,
-          createdAt: new Date("2025-03-17T16:22:34.544Z"),
-          content: {
-            video: {
-              url: "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/CSS%20in%20100%20Seconds.mp4",
-              duration: 1200,
-            },
-            coding: null,
-            finalTest: null,
-          },
-        },
-        {
-          title: "Type Challenge",
-          description: "Test your knowledge of TypeScript types",
-          lessonType: LessonType.CODING,
-          duration: 30,
-          isPreview: false,
-          createdAt: new Date("2025-03-17T16:22:34.549Z"),
-          content: {
-            video: null,
-            coding: {
-              language: SupportedLanguage.JAVA,
-              problem:
-                "Create an interface for a User object with strongly typed properties",
-              hint: "Remember to use correct TypeScript syntax for optional properties",
-              solution:
-                "interface User {\n  id: string;\n  name: string;\n  email: string;\n  age?: number;\n  roles: string[];\n}",
-              codeSnippet: "interface User {\n ",
-            },
-            finalTest: null,
-          },
-        },
-      ],
-    },
-    {
-      order: 2,
-      title: "Advanced Concepts",
-      description: "Deep dive into advanced TypeScript patterns and practices",
-      lessons: [
-        {
-          title: "Generic Utility Practice",
-          description: "Solve coding problems with generics and utility types",
-          lessonType: LessonType.CODING,
-          duration: 25,
-          isPreview: false,
-          createdAt: new Date("2025-03-17T16:30:00.000Z"),
-          content: {
-            video: null,
-            coding: {
-              language: SupportedLanguage.PYTHON,
-              problem:
-                "Write a generic function that can swap elements in a tuple",
-              hint: "Use TypeScript's tuple and generics",
-              solution:
-                "function swap<T, U>(tuple: [T, U]): [U, T] {\n  return [tuple[1], tuple[0]];\n}",
-              codeSnippet: "function swap<T, U>(tuple: [T, U]): [U, T] {",
-            },
-            finalTest: null,
-          },
-        },
-        {
-          title: "Final Test - Advanced Section",
-          description: "Test your advanced TypeScript knowledge",
-          lessonType: LessonType.FINAL_TEST,
-          duration: 40,
-          isPreview: false,
-          createdAt: new Date("2025-03-17T16:40:00.000Z"),
-          content: {
-            video: null,
-            coding: null,
-            finalTest: {
-              estimatedDuration: 30,
-              questions: [
-                {
-                  content: "What is the use of keyof in TypeScript?",
-                  order: 1,
-                  answers: [
-                    {
-                      content: "To get keys of an object type",
-                      isCorrect: true,
-                    },
-                    { content: "To iterate arrays", isCorrect: false },
-                    {
-                      content: "To import modules dynamically",
-                      isCorrect: false,
-                    },
-                  ],
-                },
-                {
-                  content: "Which keyword allows defining conditional types?",
-                  order: 2,
-                  answers: [
-                    { content: "infer", isCorrect: false },
-                    { content: "extends", isCorrect: true },
-                    { content: "typeof", isCorrect: false },
-                  ],
-                },
-              ],
-            },
-          },
-        },
-      ],
-    },
-  ],
-  CourseTopic: [
-    {
-      id: "4c89e09b-30ab-47ca-b272-8c7f5bb37b6c",
-      name: "PHP",
-      thumbnail: "https://example.com/thumbnail.jpg",
-    },
-  ],
-};
+
 const users: User[] = [
   {
     id: "user1",
@@ -306,38 +174,208 @@ const comments: Comment[] = [
   },
 ];
 const CourseStudyBoard: React.FC = () => {
+  const { courseId } = useParams<{ courseId: string }>();
+  const [course, setCourse] = useState<Course | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
   const [currentLessonIndex, setCurrentLessonIndex] = useState<number | null>(
     null
   );
-
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(true);
 
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      try {
+        setLoading(true);
+        if (!courseId) {
+          throw new Error("Course ID is required");
+        }
+
+        const response = await learnerService.getCoursebyCourseId(courseId);
+        console.log("Course data:", response);
+
+        // Transform API data to match Course interface
+        const courseData: Course = {
+          id: response.id,
+          title: response.title,
+          description: response.description,
+          price: parseFloat(response.price) || 0,
+          duration: response.duration || 0,
+          thumbnail: response.thumbnail || "",
+          isPublished: response.isPublished,
+          instructorId: response.instructorId || response.instructor?.userId,
+          instructor: response.instructor
+            ? {
+                id: response.instructor.id,
+                userId: response.instructor.userId,
+                user: response.instructor.user,
+                organization: response.instructor.organization,
+                avatar: response.instructor.avatar,
+                bio: response.instructor.bio,
+                socials: response.instructor.socials,
+              }
+            : undefined,
+          createdAt: new Date(response.createdAt),
+          updatedAt: new Date(response.updatedAt),
+          modules: response.modules
+            .map((module: Module) => {
+              // Check if the module has lessons array
+              const moduleLessons = Array.isArray(module.lessons)
+                ? module.lessons
+                : []; // Use empty array if no lessons available
+
+              return {
+                order: module.order || 1,
+                title: module.title,
+                description: module.description || "",
+                lessons: moduleLessons
+                  .map((lesson: any) => {
+                    // Determine lesson type first
+                    const lessonType =
+                      typeof lesson.lessonType === "number"
+                        ? lesson.lessonType
+                        : getLessonType(lesson);
+
+                    // Determine appropriate duration based on lesson type
+                    let duration = lesson?.duration || 0;
+                    if (
+                      lessonType === LessonType.VIDEO &&
+                      lesson?.video?.duration
+                    ) {
+                      duration = lesson.video.duration;
+                    } else if (
+                      lessonType === LessonType.FINAL_TEST &&
+                      lesson?.finalTest?.estimatedDuration
+                    ) {
+                      duration = lesson.finalTest.estimatedDuration;
+                    }
+
+                    return {
+                      id: lesson?.id || "",
+                      title: lesson?.title || "Untitled Lesson",
+                      description: lesson?.description || "",
+                      lessonType,
+                      duration,
+                      isPreview: lesson?.isPreview || false,
+                      order: lesson?.order || 1,
+                      createdAt: new Date(lesson?.createdAt || new Date()),
+                      content: {
+                        video: lesson?.video || lesson?.content?.video || null,
+                        coding:
+                          lesson?.coding || lesson?.content?.coding || null,
+                        finalTest:
+                          lesson?.finalTest ||
+                          lesson?.content?.finalTest ||
+                          null,
+                      },
+                    };
+                  })
+                  // Sort lessons by order
+                  .sort((a, b) => (a.order || 0) - (b.order || 0)),
+              };
+            })
+            // Sort modules by order
+            .sort((a, b) => (a.order || 0) - (b.order || 0)),
+          CourseTopic: Array.isArray(response.CourseTopic)
+            ? response.CourseTopic.map((topic: any) => ({
+                id: topic.topicId || topic.id || "",
+                name: topic.topic?.name || "",
+                thumbnail: topic.topic?.thumbnail || "",
+              }))
+            : [],
+        };
+
+        // Log the transformed course data
+        console.log("Transformed course data:", courseData);
+        setCourse(courseData);
+      } catch (err) {
+        console.error("Error fetching course:", err);
+        setError("Failed to load course. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourseData();
+  }, [courseId]);
+
+  // Helper function to determine lesson type from API response
+  const getLessonType = (lesson: any): LessonType => {
+    // Handle string-based lessonType from API
+    if (lesson.lessonType === "VIDEO") return LessonType.VIDEO;
+    if (lesson.lessonType === "CODING") return LessonType.CODING;
+    if (lesson.lessonType === "FINAL_TEST") return LessonType.FINAL_TEST;
+
+    // Fall back to content-based detection if lessonType is not a string
+    if (lesson.video) return LessonType.VIDEO;
+    if (lesson.coding) return LessonType.CODING;
+    if (lesson.finalTest) return LessonType.FINAL_TEST;
+
+    return LessonType.VIDEO;
+  };
+
   const renderLessonContent = () => {
-    if (!currentLesson) {
+    if (loading) {
       return (
-        <div className="h-screen w-full flex items-center justify-center text-gray-300 text-2xl">
-          Choose your lesson to play !
+        <div className="h-screen w-full flex items-center justify-center">
+          <Spin size="large" tip="Loading course content..." />
         </div>
       );
     }
-
+    if (error) {
+      return (
+        <div className="h-screen w-full flex items-center justify-center text-red-500 text-xl">
+          {error}
+        </div>
+      );
+    }
+    if (!currentLesson) {
+      return (
+        <div className="h-screen w-full flex items-center justify-center text-gray-300 text-2xl">
+          Choose your lesson to play!
+        </div>
+      );
+    }
     switch (currentLesson.lessonType) {
       case LessonType.VIDEO:
         return (
           <VideoContent
-            lesson={currentLesson}
-            lessonIndex={currentLessonIndex!}
+            video={currentLesson.content.video?.url || ""}
+            lectureTitle={`${currentLessonIndex! + 1}. ${currentLesson.title}`}
           />
         );
-      case LessonType.CODING:
-        return <CodingContent lesson={currentLesson} />;
+      case LessonType.CODING: {
+        console.log("Current lesson:", currentLesson);
+        // Nếu currentLesson.id không tồn tại, sử dụng id từ trường content.coding.lessonId
+        const codingLessonId =
+          currentLesson.id || currentLesson.content?.coding?.lessonId || "";
+        console.log("Coding lesson ID:", codingLessonId);
+        return <PracticeCode lessonId={codingLessonId} />;
+      }
       case LessonType.FINAL_TEST:
         return <FinalQuizContent lesson={currentLesson} />;
       default:
         return null;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-[#0d0d0e]">
+        <Spin size="large" tip="Loading course..." />
+      </div>
+    );
+  }
+
+  if (!course) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-[#0d0d0e] text-white text-xl">
+        Course not found
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col">
       {isSidebarVisible && (
@@ -398,7 +436,11 @@ const CourseStudyBoard: React.FC = () => {
             {renderLessonContent()}
           </div>
           <div className="px-10">
-            <CourseDescription course={course} comments={comments} users={ users} />
+            <CourseDescription
+              course={course}
+              comments={comments}
+              users={users}
+            />
           </div>
         </div>
       </div>

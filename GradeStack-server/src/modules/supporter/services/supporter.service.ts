@@ -80,15 +80,17 @@ export class SupporterService {
         role: instructorData.role,
       },
     });
-    const randomAvatar = `https://picsum.photos/200/200?random=${Math.floor(
-      Math.random() * 1000
-    )}`;
+
+    // Generate avatar using DiceBear
+    const avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
+      instructorData.firstName + instructorData.lastName
+    )}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffdfbf,ffd5dc&backgroundType=gradientLinear`;
 
     const instructor = await prisma.instructor.create({
       data: {
         userId: user.id,
         organization: instructorData.organization,
-        avatar: randomAvatar,
+        avatar: avatar,
       },
       select: {
         user: {

@@ -8,6 +8,7 @@ import type { MenuProps } from "antd";
 import { Menu } from "antd";
 import "../../styles/SideBarCourse.css";
 import { Course, Module, LessonType, Lesson } from "./CourseStudyBoard";
+import { formatDuration } from "../../utils/formatDuration";
 
 interface SideBarProps {
   course: Course;
@@ -17,8 +18,12 @@ interface SideBarProps {
   setIsSidebarVisible: (isSidebarVisible: boolean) => void;
 }
 
-const SideBar: React.FC<SideBarProps> = ({ course, currentLesson, setCurrentLesson, isSidebarVisible, setIsSidebarVisible }) => {
-  
+const SideBar: React.FC<SideBarProps> = ({
+  course,
+  setCurrentLesson,
+  isSidebarVisible,
+  setIsSidebarVisible,
+}) => {
   const getMenuItems = (modules: Module[]): MenuProps["items"] => {
     return modules.map((module, moduleIndex) => ({
       key: `module-${moduleIndex}`,
@@ -80,7 +85,7 @@ const SideBar: React.FC<SideBarProps> = ({ course, currentLesson, setCurrentLess
                       <path d="M12 12h3.5" />
                       <path d="M12 7v5" />
                     </svg>
-                    {` ${lesson.duration}m`}
+                    {` ${formatDuration(lesson.duration || 0)}`}
                   </div>
                 </>
               ) : lesson.lessonType === LessonType.CODING ? (
