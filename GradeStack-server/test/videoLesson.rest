@@ -1,0 +1,111 @@
+# GradeStack API - VideoLesson Endpoints
+# ===============================
+
+# Environment Variables
+@baseUrl = http://localhost:3000/api
+@token = YOUR_JWT_TOKEN_HERE
+@lessonId = 92403a52-e00b-4e10-a1d0-82eb83793729
+@videoLessonId = 5b9ff87e-812a-4976-9654-e641a9b9a33d
+
+# ===============================
+# VIDEO LESSON OPERATIONS
+# ===============================
+
+### Get video lesson by lesson ID
+# Returns the video information associated with a specific lesson
+GET {{baseUrl}}/lessons/{{lessonId}}/video
+Authorization: Bearer {{token}}
+
+### Get video lesson by ID
+# Returns detailed information about a specific video lesson
+GET {{baseUrl}}/video-lessons/{{videoLessonId}}
+Authorization: Bearer {{token}}
+
+### Create a video lesson for an existing lesson
+# Associates video content with an existing lesson
+POST {{baseUrl}}/lessons/{{lessonId}}/video
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "videoUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/react-hooks.mp4",
+  "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/react-hooks-thumbnail.jpg",
+  "duration": 1560
+}
+
+### Update a video lesson
+# Updates the video content for an existing lesson
+PUT {{baseUrl}}/lessons/{{lessonId}}/video
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "videoUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/updated-react-hooks.mp4",
+  "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/updated-react-hooks-thumbnail.jpg",
+  "duration": 1680
+}
+
+### Delete a video lesson
+# Removes the video content from a lesson
+DELETE {{baseUrl}}/video-lessons/{{videoLessonId}}
+Authorization: Bearer {{token}}
+
+### Upload a video file
+# Uploads a video file and automatically extracts duration and generates a thumbnail
+POST {{baseUrl}}/videos/upload
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="video"; filename="react-hooks.mp4"
+Content-Type: video/mp4
+
+< /Users/user/Documents/Do-an/programming-learning/GradeStack-server/test/css.mp4
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Get video streaming URL
+# Returns a streaming URL for a specific video lesson
+GET {{baseUrl}}/video-lessons/{{videoLessonId}}/stream
+Authorization: Bearer {{token}}
+
+### Generate thumbnail from video
+# Automatically generates a thumbnail from an existing video
+POST {{baseUrl}}/video-lessons/{{videoLessonId}}/generate-thumbnail
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "timePosition": 45
+}
+
+### Update video metadata
+# Updates metadata for a video lesson (e.g., captions, chapters)
+PATCH {{baseUrl}}/video-lessons/{{videoLessonId}}/metadata
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "captions": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/captions/react-hooks-captions.vtt",
+  "chapters": [
+    {
+      "title": "Introduction",
+      "startTime": 0,
+      "endTime": 120
+    },
+    {
+      "title": "useState Hook",
+      "startTime": 121,
+      "endTime": 480
+    },
+    {
+      "title": "useEffect Hook",
+      "startTime": 481,
+      "endTime": 960
+    },
+    {
+      "title": "Custom Hooks",
+      "startTime": 961,
+      "endTime": 1560
+    }
+  ]
+}

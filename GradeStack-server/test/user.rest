@@ -1,0 +1,139 @@
+# GradeStack API - User Endpoints
+# ===============================
+
+# Environment Variables
+@baseUrl = http://localhost:4000/api
+@token = YOUR_JWT_TOKEN_HERE
+@userId = 3fa85f64-5717-4562-b3fc-2c963f66afa6
+
+# ===============================
+# USER MANAGEMENT
+# ===============================
+
+### Get all users (Admin only)
+# Returns a list of all registered users with their basic information
+GET {{baseUrl}}/users
+Authorization: Bearer {{token}}
+
+### Get user by ID
+# Returns detailed information about a specific user
+GET {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+
+### Create a new user (Admin only)
+# Creates a new user account in the system
+POST {{baseUrl}}/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "email": "student@example.com",
+  "password": "securePassword123",
+  "firstName": "Alex",
+  "lastName": "Johnson",
+  "role": "LEARNER"
+}
+
+### Update a user
+# Updates a user's basic information
+PUT {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "Alexander",
+  "lastName": "Johnson",
+  "email": "alex.johnson@example.com"
+}
+
+### Delete a user (Admin only)
+# Permanently removes a user from the system
+DELETE {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+
+### Update user profile
+# Updates a user's profile information
+PUT {{baseUrl}}/users/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "Alex",
+  "lastName": "Johnson",
+  "bio": "Software engineering student passionate about web development",
+  "avatar": "https://example.com/avatars/alex.jpg"
+}
+
+### Change user password
+# Updates a user's password
+PUT {{baseUrl}}/users/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "currentPassword": "oldPassword123",
+  "newPassword": "newSecurePassword456"
+}
+
+### Get enrolled courses
+# Returns all courses a user is enrolled in
+GET {{baseUrl}}/users/enrolled-courses
+Authorization: Bearer {{token}}
+
+### Get user bookmarks
+# Returns all courses a user has bookmarked
+GET {{baseUrl}}/users/bookmarks
+Authorization: Bearer {{token}}
+
+### Get user purchase history
+# Returns a user's course purchase history
+GET {{baseUrl}}/users/purchase-history
+Authorization: Bearer {{token}}
+
+### Get user certificates
+# Returns all certificates earned by a user
+GET {{baseUrl}}/users/certificates
+Authorization: Bearer {{token}}
+
+### Get user learning progress
+# Returns a user's progress across all enrolled courses
+GET {{baseUrl}}/users/learning-progress
+Authorization: Bearer {{token}}
+
+### Block user (Admin only)
+# Blocks a user from accessing the platform
+PATCH {{baseUrl}}/admin/users/{{userId}}/block
+Authorization: Bearer {{token}}
+
+### Unblock user (Admin only)
+# Unblocks a previously blocked user
+PATCH {{baseUrl}}/admin/users/{{userId}}/unblock
+Authorization: Bearer {{token}}
+
+### Verify user email
+# Verifies a user's email address using a verification token
+POST {{baseUrl}}/users/verify-email
+Content-Type: application/json
+
+{
+  "token": "email-verification-token-123456"
+}
+
+### Request password reset
+# Sends a password reset link to the user's email
+POST {{baseUrl}}/users/request-password-reset
+Content-Type: application/json
+
+{
+  "email": "alex.johnson@example.com"
+}
+
+### Reset password
+# Resets a user's password using a reset token
+POST {{baseUrl}}/users/reset-password
+Content-Type: application/json
+
+{
+  "token": "password-reset-token-123456",
+  "newPassword": "newSecurePassword789"
+}

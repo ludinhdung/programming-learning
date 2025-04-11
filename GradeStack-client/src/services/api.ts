@@ -1,4 +1,5 @@
 import axios from "axios";
+import { RcFile } from "antd/es/upload";
 
 const API_URL = "http://localhost:3000/api";
 
@@ -24,15 +25,15 @@ export const authService = {
     return response.data;
   },
 
-  async register(userData: {
-    email: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-  }) {
-    const response = await api.post("/auth/register", userData);
-    return response.data;
-  },
+    async register(userData: {
+        email: string;
+        password: string;
+        firstName: string;
+        lastName: string;
+    }) {
+        const response = await api.post('/auth/register', userData);
+        return response.data;
+    },
 };
 
 export const supporterService = {

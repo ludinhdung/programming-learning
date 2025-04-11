@@ -8,6 +8,12 @@ import {
   Route,
   Outlet,
 } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Outlet,
+} from "react-router-dom";
 import Home from "./pages/HomePage/Home";
 import NotFound from "./pages/NotFound";
 // Learner
@@ -51,6 +57,18 @@ const App: React.FC = () => {
           <Route path="/checkout/:courseId" element={<Checkout />} />
           <Route path="/profile" element={<Profile />} />
           {/* Instructor Dashboard*/}
+          <Route path="/supporter-dashboard" element={<SupporterDashboard />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          {/* <Route path="/create-course" element={<CreateCourse />} /> */}
+          <Route path="/courses" element={<CourseList />} />
+          {/* <Route path="/courses/:id" element={<CourseDetail />} /> */}
+          <Route path="/topics" element={<Topics />} />
+          <Route path="/topics/:id" element={<CourseList />} />
+          <Route path="/learning-paths" element={<LearningPaths />} />
+          <Route path="/learning-paths/:id" element={<CourseList />} />
+          <Route path="/checkout/:courseId" element={<Checkout />} />
+          <Route path="/profile" element={<Profile />} />
+          {/* Instructor Dashboard*/}
           <Route
             path="/instructor-management"
             element={<InstructorManagement />}
@@ -72,7 +90,17 @@ const App: React.FC = () => {
               <Route index element={<SupporterManageLearner />}></Route>
               <Route path="comment/:learnerId" element={<SupporterManageLearnerComments />} />
             </Route>
+            <Route path="course" element={<Outlet />}>
+              <Route index element={<InstructorCourseList />} />
+              <Route path="create" element={<InstructorCreateCourse />} />
+              <Route
+                path="detail/:courseId"
+                element={<InstructorCourseDetail />}
+              />
+            </Route>
           </Route>
+
+          <Route path="*" element={<NotFound />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>

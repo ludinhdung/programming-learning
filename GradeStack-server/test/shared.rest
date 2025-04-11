@@ -1,0 +1,64 @@
+# GradeStack API - Shared Components Tests
+# ===============================
+
+# Environment Variables
+@baseUrl = http://localhost:3000/api
+@token = YOUR_JWT_TOKEN_HERE
+
+# ===============================
+# R2 STORAGE SERVICE TESTS
+# ===============================
+
+### Upload a video file (tests R2StorageService)
+POST {{baseUrl}}/instructors/upload-video
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="video"; filename="sample-video.mp4"
+Content-Type: video/mp4
+
+< /Users/user/Documents/Do-an/programming-learning/GradeStack-server/test/css.mp4
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+# ===============================
+# MIDDLEWARE TESTS
+# ===============================
+
+### Test authentication middleware (should return 401 if no token)
+GET {{baseUrl}}/instructors/me
+
+### Test authentication middleware (should work with token)
+GET {{baseUrl}}/instructors/me
+Authorization: Bearer {{token}}
+
+### Test role-based authorization (admin only endpoint)
+GET {{baseUrl}}/users
+Authorization: Bearer {{token}}
+
+# ===============================
+# ERROR HANDLING TESTS
+# ===============================
+
+### Test 404 Not Found
+GET {{baseUrl}}/non-existent-endpoint
+Authorization: Bearer {{token}}
+
+### Test validation error
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "email": "invalid-email",
+    "password": "short"
+}
+
+# ===============================
+# UTILITY TESTS
+# ===============================
+
+### Test health check endpoint (if available)
+GET {{baseUrl}}/health
+
+### Test API version endpoint (if available)
+GET {{baseUrl}}/version
