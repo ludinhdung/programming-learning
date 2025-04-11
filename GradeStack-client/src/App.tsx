@@ -33,6 +33,7 @@ import SupporterOverview from "./components/SupporterManagement/Contents/Overvie
 import SupporterManageInstructor from "./components/SupporterManagement/Contents/InstructorManagement";
 import SupporterManageLearner from "./components/SupporterManagement/Contents/LearnerManagement/LearnerList";
 import SupporterManageLearnerComments from "./components/SupporterManagement/Contents/LearnerManagement/LearnerComment";
+import UserDashboard from "./pages/UserDashboard/UserDashboard";
 
 const App: React.FC = () => {
   return (
@@ -64,6 +65,8 @@ const App: React.FC = () => {
           <Route path="/checkout/:courseId" element={<Checkout />} />
           <Route path="/profile" element={<Profile />} />
           {/* Instructor Dashboard*/}
+          <Route path="/profile" element={< Profile />} />
+          <Route path="/dashboard" element={<UserDashboard />} />
           <Route
             path="/instructor-management"
             element={<InstructorManagement />}
@@ -96,6 +99,7 @@ const App: React.FC = () => {
           <Route path="*" element={<NotFound />} />
 
           <Route path="*" element={<NotFound />} />
+
         </Routes>
       </Router>
     </MantineProvider>

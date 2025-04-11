@@ -427,3 +427,18 @@ model Certificate {
 
   @@unique([learnerId, courseId]) // Đảm bảo mỗi học viên chỉ có một chứng chỉ cho mỗi khóa học
 }
+
+//meta data only
+model Order {
+  orderCode Int @id @unique
+
+  courseId     String
+  userId       String
+  instructorId String
+
+  amount Decimal
+  status String  @default("PENDING")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

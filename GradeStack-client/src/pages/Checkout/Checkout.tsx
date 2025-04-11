@@ -1,14 +1,16 @@
-import { FC, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Input, Button, Rate, Breadcrumb, Checkbox, ConfigProvider } from 'antd';
-import { LeftOutlined, TagOutlined, ClockCircleOutlined, BookOutlined, LockOutlined } from '@ant-design/icons';
+import { Input, Button, Rate, Checkbox, ConfigProvider, message } from 'antd';
+import { TagOutlined, ClockCircleOutlined, BookOutlined, LockOutlined } from '@ant-design/icons';
 import styled from "styled-components";
 import Header from '../../components/Header/Header';
+import { courseService, CourseDetail } from '../../services/course.service';
+import { paymentService, CreatePaymentRequest } from '../../services/payment.service';
 
 // Styled Input similar to CourseList
 const StyledInput = styled(Input)`
   .ant-input::placeholder {
-    color: #717780 ;
+    color: #717780;
     border-radius: 0; 
     font-weight: 500;
   }
@@ -21,35 +23,93 @@ const CustomCheckbox = styled(Checkbox)`
       border: none;
       border-radius: 0;
     }
-  `;
+`;
 
-const Checkout: FC = () => {
-  const { courseId } = useParams();
+export const Checkout: React.FC = () => {
+  const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
+  const [course, setCourse] = useState<CourseDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [promoCode, setPromoCode] = useState<string>('');
   const [useVietQR, setUseVietQR] = useState<boolean>(true);
+  const [processingPayment, setProcessingPayment] = useState(false);
 
-  // Mock data - will be replaced with API call
-  const course = {
-    id: courseId,
-    title: 'Python for Beginners',
-    rating: 3,
-    totalHours: 29,
-    totalLessons: 132,
-    originalPrice: 720000,
-    discountedPrice: 499000,
-    image: 'https://s3-sgn09.fptcloud.com/codelearnstorage/files/thumbnails/cpp-cho-nguoi-moi-bat-dau_09e94813a177425db74fb7c23e65c859.png'
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        if (!courseId) {
+          throw new Error('Course ID is required');
+        }
+        const courseData = await courseService.getCourseById(courseId);
+        console.log("Fetched course data:", courseData); // Kiểm tra dữ liệu course
+        setCourse(courseData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch course details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourse();
+  }, [courseId]);
+
+  const handlePayment = async () => {
+    if (!course || !courseId || !course.instructor?.userId) {
+      message.error('Missing required course information');
+      console.error("Missing course details:", { course, courseId, instructor: course?.instructor });
+      return;
+    }
+
+    try {
+      setProcessingPayment(true);
+      const paymentData: CreatePaymentRequest = {
+        courseId,
+        price: Number(course.price),
+        instructorId: course.instructor.userId,
+        courseName: course.title
+      };
+
+      console.log("Payment request payload:", paymentData); 
+
+      const response = await paymentService.createPayment(paymentData);
+
+      console.log("Payment response:", response); 
+      
+      if (response.checkoutUrl) {
+        window.location.href = response.checkoutUrl;
+      } else {
+        message.success('Payment initiated successfully!');
+      }
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : 'Failed to process payment');
+      console.error("Payment error:", err);
+    } finally {
+      setProcessingPayment(false);
+    }
   };
 
-  return (
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!course) {
+    return <div>Course not found</div>;
+  }
+
+  return (
     <div className="min-h-screen bg-[#0a1321]">
       <Header />
 
       <div className="container mx-auto px-12 py-8">
-        {/* Breadcrumb */}
+        {/* Back Button */}
         <Button
-          type="none"
+          type="default"
           className="bg-[#29324a] mb-4 uppercase text-[#fff] text-xs font-medium rounded-none hover:border-[#1b55ac] hover:bg-[#1c2e48]"
           onClick={() => navigate("/")}
         >
@@ -67,7 +127,7 @@ const Checkout: FC = () => {
           {/* Left Content - Course Summary */}
           <div className="lg:col-span-2">
             <div className="bg-[#14202e] rounded-none shadow-md p-6 flex items-start">
-              <img src={course.image} alt={course.title} className="w-70 h-40 object-cover rounded-none mr-6" />
+              <img src={course.thumbnail} alt={course.title} className="w-70 h-40 object-cover rounded-none mr-6" />
               <div className="course-info">
                 <h1 className="text-3xl font-medium text-white mb-2">{course.title}</h1>
                 <div className="flex items-center text-yellow-500 mb-2 space-x-8">
@@ -82,36 +142,37 @@ const Checkout: FC = () => {
                         },
                       }}
                     >
-                      <Rate disabled defaultValue={course.rating} />
+                      <Rate disabled defaultValue={course.averageRating} />
                     </ConfigProvider>
-                    <span className="text-gray-400 ml-2">{course.rating}</span>
+                    <span className="text-gray-400 ml-2">{course.averageRating.toFixed(1)}</span>
                   </div>
                   <div className="flex items-center">
                     <ClockCircleOutlined className="text-gray-400" />
-                    <span className="text-gray-400 ml-2">{course.totalHours} hours</span>
+                    <span className="text-gray-400 ml-2">{Math.floor(course.duration / 60)} hours</span>
                   </div>
                   <div className="flex items-center">
-                    <BookOutlined className="text-gray-400 " />
+                    <BookOutlined className="text-gray-400" />
                     <span className="text-gray-400 ml-2">{course.totalLessons} lessons</span>
                   </div>
                 </div>
                 <div className="flex items-center mt-4 space-x-4">
-                  <p className="text-xl font-semibold text-[#3b82f6]">{course.discountedPrice.toLocaleString()} đ</p>
-                  <p className="text-lg line-through text-gray-400">{course.originalPrice.toLocaleString()} đ</p>
+                  <p className="text-xl font-semibold text-[#3b82f6]">
+                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(course.price))}
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Right Content - Payment Details */}
-          <div className="lg:col-span-1 ">
+          <div className="lg:col-span-1">
             <div className="bg-[#14202e] rounded-none p-6 space-y-6">
               <h2 className="text-xl font-bold text-white mb-4">
                 Payment Method
               </h2>
 
               <div className="payment-option flex items-center mb-4">
-                <CustomCheckbox checked={true} onChange={(e) => setUseVietQR(e.target.checked)} className="mr-4" />
+                <CustomCheckbox checked={useVietQR} onChange={(e) => setUseVietQR(e.target.checked)} className="mr-4" />
                 <img src="https://codelearn.io/images/payment/vietqr_3.png" alt="VietQR" className="w-12 h-7 mr-2 rounded-none" />
                 <span className="text-[#d8e3ee]">VietQR</span>
               </div>
@@ -121,14 +182,13 @@ const Checkout: FC = () => {
                 <div className="flex items-center space-x-2">
                   <StyledInput
                     placeholder="Enter promo code"
-                    variant='borderless'
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
                     prefix={<TagOutlined className="text-[#62748b] mr-2" />}
                     className="rounded-none bg-[#1c2936] border-none text-white hover:bg-[#243447] p-2"
                   />
                   <Button
-                    type='none'
+                    type="default"
                     className="bg-[#1b55ac] p-4 text-[#fff] text-xs font-medium rounded-none hover:border-[#1b55ac] hover:bg-[#1c2e48]"
                   >
                     Apply
@@ -140,25 +200,23 @@ const Checkout: FC = () => {
               <div className="space-y-4 pt-4 border-t border-[#29334a]">
                 <div className="flex justify-between text-[#d8e3ee]">
                   <span>Total</span>
-                  <span>{course.originalPrice.toLocaleString()} đ</span>
-                </div>
-                <div className="flex justify-between text-[#62748b]">
-                  <span>Discount</span>
-                  <span>{(course.originalPrice - course.discountedPrice).toLocaleString()} đ</span>
+                  <span>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(course.price))}</span>
                 </div>
                 <div className="flex justify-between text-[#d8e3ee] font-bold">
                   <span>Total Payment</span>
-                  <span>{course.discountedPrice.toLocaleString()} đ</span>
+                  <span>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(course.price))}</span>
                 </div>
               </div>
 
               <Button
-                type="none"
+                type="default"
                 size="large"
                 block
+                loading={processingPayment}
+                onClick={handlePayment}
                 className="bg-[#1b55ac] text-[#fff] text-md font-medium rounded-none hover:border-[#1b55ac] hover:bg-[#1c2e48]"
               >
-                <span className="mr-2"><LockOutlined /></span> Pay {course.discountedPrice.toLocaleString()} đ
+                <span className="mr-2"><LockOutlined /></span> Pay {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(course.price))}
               </Button>
             </div>
           </div>
