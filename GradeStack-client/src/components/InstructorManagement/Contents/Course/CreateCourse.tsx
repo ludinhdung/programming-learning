@@ -239,11 +239,8 @@ const CourseInformation: React.FC<CourseInformationProps> = ({
     <div className="p-2">
       <p className="text-sm text-gray-700">Platform Fee Information:</p>
       <ul className="list-disc pl-4 mt-1 text-sm text-gray-600">
-        <li>Platform fee: 20% of course price</li>
-        <li>Your earnings: 80% of course price</li>
-        <li>Example: If price is 1,000,000 VND</li>
-        <li>- Platform fee: 200,000 VND</li>
-        <li>- Your earnings: 800,000 VND</li>
+        <li>Platform fee: 15% of course price</li>
+        <li>Your earnings: 85% of course price</li>
       </ul>
     </div>
   );

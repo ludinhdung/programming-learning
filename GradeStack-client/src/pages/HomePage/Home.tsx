@@ -1,7 +1,8 @@
 // src/pages/Home.tsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
+import { learnerService } from "../../services/api";
 
 //React-bits components
 import BlurText from "../../components/React-bitsComponents/BlurText";
@@ -9,96 +10,39 @@ import Squares from "../../components/React-bitsComponents/Squares";
 import RotatingText from "../../components/React-bitsComponents/RotatingText";
 
 import CodeEditorImage from "../../assets/CodeEditor.svg";
+
+interface Course {
+  title: string;
+  author: string;
+  authorAvatar: string;
+  thumbnail: string;
+  href: string;
+}
+
+interface Instructor {
+  userId: string;
+  organization: string;
+  avatar: string;
+  bio: string | null;
+  socials: string[];
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: string;
+    isBlocked: boolean;
+  };
+  Wallet: {
+    balance: string;
+  };
+}
+
 const handleAnimationComplete = () => {
   console.log("Animation completed!");
 };
-
-const instructorData = [
-  {
-    userId: "instructor-1",
-    organization: "GradeStack",
-    avatar: "https://images.laracasts.com/instructors/1770.jpeg?tr=w-400",
-    bio: "Owner at GradeStack",
-    socials: [
-      "https://twitter.com/instructor1",
-      "https://linkedin.com/in/instructor1",
-    ],
-    createdAt: "2023-10-01T12:00:00Z",
-    updatedAt: "2023-10-01T12:00:00Z",
-  },
-  {
-    userId: "instructor-2",
-    organization: "GradeStack",
-    avatar: "https://images.laracasts.com/instructors/253739.jpeg?tr=w-400",
-    bio: "Instructor at GradeStack",
-    socials: [
-      "https://twitter.com/instructor2",
-      "https://linkedin.com/in/instructor2",
-    ],
-    createdAt: "2023-10-01T12:00:00Z",
-    updatedAt: "2023-10-01T12:00:00Z",
-  },
-  {
-    userId: "instructor-3",
-    organization: "GradeStack",
-    avatar: "https://images.laracasts.com/instructors/24345.jpeg?tr=w-400",
-    bio: "Instructor at GradeStack",
-    socials: [
-      "https://twitter.com/instructor3",
-      "https://linkedin.com/in/instructor3",
-    ],
-    createdAt: "2023-10-01T12:00:00Z",
-    updatedAt: "2023-10-01T12:00:00Z",
-  },
-  {
-    userId: "instructor-4",
-    organization: "GradeStack",
-    avatar: "https://images.laracasts.com/instructors/80737.jpeg?tr=w-400",
-    bio: "Instructor at GradeStack",
-    socials: [
-      "https://twitter.com/instructor4",
-      "https://linkedin.com/in/instructor4",
-    ],
-    createdAt: "2023-10-01T12:00:00Z",
-    updatedAt: "2023-10-01T12:00:00Z",
-  },
-  {
-    userId: "instructor-5",
-    organization: "GradeStack",
-    avatar: "https://images.laracasts.com/instructors/5005.jpeg?tr=w-400",
-    bio: "Software Developer at GradeStack",
-    socials: [
-      "https://twitter.com/instructor5",
-      "https://linkedin.com/in/instructor5",
-    ],
-    createdAt: "2023-10-01T12:00:00Z",
-    updatedAt: "2023-10-01T12:00:00Z",
-  },
-  {
-    userId: "instructor-6",
-    organization: "GradeStack",
-    avatar: "https://images.laracasts.com/instructors/110151.jpeg?tr=w-400",
-    bio: "DevRel at GradeStack",
-    socials: [
-      "https://twitter.com/instructor6",
-      "https://linkedin.com/in/instructor6",
-    ],
-    createdAt: "2023-10-01T12:00:00Z",
-    updatedAt: "2023-10-01T12:00:00Z",
-  },
-  {
-    userId: "instructor-7",
-    organization: "GradeStack",
-    avatar: "https://images.laracasts.com/instructors/3587.jpeg?tr=w-400",
-    bio: "Software Engineer at GradeStack",
-    socials: [
-      "https://twitter.com/instructor7",
-      "https://linkedin.com/in/instructor7",
-    ],
-    createdAt: "2023-10-01T12:00:00Z",
-    updatedAt: "2023-10-01T12:00:00Z",
-  },
-];
 
 const testimonials = [
   {
@@ -146,66 +90,6 @@ const testimonials = [
     name: "Chris Bogardo",
     image: "https://ik.imagekit.io/laracasts/reviews/chris.jpg",
   },
-];
-
-const streamOfCourses = [
-  {
-    title: "The Definition Series ",
-    author: "Jeremy McPeak",
-    authorAvatar: "//unavatar.io/x/jwmcpeak",
-    thumbnail:
-      "https://ik.imagekit.io/laracasts/series/thumbnails/png//definition-series.png",
-    href: "/series/the-definition-series",
-  },
-  {
-    title: "The Definition Series",
-    author: "Jeremy McPeak",
-    authorAvatar: "//unavatar.io/x/jwmcpeak",
-    thumbnail:
-      "https://ik.imagekit.io/laracasts/series/thumbnails/png//definition-series.png",
-    href: "/series/the-definition-series",
-  },
-  {
-    title: "The Definition Series",
-    author: "Jeremy McPeak",
-    authorAvatar: "//unavatar.io/x/jwmcpeak",
-    thumbnail:
-      "https://ik.imagekit.io/laracasts/series/thumbnails/png//definition-series.png",
-    href: "/series/the-definition-series",
-  },
-  {
-    title: "The Definition Series",
-    author: "Jeremy McPeak",
-    authorAvatar: "//unavatar.io/x/jwmcpeak",
-    thumbnail:
-      "https://ik.imagekit.io/laracasts/series/thumbnails/png//definition-series.png",
-    href: "/series/the-definition-series",
-  },
-  {
-    title: "The Definition Series",
-    author: "Jeremy McPeak",
-    authorAvatar: "//unavatar.io/x/jwmcpeak",
-    thumbnail:
-      "https://ik.imagekit.io/laracasts/series/thumbnails/png//definition-series.png",
-    href: "/series/the-definition-series",
-  },
-  {
-    title: "The Definition Series",
-    author: "Jeremy McPeak",
-    authorAvatar: "//unavatar.io/x/jwmcpeak",
-    thumbnail:
-      "https://ik.imagekit.io/laracasts/series/thumbnails/png//definition-series.png",
-    href: "/series/the-definition-series",
-  },
-  {
-    title: "The Definition Series",
-    author: "Jeremy McPeak",
-    authorAvatar: "//unavatar.io/x/jwmcpeak",
-    thumbnail:
-      "https://ik.imagekit.io/laracasts/series/thumbnails/png//definition-series.png",
-    href: "/series/the-definition-series",
-  },
-  // Thêm các khóa học khác...
 ];
 
 const creatorSeries = [
@@ -460,6 +344,32 @@ const topicsMockup = [
 ];
 
 const Home: React.FC = () => {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await learnerService.getCourses();
+        setCourses(response.data);
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      }
+    };
+
+    const fetchInstructors = async () => {
+      try {
+        const response = await learnerService.getAllInstructor();
+        setInstructors(response.data);
+      } catch (error) {
+        console.error("Error fetching instructors:", error);
+      }
+    };
+
+    fetchCourses();
+    fetchInstructors();
+  }, []);
+
   return (
     <>
       <Header />
@@ -558,31 +468,31 @@ const Home: React.FC = () => {
           </div>
         </div>
       </div>
-      {/*Instructor list*/}
 
+      {/*Instructor list*/}
       <div className="w-full h-fit bg-[#0d1118]">
         <div className="-mt-20">
           <div className="grid auto-cols-max grid-flow-col gap-4 overflow-auto hide-scrollbar z-10 relative scrolling-container">
-            {instructorData.map((instructor, index) => (
+            {instructors.map((instructor, index) => (
               <a
                 key={index}
-                className=" block"
+                className="block"
                 href={`/instructors/${instructor.userId}`}
               >
                 <figure className="relative group overflow-hidden h-full flex">
                   <img
                     loading="lazy"
-                    className="transition-all duration-300 w-[266px] h-[382px]"
+                    className="transition-all duration-300 w-full h-full"
                     src={instructor.avatar}
-                    alt={`Photo of ${instructor.organization}`}
+                    alt={`Photo of ${instructor.user.firstName} ${instructor.user.lastName}`}
                   />
-                  <figcaption className="absolute bottom-0 w-full py-6 bg-black/40  ">
+                  <figcaption className="absolute bottom-0 w-full py-6 bg-black/40">
                     <div className="flex flex-col font-semibold text-center">
-                      <span className="text-2xl text-gray-100 ">
-                        Instructor name
+                      <span className="text-2xl text-gray-100">
+                        {instructor.user.firstName} {instructor.user.lastName}
                       </span>
                       <span className="text-gray-300 text-sm mt-1">
-                        {instructor.bio}
+                        {instructor.organization} • {instructor.user.role}
                       </span>
                     </div>
                   </figcaption>
@@ -644,7 +554,7 @@ const Home: React.FC = () => {
                   "linear-gradient(to right, black calc(100% - 10rem), transparent)",
               }}
             >
-              {streamOfCourses.map((course, index) => (
+              {courses.map((course, index) => (
                 <div
                   key={index}
                   className="group flex h-[min-content] aspect-[1/.7] lg:h-auto lg:aspect-auto lg:max-w-none series-card"

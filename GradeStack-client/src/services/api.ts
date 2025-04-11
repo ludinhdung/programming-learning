@@ -298,5 +298,23 @@ export const instructorService = {
     return response.data;
   },
 };
+export const learnerService = {
+  async getAllInstructor() {
+    const respone = await api.get("/supporter/instructors");
+    return respone.data;
+  },
+  async getCourses() {
+    const respone = await api.get("/courses/");
+    return respone.data;
+  },
+  async getCoursebyCourseId(courseId: string) {
+    const respone = await api.get(`/courses/course/${courseId}`);
+    return respone.data;
+  },
+  async getAllCourses() {
+    const respone = await api.get("/courses/all");
+    return respone.data;
+  },
+};
 
 export default api;
