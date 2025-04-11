@@ -34,7 +34,6 @@ router.get('/courses/:courseId/notes',
     authenticate, noteController.getNoteByCourse.bind(noteController)
 );
 
-// New route to get all courses noted by the authenticated user
 router.get('/my-noted-courses',
     authenticate,
     noteController.getMyNotedCourses.bind(noteController)
