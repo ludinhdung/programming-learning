@@ -3,9 +3,17 @@ import morgan from 'morgan';
 import cors from 'cors';
 import authRouter from './modules/auth/routes/auth.routes';
 import userRouter from './modules/user/routes/user.routes';
-import { errorHandler } from './shared/middleware/error.middleware';
-import courseRoutes from './modules/course/routes/course.routes';
-import practiceCodeRoutes from './modules/practice-code/routes/coding-exercise.routes';
+import instructorRouter from './modules/instructor/routes/instructor.route';
+import courseRouter from './modules/course/routes/course.routes';
+import topicRouter from './modules/topic/routes/topic.routes';
+import lessonRouter from './modules/lesson/routes/lesson.routes';
+import videoLessonRouter from './modules/videoLesson/routes/videoLesson.routes';
+import moduleRouter from './modules/module/routes/module.routes';
+import learningPathRouter from './modules/learningPath/routes/learningPath.routes';
+import certificateRouter from './modules/certificate/routes/certificate.routes';
+import imageUploadRouter from './shared/routes/image-upload.routes';
+import supporterRouter from "./modules/supporter/routes/supporter.routes";
+import { setupSwagger } from './shared/config/swagger';
 
 const app = express();
 
@@ -14,17 +22,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
+// Setup Swagger documentation
+setupSwagger(app);
+
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
-app.use('/api/courses', courseRoutes);
-app.use('/api/practice-code', practiceCodeRoutes);
-
-app.use(errorHandler);
-
-// Basic error handling
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error(err.stack);
-    res.status(500).json({ message: 'Something went wrong!', error: err.message });
-});
-
+app.use('/api/instructors', instructorRouter);
+app.use('/api', courseRouter);
+app.use('/api', topicRouter);
+app.use('/api', lessonRouter);
+app.use('/api', videoLessonRouter);
+app.use('/api', moduleRouter);
+app.use('/api', learningPathRouter);
+app.use('/api', certificateRouter);
+app.use('/api/images', imageUploadRouter);
+app.use("/api/supporter", supporterRouter);
 export default app;
