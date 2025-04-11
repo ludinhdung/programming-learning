@@ -84,7 +84,7 @@ const CourseDetail: React.FC = () => {
   const [moduleToDelete, setModuleToDelete] = useState<Module | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
-  
+
   useEffect(() => {
     const fetchCourse = async () => {
       try {
@@ -203,90 +203,113 @@ const CourseDetail: React.FC = () => {
     setSelectedModule(module);
     setIsEditDrawerOpen(true);
   };
-  //Update module
+  //Update module theo state local
   const handleSaveModule = async (updatedModule: Module) => {
     try {
+      // Tính toán videoDuration từ tất cả lessons
+      const totalDuration = updatedModule.lessons.reduce(
+        (total, lesson) => total + (lesson.video?.duration || 0),
+        0
+      );
       await instructorService.updateModule(updatedModule.id, {
         title: updatedModule.title,
         description: updatedModule.description,
+        videoDuration: totalDuration,
       });
 
-      // Update course state directly
-      setCourse((prevCourse) => {
-        if (!prevCourse) return null;
-        return {
-          ...prevCourse,
-          modules: prevCourse.modules.map((module) =>
-            module.id === updatedModule.id ? updatedModule : module
-          ),
-        };
-      });
+      // Fetch lại toàn bộ dữ liệu course để có thông tin mới nhất
+      const userData = localStorage.getItem("user");
+      if (!userData) return;
+      const user = JSON.parse(userData);
+      const updatedCourse = await instructorService.getCourse(
+        user.id,
+        courseId!
+      );
+
+      const transformedCourse = {
+        ...updatedCourse,
+        modules: updatedCourse.modules.map((module: Module) => ({
+          ...module,
+          lessons: module.lessons.map((lesson: Lesson) => ({
+            ...lesson,
+            content: {
+              ...(lesson.lessonType === "VIDEO" && {
+                video: {
+                  url: lesson.video?.url || "",
+                  duration: lesson.video?.duration || 0,
+                },
+              }),
+            },
+          })),
+        })),
+      };
+
+      setCourse(transformedCourse);
     } catch (error) {
       message.error("Failed to update module");
       console.error("Failed to update module:", error);
     }
   };
   // Create module
- const handleCreateModule = async (values: {
-   title: string;
-   description: string;
- }) => {
-   try {
-     const newModule = await instructorService.createModule(courseId!, values);
+  const handleCreateModule = async (values: {
+    title: string;
+    description: string;
+  }) => {
+    try {
+      const newModule = await instructorService.createModule(courseId!, values);
 
-     // Transform module data giống như trong useEffect
-     const transformedModule = {
-       ...newModule,
-       lessons: (newModule.lessons || []).map((lesson: Lesson) => ({
-         ...lesson,
-         content: {
-           ...(lesson.lessonType === "VIDEO" && {
-             video: {
-               url: lesson.video?.url || "",
-             },
-           }),
-           ...(lesson.lessonType === "CODING" && {
-             coding: {
-               language: lesson.coding?.language,
-               problem: lesson.coding?.problem || "",
-               solution: lesson.coding?.solution || "",
-               hint: lesson.coding?.hint || "",
-               codeSnippet: lesson.coding?.codeSnippet || "",
-             },
-           }),
-           ...(lesson.lessonType === "FINAL_TEST" && {
-             finalTest: {
-               questions:
-                 lesson.finalTest?.questions?.map((q) => ({
-                   content: q.content,
-                   order: q.order,
-                   answers:
-                     q.answers?.map((a) => ({
-                       content: a.content,
-                       isCorrect: a.isCorrect,
-                     })) || [],
-                 })) || [],
-             },
-           }),
-         },
-       })),
-     };
+      // Transform module data giống như trong useEffect
+      const transformedModule = {
+        ...newModule,
+        lessons: (newModule.lessons || []).map((lesson: Lesson) => ({
+          ...lesson,
+          content: {
+            ...(lesson.lessonType === "VIDEO" && {
+              video: {
+                url: lesson.video?.url || "",
+              },
+            }),
+            ...(lesson.lessonType === "CODING" && {
+              coding: {
+                language: lesson.coding?.language,
+                problem: lesson.coding?.problem || "",
+                solution: lesson.coding?.solution || "",
+                hint: lesson.coding?.hint || "",
+                codeSnippet: lesson.coding?.codeSnippet || "",
+              },
+            }),
+            ...(lesson.lessonType === "FINAL_TEST" && {
+              finalTest: {
+                questions:
+                  lesson.finalTest?.questions?.map((q) => ({
+                    content: q.content,
+                    order: q.order,
+                    answers:
+                      q.answers?.map((a) => ({
+                        content: a.content,
+                        isCorrect: a.isCorrect,
+                      })) || [],
+                  })) || [],
+              },
+            }),
+          },
+        })),
+      };
 
-     setCourse((prevCourse) => {
-       if (!prevCourse) return null;
-       return {
-         ...prevCourse,
-         modules: [...prevCourse.modules, transformedModule],
-       };
-     });
-
-     setIsCreateDrawerOpen(false);
-     message.success("Module created successfully");
-   } catch (error) {
-     console.log("Failed to create new module:", error);
-     message.error("Failed to create new module");
-   }
- };
+      setCourse((prevCourse) => {
+        if (!prevCourse) return null;
+        return {
+          ...prevCourse,
+          modules: [...prevCourse.modules, transformedModule],
+        };
+      });
+      setIsCreateDrawerOpen(false);
+      message.success("Module created successfully");
+    } catch (error) {
+      console.log("Failed to create new module:", error);
+      message.error("Failed to create new module");
+    }
+  };
 
   const handleConfirmDelete = async () => {
     if (moduleToDelete?.id) {
