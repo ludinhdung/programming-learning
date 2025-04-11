@@ -2,9 +2,9 @@
 # ===============================
 
 # Environment Variables
-@baseUrl = http://localhost:4000/api
-@moduleId = a1353f96-84c8-4a69-85ed-5e7976c3cc5f
-@lessonId = 083c3254-eaf2-4392-8cb2-e96083beff68
+@baseUrl = http://localhost:3000/api
+@moduleId = bad30b92-22cf-4cb7-9665-d8cb5cd67315
+@lessonId = 95d19f71-b124-4368-8b43-5838cc4b1b54
 
 ### Create a Final Test with estimatedDuration and questions
 # @name createFinalTest

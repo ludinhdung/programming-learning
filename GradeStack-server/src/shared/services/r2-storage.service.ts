@@ -1,11 +1,15 @@
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import * as dotenv from 'dotenv';
-import { exec } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
-import { promisify } from 'util';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import * as dotenv from "dotenv";
+import { exec } from "child_process";
+import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
+import { promisify } from "util";
 
 const execPromise = promisify(exec);
 
@@ -37,16 +41,16 @@ export class R2StorageService {
 
   constructor() {
     this.s3Client = new S3Client({
-      region: 'auto',
+      region: "auto",
       endpoint: process.env.CLOUDFLARE_R2_ENDPOINT,
       credentials: {
-        accessKeyId: process.env.CLOUDFLARE_ACCESS_KEY_ID || '',
-        secretAccessKey: process.env.CLOUDFLARE_SECRET_ACCESS_KEY || '',
+        accessKeyId: process.env.CLOUDFLARE_ACCESS_KEY_ID || "",
+        secretAccessKey: process.env.CLOUDFLARE_SECRET_ACCESS_KEY || "",
       },
     });
 
-    this.bucketName = process.env.CLOUDFLARE_R2_BUCKET || '';
-    this.publicBaseUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL || '';
+    this.bucketName = process.env.CLOUDFLARE_R2_BUCKET || "";
+    this.publicBaseUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL || "";
   }
 
   /**
@@ -59,23 +63,26 @@ export class R2StorageService {
       // Create a temporary file to analyze with ffprobe
       const tempDir = os.tmpdir();
       const tempFilePath = path.join(tempDir, `temp_video_${Date.now()}.mp4`);
-      
+
       // Write the buffer to a temporary file
       fs.writeFileSync(tempFilePath, buffer);
-      
+
+      // Sử dụng đường dẫn tuyệt đối của ffprobe
+      const ffprobePath = "/opt/homebrew/bin/ffprobe";
+
       // Use ffprobe to get video duration
       const { stdout } = await execPromise(
-        `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${tempFilePath}"`
+        `${ffprobePath} -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${tempFilePath}"`
       );
-      
+
       // Clean up the temporary file
       fs.unlinkSync(tempFilePath);
-      
+
       // Parse the duration (in seconds)
       const duration = parseFloat(stdout.trim());
       return isNaN(duration) ? 0 : duration;
     } catch (error) {
-      console.error('Error extracting video duration:', error);
+      console.error("Error extracting video duration:", error);
       return 0; // Return 0 if duration extraction fails
     }
   }
@@ -86,10 +93,13 @@ export class R2StorageService {
    * @param folder Optional folder path within the bucket
    * @returns Object containing URLs for the video and thumbnail, plus duration
    */
-  async uploadVideo(file: UploadedFile, folder: string = 'videos'): Promise<VideoUploadResult> {
+  async uploadVideo(
+    file: UploadedFile,
+    folder: string = "videos"
+  ): Promise<VideoUploadResult> {
     try {
       if (!file || !file.buffer) {
-        throw new Error('Invalid file provided');
+        throw new Error("Invalid file provided");
       }
 
       // Extract video duration
@@ -97,12 +107,12 @@ export class R2StorageService {
 
       // Generate a unique filename
       const timestamp = Date.now();
-      const fileExtension = file.originalname.split('.').pop();
-      const fileName = `${timestamp}-${file.originalname.replace(/\s+/g, '-')}`;
-      
+      const fileExtension = file.originalname.split(".").pop();
+      const fileName = `${timestamp}-${file.originalname.replace(/\s+/g, "-")}`;
+
       // Path for the video in R2
       const videoKey = `${folder}/${fileName}`;
-      
+
       // Upload video to R2
       await this.s3Client.send(
         new PutObjectCommand({
@@ -117,18 +127,18 @@ export class R2StorageService {
       // For this example, we'll assume we have a thumbnail and upload it
       // In a real implementation, you would extract a frame from the video to use as thumbnail
       const thumbnailKey = `${folder}/thumbnails/${timestamp}-thumbnail.jpg`;
-      
+
       // For demonstration purposes, we're creating a placeholder for the thumbnail
       // In a real implementation, you would generate a thumbnail from the video
       // and upload the actual thumbnail image
-      const placeholderThumbnail = Buffer.from('Placeholder for thumbnail');
-      
+      const placeholderThumbnail = Buffer.from("Placeholder for thumbnail");
+
       await this.s3Client.send(
         new PutObjectCommand({
           Bucket: this.bucketName,
           Key: thumbnailKey,
           Body: placeholderThumbnail,
-          ContentType: 'image/jpeg',
+          ContentType: "image/jpeg",
         })
       );
 
@@ -136,10 +146,10 @@ export class R2StorageService {
       return {
         videoUrl: `${this.publicBaseUrl}/${videoKey}`,
         thumbnailUrl: `${this.publicBaseUrl}/${thumbnailKey}`,
-        duration: duration
+        duration: duration,
       };
     } catch (error) {
-      console.error('Error uploading video to R2:', error);
+      console.error("Error uploading video to R2:", error);
       throw new Error(`Failed to upload video: ${(error as Error).message}`);
     }
   }
@@ -191,7 +201,11 @@ export class R2StorageService {
    * @param expiresIn Expiration time in seconds
    * @returns Pre-signed URL for upload
    */
-  async getPresignedUploadUrl(key: string, contentType: string, expiresIn: number = 3600): Promise<string> {
+  async getPresignedUploadUrl(
+    key: string,
+    contentType: string,
+    expiresIn: number = 3600
+  ): Promise<string> {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: key,
@@ -207,7 +221,10 @@ export class R2StorageService {
    * @param expiresIn Expiration time in seconds
    * @returns Pre-signed URL for download
    */
-  async getPresignedDownloadUrl(key: string, expiresIn: number = 3600): Promise<string> {
+  async getPresignedDownloadUrl(
+    key: string,
+    expiresIn: number = 3600
+  ): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
       Key: key,
