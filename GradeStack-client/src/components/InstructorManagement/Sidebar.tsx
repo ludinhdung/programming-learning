@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { IconType } from "react-icons";
 import {
@@ -11,6 +11,22 @@ import {
   MdAttachMoney,
   MdBrush,
 } from "react-icons/md";
+import { instructorService } from "../../services/api";
+import { message } from "antd";
+
+interface InstructorData {
+  id: string;
+  userId: string;
+  user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    avatarUrl?: string;
+  };
+  organization?: string;
+  avatar?: string;
+  bio?: string;
+}
 
 interface NavItemProps {
   icon: IconType;
@@ -18,11 +34,7 @@ interface NavItemProps {
   href: string;
 }
 
-const NavItem: React.FC<NavItemProps> = ({
-  icon: Icon,
-  text,
-  href,
-}) => {
+const NavItem: React.FC<NavItemProps> = ({ icon: Icon, text, href }) => {
   return (
     <li>
       <NavLink
@@ -42,6 +54,100 @@ const NavItem: React.FC<NavItemProps> = ({
 };
 
 const Sidebar = () => {
+  const [instructor, setInstructor] = useState<InstructorData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchInstructorData = async () => {
+      try {
+        setLoading(true);
+        const userData = localStorage.getItem("user");
+        if (!userData) {
+          message.error("User not found. Please login again.");
+          return;
+        }
+        const user = JSON.parse(userData);
+        if (user) {
+          const response = await instructorService.getInstructorById(user.id);
+          console.log("Instructor API response:", response);
+
+          // Kiểm tra và định dạng lại dữ liệu nếu cần
+          let instructorData: InstructorData;
+
+          // Nếu response có cấu trúc dữ liệu khác với InstructorData
+          if (response && typeof response === "object") {
+            // Xử lý tùy thuộc vào cấu trúc của API response
+            if (response.data) {
+              // Nếu API trả về dữ liệu trong trường data
+              instructorData = response.data;
+            } else {
+              // Thử lấy các trường cần thiết từ response
+              instructorData = {
+                id: response.id || user.id || "",
+                userId: response.userId || user.id || "",
+                user: {
+                  firstName:
+                    response.firstName ||
+                    response.user?.firstName ||
+                    user.firstName ||
+                    "",
+                  lastName:
+                    response.lastName ||
+                    response.user?.lastName ||
+                    user.lastName ||
+                    "",
+                  email:
+                    response.email || response.user?.email || user.email || "",
+                  avatarUrl:
+                    response.avatarUrl || response.user?.avatarUrl || "",
+                },
+                avatar: response.avatar || response.avatarUrl || "",
+                bio: response.bio || "",
+              };
+            }
+            setInstructor(instructorData);
+          } else {
+            // Nếu không có dữ liệu hợp lệ từ API
+            setInstructor({
+              id: user.id || "",
+              userId: user.id || "",
+              user: {
+                firstName: user.firstName || "",
+                lastName: user.lastName || "",
+                email: user.email || "",
+              },
+              avatar: user.avatarUrl || "",
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch instructor data:", error);
+        // Fallback khi có lỗi
+        try {
+          const userData = localStorage.getItem("user");
+          if (userData) {
+            const user = JSON.parse(userData);
+            setInstructor({
+              id: user.id || "",
+              userId: user.id || "",
+              user: {
+                firstName: user.firstName || "",
+                lastName: user.lastName || "",
+                email: user.email || "",
+              },
+            });
+          }
+        } catch (parseError) {
+          console.error("Error parsing user data:", parseError);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInstructorData();
+  }, []);
+
   const navItems = [
     { icon: MdDashboard, text: "Overview", href: "/instructor-management" },
     {
@@ -81,19 +187,41 @@ const Sidebar = () => {
     },
   ];
 
+  // Tạo đường dẫn avatar
+  const avatarUrl =
+    instructor?.avatar ;
+
+  // Cải thiện xử lý tên đầy đủ
+  const fullName = instructor?.user
+    ? `${instructor.user.firstName || ""} ${instructor.user.lastName || ""}`
+    : "Instructor";
+
+  // Thêm console.log để debug
+  console.log("Current instructor state:", instructor);
+  console.log("Avatar URL:", avatarUrl);
+  console.log("Full name:", fullName);
+
   return (
     <nav className="flex flex-col relative w-full h-screen bg-zinc-900 text-white transition-all duration-300">
       {/* Profile Section */}
       <div className="p-4 border-b border-zinc-700">
         <div className="flex items-center space-x-3">
-          <img
-            src="https://scontent.fhan5-3.fna.fbcdn.net/v/t39.30808-6/485886292_2316536695414452_3735739565780887893_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=ooA0bi5ptPUQ7kNvgGIf4ju&_nc_oc=Adkbbfr5mYFV-xvpy_HbKY8WXrBDatkgJOXgXdL3LLzNaaBRxelzBoNR08h9ZRQCSD-6rhhl2UV2axLqGUYUpr2A&_nc_zt=23&_nc_ht=scontent.fhan5-3.fna&_nc_gid=1vTgyhHIMqyFDtb2yZTVgQ&oh=00_AYGMCZoG8k6iFBHBdgdw5BhQ9YeyI2MWYiOEPrfEFRyOcw&oe=67E4892B"
-            alt="Channel Avatar"
-            className="w-16 h-16 rounded-full"
-          />
-          <div className="flex flex-col col-">
+          {loading ? (
+            <div className="w-16 h-16 rounded-full bg-slate-700 animate-pulse"></div>
+          ) : (
+            <img
+              src={avatarUrl}
+              alt="Instructor Avatar"
+              className="w-16 h-16 rounded-full object-cover"
+            />
+          )}
+          <div className="flex flex-col">
             <div className="text-sm text-gray-400">Instructor</div>
-            <div className="font-medium">Ngoc Nhan Huynh</div>
+            {loading ? (
+              <div className="w-24 h-5 bg-slate-700 rounded animate-pulse mt-1"></div>
+            ) : (
+              <div className="font-medium">{fullName}</div>
+            )}
           </div>
         </div>
       </div>
