@@ -23,6 +23,7 @@ CREATE TABLE "User" (
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "isBlocked" BOOLEAN NOT NULL DEFAULT false,
     "role" "Role" NOT NULL DEFAULT 'LEARNER',
+    "warningCount" INTEGER DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -33,8 +34,8 @@ CREATE TABLE "User" (
 CREATE TABLE "Instructor" (
     "userId" TEXT NOT NULL,
     "organization" TEXT NOT NULL,
-    "avatar" TEXT NOT NULL,
-    "bio" TEXT NOT NULL,
+    "avatar" TEXT,
+    "bio" TEXT,
     "socials" TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -142,6 +143,7 @@ CREATE TABLE "FinalTestLesson" (
     "id" TEXT NOT NULL,
     "lessonId" TEXT NOT NULL,
     "estimatedDuration" INTEGER,
+    "passingScore" INTEGER NOT NULL DEFAULT 70,
 
     CONSTRAINT "FinalTestLesson_pkey" PRIMARY KEY ("id")
 );
