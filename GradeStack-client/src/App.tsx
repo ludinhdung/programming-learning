@@ -27,6 +27,7 @@ import InstructorManagement from "./pages/InstructorDashboard/InstructorDashboar
 import Overview from "./components/InstructorManagement/Contents/Overview";
 import InstructorCourseList from "./components/InstructorManagement/Contents/Course/CourseList";
 import InstructorCreateCourse from "./components/InstructorManagement/Contents/Course/CreateCourse";
+import InstructorCourseDetail from "./components/InstructorManagement/Contents/Course/CourseDetail";
 const App: React.FC = () => {
   return (
     <MantineProvider>
@@ -54,6 +55,10 @@ const App: React.FC = () => {
             <Route path="course" element={<Outlet />}>
               <Route index element={<InstructorCourseList />} />
               <Route path="create" element={<InstructorCreateCourse />} />
+              <Route
+                path="detail/:courseId"
+                element={<InstructorCourseDetail />}
+              />
             </Route>
           </Route>
 

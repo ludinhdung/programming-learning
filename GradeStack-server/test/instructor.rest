@@ -2,10 +2,11 @@
 # ===============================
 
 # Environment Variables
-@baseUrl = http://localhost:4000/api
-@instructorId = e6198855-6671-417a-88dc-6dca42bdb80b
+@baseUrl = http://localhost:3000/api
+@instructorId = 70b23b50-e518-45cd-9619-8182b2bc68fc
+@topicId = 18f99113-7dcf-4489-b981-86c6275aa63d
 @token = YOUR_JWT_TOKEN_HERE
-@userId = 1f041ae3-e8bb-443a-8790-94abd18d48a5
+@userId = 7c8a9b0d-1e2f-3g4h-5i6j-7k8l9m0n1o2p
 
 # ===============================
 # AUTHENTICATION
@@ -33,13 +34,13 @@ Content-Type: application/json
 
 {
   "userData": {
-    "email": "DuongThanhPhuLearner@example.com",
+    "email": "new.1234instructor@example.com",
     "password": "securePassword123",
-    "firstName": "Duong",
-    "lastName": "Thanh Phu"
+    "firstName": "Jane",
+    "lastName": "Smith"
   },
   "instructorData": {
-    "organization": "FPT University",
+    "organization": "Tech University",
     "bio": "Experienced software engineer with 8 years of teaching experience in web development and programming fundamentals",
     "avatar": "https://example.com/avatars/jane-smith.jpg",
     "socials": [
@@ -105,10 +106,22 @@ Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="avatar"; filename="instructor-avatar.jpg"
-Content-Type: image/jpeg
+Content-Disposition: form-data; name="video"; filename="css.mp4"
+Content-Type: video/mp4
 
-< ./instructor-avatar.jpg
+< C:\Users\duong\Downloads\css.mp4
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="moduleId"
+
+{{moduleId}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lessonId"
+
+{{lessonId}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="videoLessonId"
+
+{{videoLessonId}}
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### Convert User to Instructor
@@ -139,16 +152,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "amount": 500.00,
-  "bankDetails": {
-    "accountName": "Jane Smith",
-    "accountNumber": "1234567890",
-    "bankName": "Example Bank",
-    "swiftCode": "EXBKUS12"
-  }
+    "name": "Introduction to PYTHON",
+    "description": "Learn the basics of PYTHON programming language",
+    "thumbnail": "https://example.com/thumbnail.jpg"
 }
-
-### Get Withdrawal History
-# Returns the history of withdrawal requests for an instructor
-GET {{baseUrl}}/instructors/{{instructorId}}/wallet/withdrawals
-Authorization: Bearer {{token}}

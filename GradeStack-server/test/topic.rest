@@ -2,10 +2,10 @@
 # ===============================
 
 # Environment Variables
-@baseUrl = http://localhost:4000/api
+@baseUrl = http://localhost:3000/api
 @token = YOUR_JWT_TOKEN_HERE
 @topicId = 713bbb5f-cae1-4390-a722-c1b79b17b0e3
-@instructorId = 1bc9424f-50cf-43ce-b034-f3edc36f2135
+@instructorId = cdb86371-a59a-42d2-b939-8f00503a3232
 
 # ===============================
 # TOPIC CRUD OPERATIONS
@@ -28,9 +28,9 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "name": "Machine Learning",
-    "description": "Learn about machine learning algorithms, neural networks, and AI applications",
-    "thumbnail": "https://example.com/thumbnails/machine-learning.jpg"
+    "name": "JavaScript",
+    "description": "A high-level, dynamic, untyped, and interpreted programming language.",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png"
 }
 
 ### Update a topic (Instructor/Admin only)

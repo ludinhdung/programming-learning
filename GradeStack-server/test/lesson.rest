@@ -2,10 +2,10 @@
 # ===============================
 
 # Environment Variables
-@baseUrl = http://localhost:4000/api
+@baseUrl = http://localhost:3000/api
 @token = YOUR_JWT_TOKEN_HERE
-@moduleId = 0100da56-5a0c-4b95-8c25-2a8ff7147939
-@lessonId = c4b2df9d-4bec-4ee4-851c-18bced3f6a57
+@moduleId = 2b87c8a1-f7ad-41a8-b4e1-975acb6c44a4
+@lessonId = eb86b40d-1cb4-4da7-9009-85ba4ed236e0
 @videoLessonId = dcc2f141-dd8e-4811-bc31-ef0cd517af98
 @codingExerciseId = 6a4b3c2d-1e0f-9a8b-7c6d-5e4f3a2b1c0d
 
@@ -36,7 +36,6 @@ Content-Type: application/json
   "lessonData": {
     "title": "test video lesson ",
     "description": "Learn how to create and use functions in JavaScript",
-    "order": 2,
     "isPreview": true
   },
   "videoData": {
@@ -57,7 +56,6 @@ Content-Type: application/json
   "lessonData": {
     "title": "test coding exercise lesson ",
     "description": "Practice creating JavaScript functions",
-    "order": 2,
     "isPreview": false
   },
   "codingData": {
@@ -146,7 +144,6 @@ Content-Type: application/json
 {
   "title": "Updated JavaScript Functions",
   "description": "Updated description for JavaScript functions lesson",
-  "order": 2,
   "isPreview": true
 }
 

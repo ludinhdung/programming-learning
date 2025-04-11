@@ -2,10 +2,10 @@
 # ===============================
 
 # Environment Variables
-@baseUrl = http://localhost:4000/api
+@baseUrl = http://localhost:3000/api
 @token = YOUR_JWT_TOKEN_HERE
-@courseId = 9138f071-0728-4d95-8a93-158439346168 
-@moduleId = 0100da56-5a0c-4b95-8c25-2a8ff7147939
+@courseId = c47e1182-f2be-45db-a361-bb65e4c491d5
+@moduleId = bad30b92-22cf-4cb7-9665-d8cb5cd67315
 
 # ===============================
 # MODULE CRUD OPERATIONS
@@ -47,12 +47,11 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "title": "Advanced Python Concepts 2",
+  "title": "Updated module",
   "description": "Deep dive into advanced Python features and patterns",
-  "order": 2,
   "videoUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/advanced-js.mp4",
   "thumbnailUrl": "https://pub-dafea69342db4ec593c6d0d001af4f41.r2.dev/course-videos/thumbnails/advanced-js-thumbnail.jpg",
-  "videoDuration": 240
+  "videoDuration": 0
 }
 
 ### Delete Module
