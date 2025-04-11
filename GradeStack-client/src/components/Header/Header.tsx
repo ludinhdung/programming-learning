@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Dialog, DialogPanel, PopoverGroup, Listbox, Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { Bars3Icon, XMarkIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  Dialog,
+  DialogPanel,
+  PopoverGroup,
+  Listbox,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+} from "@headlessui/react";
+import {
+  Bars3Icon,
+  XMarkIcon,
+  ChevronDownIcon,
+} from "@heroicons/react/24/outline";
 import { Modal } from "antd";
 
 // Components
@@ -34,7 +47,7 @@ const Header: React.FC = () => {
 
   useEffect(() => {
     // Check for user data in localStorage on component mount
-    const userStr = localStorage.getItem('user');
+    const userStr = localStorage.getItem("user");
     if (userStr) {
       setUser(JSON.parse(userStr));
     }
@@ -50,11 +63,11 @@ const Header: React.FC = () => {
 
   const handleLogout = () => {
     // Clear user data and token from localStorage
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
     setUser(null);
     // Redirect to home page
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   const renderForm = () => {
@@ -76,9 +89,9 @@ const Header: React.FC = () => {
   };
 
   const profileMenu = [
-    { name: 'My Home', href: '/#' },
-    { name: 'Settings', href: '/settings' },
-    { name: 'Logout', onClick: handleLogout }
+    { name: "My Home", href: "/#" },
+    { name: "Settings", href: "/settings" },
+    { name: "Logout", onClick: handleLogout },
   ];
 
   // Replace the welcome message and logout button with this profile menu
@@ -99,14 +112,14 @@ const Header: React.FC = () => {
         {profileMenu.map((item) => (
           <MenuItem key={item.name}>
             {item.onClick ? (
-              <button 
+              <button
                 onClick={item.onClick}
                 className="group flex w-full items-center gap-2 rounded-lg py-1.5 px-3 data-[focus]:bg-white/10"
               >
                 {item.name}
               </button>
             ) : (
-              <a 
+              <a
                 href={item.href}
                 className="group flex w-full items-center gap-2 rounded-lg py-1.5 px-3 data-[focus]:bg-white/10"
               >
@@ -121,9 +134,7 @@ const Header: React.FC = () => {
 
   // Update the user profile section in the desktop navigation
   const userProfileSection = user ? (
-    <div className="flex items-center gap-4">
-      {renderProfileMenu()}
-    </div>
+    <div className="flex items-center gap-4">{renderProfileMenu()}</div>
   ) : (
     <>
       <button
@@ -176,9 +187,7 @@ const Header: React.FC = () => {
 
           {/* Right Navigation */}
           <div className="flex-1 hidden md:flex justify-end items-center gap-4">
-            <div className="flex items-center gap-4">
-              {userProfileSection}
-            </div>
+            <div className="flex items-center gap-4">{userProfileSection}</div>
           </div>
 
           {/* Mobile Menu Button */}

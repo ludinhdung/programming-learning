@@ -1,0 +1,67 @@
+# Environment Variables
+@baseUrl = http://localhost:4000/api
+@instructorId = 1bc9424f-50cf-43ce-b034-f3edc36f2135
+@learningPathId = 656ddbaa-19bf-41c8-88ee-46f2a61d93b2
+@courseId1 = ba461fa1-9eb3-4722-9eaa-318f1e0c5e11
+@courseId2 = 62b86ff2-5637-4868-8a47-98d3c04bf462
+@courseId3 = 1d4ee7f2-f58b-47d5-a437-84c79edebd57
+@courseId4 = 0537db39-7a5b-440b-bb69-9dabfc9687ec
+
+### Get all learning paths (public)
+GET {{baseUrl}}/learning-paths
+Content-Type: application/json
+
+### Get specific learning path by ID
+GET {{baseUrl}}/learning-paths/{{learningPathId}}
+Content-Type: application/json
+
+### Create a new learning path (instructor)
+POST {{baseUrl}}/instructors/{{instructorId}}/learning-paths
+Content-Type: application/json
+
+{
+  "title": "Complete Web Development Path",
+  "description": "Learn everything you need to become a full-stack web developer",
+  "thumbnail": "https://example.com/thumbnail.jpg",
+  "courseIds": ["{{courseId1}}", "{{courseId2}}", "{{courseId3}}"]
+}
+
+### Get all learning paths for an instructor
+GET {{baseUrl}}/instructors/{{instructorId}}/learning-paths
+Content-Type: application/json
+
+### Update a learning path
+PUT {{baseUrl}}/instructors/{{instructorId}}/learning-paths/{{learningPathId}}
+Content-Type: application/json
+
+{
+  "title": "Updated Web Development Path ",
+  "description": "Updated description for the learning path",
+  "thumbnail": "https://example.com/new-thumbnail.jpg",
+  "courseIds": ["{{courseId1}}", "{{courseId2}}", "{{courseId3}}", "{{courseId4}}"]
+}
+
+### Update course order in a learning path
+PUT {{baseUrl}}/instructors/{{instructorId}}/learning-paths/{{learningPathId}}/courses-order
+Content-Type: application/json
+
+{
+  "courses": [
+    {
+      "courseId": "{{courseId1}}",
+      "order": 0
+    },
+    {
+      "courseId": "{{courseId2}}",
+      "order": 1
+    },
+    {
+      "courseId": "{{courseId3}}",
+      "order": 2
+    }
+  ]
+}
+
+### Delete a learning path
+DELETE {{baseUrl}}/instructors/{{instructorId}}/learning-paths/{{learningPathId}}
+Content-Type: application/json
