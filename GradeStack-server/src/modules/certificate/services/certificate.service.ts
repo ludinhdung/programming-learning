@@ -12,20 +12,20 @@ export class CertificateService {
     const learner = await prisma.user.findUnique({
       where: { id: data.learnerId }
     });
-    
+
     if (!learner) {
       throw { status: 404, message: `Học viên với id ${data.learnerId} không tồn tại` };
     }
-    
+
     // Check if course exists
     const course = await prisma.course.findUnique({
       where: { id: data.courseId }
     });
-    
+
     if (!course) {
       throw { status: 404, message: `Khóa học với id ${data.courseId} không tồn tại` };
     }
-    
+
     // Check if certificate already exists for this learner and course
     const existingCertificate = await prisma.certificate.findUnique({
       where: {
@@ -35,11 +35,11 @@ export class CertificateService {
         }
       }
     });
-    
+
     if (existingCertificate) {
       throw { status: 409, message: 'Chứng chỉ cho học viên này và khóa học này đã tồn tại' };
     }
-    
+
     // Create the certificate
     return prisma.certificate.create({
       data: {
@@ -49,7 +49,7 @@ export class CertificateService {
       }
     });
   }
-  
+
   /**
    * Get all certificates
    */
@@ -74,7 +74,7 @@ export class CertificateService {
       }
     });
   }
-  
+
   /**
    * Get certificates by learner ID
    */
@@ -83,11 +83,11 @@ export class CertificateService {
     const learner = await prisma.user.findUnique({
       where: { id: learnerId }
     });
-    
+
     if (!learner) {
       throw { status: 404, message: `Học viên với id ${learnerId} không tồn tại` };
     }
-    
+
     return prisma.certificate.findMany({
       where: { learnerId },
       include: {
@@ -102,7 +102,7 @@ export class CertificateService {
       }
     });
   }
-  
+
   /**
    * Get certificates by course ID
    */
@@ -111,11 +111,11 @@ export class CertificateService {
     const course = await prisma.course.findUnique({
       where: { id: courseId }
     });
-    
+
     if (!course) {
       throw { status: 404, message: `Khóa học với id ${courseId} không tồn tại` };
     }
-    
+
     return prisma.certificate.findMany({
       where: { courseId },
       include: {
@@ -130,7 +130,7 @@ export class CertificateService {
       }
     });
   }
-  
+
   /**
    * Get certificate by ID
    */
@@ -156,14 +156,14 @@ export class CertificateService {
         }
       }
     });
-    
+
     if (!certificate) {
       throw { status: 404, message: `Chứng chỉ với id ${certificateId} không tồn tại` };
     }
-    
+
     return certificate;
   }
-  
+
   /**
    * Get certificate by learner ID and course ID
    */
@@ -194,14 +194,14 @@ export class CertificateService {
         }
       }
     });
-    
+
     if (!certificate) {
       throw { status: 404, message: 'Chứng chỉ không tồn tại cho học viên và khóa học này' };
     }
-    
+
     return certificate;
   }
-  
+
   /**
    * Update certificate
    */
@@ -210,18 +210,18 @@ export class CertificateService {
     const certificate = await prisma.certificate.findUnique({
       where: { id: certificateId }
     });
-    
+
     if (!certificate) {
       throw { status: 404, message: `Chứng chỉ với id ${certificateId} không tồn tại` };
     }
-    
+
     // Update the certificate
     return prisma.certificate.update({
       where: { id: certificateId },
       data
     });
   }
-  
+
   /**
    * Delete certificate
    */
@@ -230,11 +230,11 @@ export class CertificateService {
     const certificate = await prisma.certificate.findUnique({
       where: { id: certificateId }
     });
-    
+
     if (!certificate) {
       throw { status: 404, message: `Chứng chỉ với id ${certificateId} không tồn tại` };
     }
-    
+
     // Delete the certificate
     await prisma.certificate.delete({
       where: { id: certificateId }

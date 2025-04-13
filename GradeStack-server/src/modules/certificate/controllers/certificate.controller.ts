@@ -29,9 +29,9 @@ export class CertificateController {
             // Validate using Zod schema
             const validationResult = createCertificateSchema.safeParse(certificateData);
             if (!validationResult.success) {
-                res.status(400).json({ 
-                    message: 'Validation error', 
-                    errors: validationResult.error.format() 
+                res.status(400).json({
+                    message: 'Validation error',
+                    errors: validationResult.error.format()
                 });
                 return;
             }
@@ -118,9 +118,9 @@ export class CertificateController {
             // Validate using Zod schema
             const validationResult = updateCertificateSchema.safeParse(certificateData);
             if (!validationResult.success) {
-                res.status(400).json({ 
-                    message: 'Validation error', 
-                    errors: validationResult.error.format() 
+                res.status(400).json({
+                    message: 'Validation error',
+                    errors: validationResult.error.format()
                 });
                 return;
             }

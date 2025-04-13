@@ -34,6 +34,7 @@ import SupporterManageInstructor from "./components/SupporterManagement/Contents
 import SupporterManageLearner from "./components/SupporterManagement/Contents/LearnerManagement/LearnerList";
 import SupporterManageLearnerComments from "./components/SupporterManagement/Contents/LearnerManagement/LearnerComment";
 import UserDashboard from "./pages/UserDashboard/UserDashboard";
+import CourseDetail from "./pages/CourseDetail/CourseDetail";
 
 const App: React.FC = () => {
   return (
@@ -43,6 +44,7 @@ const App: React.FC = () => {
           <Route path="/" element={<Home />} />
           <Route path="/course-study" element={<CourseStudy />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/courses/:id" element={<CourseDetail />} />
           {/* <Route path="/create-course" element={<CreateCourse />} /> */}
           <Route path="/courses" element={<CourseList />} />
           {/* <Route path="/courses/:id" element={<CourseDetail />} /> */}
@@ -72,7 +74,7 @@ const App: React.FC = () => {
             element={<InstructorManagement />}
           >
             <Route index element={<Overview />} />
-            
+
             <Route path="course" element={<Outlet />}>
               <Route index element={<InstructorCourseList />} />
               <Route path="create" element={<InstructorCreateCourse />} />
@@ -93,7 +95,7 @@ const App: React.FC = () => {
               <Route index element={<SupporterManageLearner />}></Route>
               <Route path="comment/:learnerId" element={<SupporterManageLearnerComments />} />
             </Route>
-            
+
           </Route>
 
           <Route path="*" element={<NotFound />} />

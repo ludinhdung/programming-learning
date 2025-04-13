@@ -70,7 +70,7 @@ model Course {
   title       String
   description String
   price       Decimal @default(0.00)
-  duration    Int     @default(0) 
+  duration    Int     @default(0)
   isPublished Boolean @default(false)
   thumbnail   String?
 
@@ -124,9 +124,9 @@ model Lesson {
   title       String
   description String
   lessonType  LessonType
-  duration    Int?                        // Dành cho video hoặc estimated time
-  isPreview   Boolean    @default(false)  // Instructor đánh dấu nội dung xem trước
-  order       Int        @default(1)      // Thứ tự bài học trong module
+  duration    Int? // Dành cho video hoặc estimated time
+  isPreview   Boolean    @default(false) // Instructor đánh dấu nội dung xem trước
+  order       Int        @default(1) // Thứ tự bài học trong module
 
   video     VideoLesson?
   coding    CodingExercise?
@@ -171,12 +171,12 @@ model Note {
 }
 
 model VideoLesson {
-  id       String @id @default(uuid())
-  lesson   Lesson @relation(fields: [lessonId], references: [id])
-  lessonId String @unique
-  url      String
+  id           String  @id @default(uuid())
+  lesson       Lesson  @relation(fields: [lessonId], references: [id])
+  lessonId     String  @unique
+  url          String
   thumbnailUrl String?
-  duration Int
+  duration     Int
 }
 
 enum SupportedLanguage {
