@@ -10,6 +10,8 @@ import {
   MdCopyright,
   MdAttachMoney,
   MdBrush,
+  MdCategory,
+  MdTimeline,
 } from "react-icons/md";
 
 interface NavItemProps {
@@ -48,6 +50,16 @@ const Sidebar = () => {
       icon: MdVideoLibrary,
       text: "Course",
       href: "/instructor-management/course",
+    },
+    {
+      icon: MdCategory,
+      text: "Topics",
+      href: "/instructor/topics",
+    },
+    {
+      icon: MdTimeline,
+      text: "Learning Paths",
+      href: "/instructor/learning-paths",
     },
     {
       icon: MdAnalytics,

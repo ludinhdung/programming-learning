@@ -2,10 +2,10 @@
 # ===============================
 
 # Environment Variables
-@baseUrl = http://localhost:3000/api
+@baseUrl = http://localhost:4000/api
 @token = YOUR_JWT_TOKEN_HERE
 @topicId = 713bbb5f-cae1-4390-a722-c1b79b17b0e3
-@instructorId = cdb86371-a59a-42d2-b939-8f00503a3232
+@instructorId = b2a0180f-bcf0-40d7-99c1-405ab4bbaebe
 
 # ===============================
 # TOPIC CRUD OPERATIONS
