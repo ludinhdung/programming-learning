@@ -5,7 +5,7 @@
 @baseUrl = http://localhost:3000/api
 @token = YOUR_JWT_TOKEN_HERE
 @topicId = 713bbb5f-cae1-4390-a722-c1b79b17b0e3
-@instructorId = cfe6f75a-19c7-4f92-b3ed-e04cd530e717
+@instructorId = 6f315ddf-698f-4fbf-adb9-bd868816fa7e
 
 # ===============================
 # TOPIC CRUD OPERATIONS
@@ -28,9 +28,9 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "C",
-  "description": "A powerful general-purpose programming language that provides low-level access to memory and is widely used in system programming.",
-  "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/3/35/The_C_Programming_Language_logo.svg"
+  "name": "DevOps",
+  "description": "A set of practices that combines software development (Dev) and IT operations (Ops) to shorten the development life cycle.",
+  "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/0/05/Devops-toolchain.svg"
 }
 
 ### Update a topic (Instructor/Admin only)
