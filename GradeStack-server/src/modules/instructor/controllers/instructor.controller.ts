@@ -583,4 +583,20 @@ export class InstructorController {
             this.handleError(res, error);
         }
     };
+
+    /**
+     * Get instructor wallet
+     */
+    public getInstructorWallet = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { id } = req.params;
+            const wallet = await this.instructorService.getInstructorWallet(id);
+            res.status(200).json({
+                success: true,
+                data: wallet
+            });
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
 }

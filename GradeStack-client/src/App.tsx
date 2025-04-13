@@ -27,6 +27,7 @@ import Overview from "./components/InstructorManagement/Contents/Overview";
 import InstructorCourseList from "./components/InstructorManagement/Contents/Course/CourseList";
 import InstructorCreateCourse from "./components/InstructorManagement/Contents/Course/CreateCourse";
 import InstructorCourseDetail from "./components/InstructorManagement/Contents/Course/CourseDetail";
+import InstructorMonetization from "./components/InstructorManagement/Contents/Monetization";
 // Supporter Dashboard
 import SupporterDashboard from "./pages/SupporterDashboard/SupporterDashboard";
 import SupporterOverview from "./components/SupporterManagement/Contents/Overview";
@@ -84,6 +85,7 @@ const App: React.FC = () => {
                 element={<InstructorCourseDetail />}
               />
             </Route>
+            <Route path="monetization" element={<InstructorMonetization />} />
           </Route>
           {/* Supporter Dashboard*/}
           <Route path="/supporter-management" element={<SupporterDashboard />}>

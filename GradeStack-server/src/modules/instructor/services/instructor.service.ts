@@ -1359,4 +1359,25 @@ export class InstructorService extends InstructorBaseService<
       throw PrismaErrorHandler.handle(error, "Topic");
     }
   }
+
+  // get instructor wallet
+  async getInstructorWallet(instructorId: string): Promise<any> {
+    try {
+      const wallet = await prisma.wallet.findUnique({
+        where: {
+          instructorId: instructorId,
+        },
+      });
+
+      if (!wallet) {
+        throw ApiError.notFound(
+          `Không tìm thấy ví của giảng viên với ID ${instructorId}`
+        );
+      }
+
+      return wallet;
+    } catch (error) {
+      throw PrismaErrorHandler.handle(error, "Instructor");
+    }
+  }
 }
