@@ -34,6 +34,7 @@ const SideBar: React.FC<SideBarProps> = ({
       ),
       children: module.lessons.map((lesson, lessonIndex) => ({
         key: `lesson-${moduleIndex}-${lessonIndex}`,
+        disabled: !lesson.isPreview,
         icon:
           lesson.lessonType === LessonType.VIDEO ? (
             <PlayCircleOutlined />
@@ -44,8 +45,12 @@ const SideBar: React.FC<SideBarProps> = ({
           ),
         label: (
           <div
-            className="flex flex-col py-2"
-            onClick={() => setCurrentLesson(lesson, lessonIndex)}
+            className={`flex flex-col py-2 ${
+              !lesson.isPreview ? "cursor-not-allowed" : ""
+            }`}
+            onClick={() =>
+              lesson.isPreview ? setCurrentLesson(lesson, lessonIndex) : null
+            }
           >
             <div
               className="text-sm truncate"
@@ -61,7 +66,7 @@ const SideBar: React.FC<SideBarProps> = ({
                 ? module.lessons[lessonIndex].title
                 : lesson.lessonType === LessonType.CODING
                 ? module.lessons[lessonIndex].title
-                : module.lessons[lessonIndex].title}
+                : module.lessons[lessonIndex].title} 
             </div>
             <div className="text-xs text-gray-400 font-semibold flex items-center gap-4">
               {lesson.lessonType === LessonType.VIDEO ? (

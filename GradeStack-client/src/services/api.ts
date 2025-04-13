@@ -297,6 +297,12 @@ export const instructorService = {
     });
     return response.data;
   },
+
+  async getInstructorWallet(instructorId: string) {
+    const response = await api.get(`/instructors/${instructorId}/wallet`);
+    return response.data;
+  },
+  
 };
 export const learnerService = {
   async getAllInstructor() {
