@@ -29,6 +29,38 @@ export class CourseController {
         res.status(status).json({ message });
     }
 
+    async getCoursesPage(req: Request, res: Response): Promise<void> {
+        try {
+            const {
+                topicId,
+                instructorId,
+                search,
+                page = 1,
+                limit = 10,
+                sortBy = 'createdAt',
+                order = 'desc',
+                select
+            } = req.query;
+
+            const courses = await this.courseService.findCourses({
+                topicId: topicId as string,
+                instructorId: instructorId as string,
+                search: search as string,
+                page: Number(page),
+                limit: Number(limit),
+                sortBy: sortBy as string,
+                order: order as 'asc' | 'desc',
+                select: select as string
+            });
+
+            res.status(200).json(courses);
+        } catch (error) {
+            res.status(500).json({
+                message: 'Failed to retrieve courses',
+                error: (error as Error).message
+            });
+        }
+    }
     /**
      * Create a new course
      */

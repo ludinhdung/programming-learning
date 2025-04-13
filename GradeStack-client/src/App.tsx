@@ -13,7 +13,6 @@ import NotFound from "./pages/NotFound";
 // Learner
 import CourseStudy from "./pages/CourseStudyPage/CourseStudy";
 // Instructor
-import SupporterDashboard from "./pages/SupporterDashboard/SupporterDashboard";
 import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
 import CourseList from "./pages/CourseList/CourseList";
 import CourseDetail from "./pages/Courses/CourseDetail";
@@ -39,13 +38,35 @@ import LearningPathList from "./pages/InstructorDashboard/LearningPaths/Learning
 import CreateLearningPath from "./pages/InstructorDashboard/LearningPaths/CreateLearningPath";
 import EditLearningPath from "./pages/InstructorDashboard/LearningPaths/EditLearningPath";
 import LearningPathLayout from "./pages/InstructorDashboard/LearningPaths/LearningPathLayout";
-const App: React.FC = () => {
+// Supporter Dashboard
+import SupporterDashboard from "./pages/SupporterDashboard/SupporterDashboard";
+import SupporterOverview from "./components/SupporterManagement/Contents/Overview";
+import SupporterManageInstructor from "./components/SupporterManagement/Contents/InstructorManagement";
+import SupporterManageLearner from "./components/SupporterManagement/Contents/LearnerManagement/LearnerList";
+import SupporterManageLearnerComments from "./components/SupporterManagement/Contents/LearnerManagement/LearnerComment";
+import UserDashboard from "./pages/UserDashboard/UserDashboard";
+
+import PracticeCode from "./pages/PracticeCode/PracticeCode";
+
+gitconst App: React.FC = () => {
   return (
     <MantineProvider>
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/course-study" element={<CourseStudy />} />
+          <Route path="/course-study/:courseId" element={<CourseStudy />} />
+          <Route path="/practice-code/:lessonId" element={<PracticeCode />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          {/* <Route path="/create-course" element={<CreateCourse />} /> */}
+          <Route path="/courses" element={<CourseList />} />
+          {/* <Route path="/courses/:id" element={<CourseDetail />} /> */}
+          <Route path="/topics" element={<Topics />} />
+          <Route path="/topics/:id" element={<CourseList />} />
+          <Route path="/learning-paths" element={<LearningPaths />} />
+          {/* <Route path="/learning-paths/:id" element={<CourseList />} /> */}
+          <Route path="/checkout/:courseId" element={<Checkout />} />
+          <Route path="/profile" element={<Profile />} />
+          {/* Instructor Dashboard*/}
           <Route path="/supporter-dashboard" element={<SupporterDashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
           {/* <Route path="/create-course" element={<CreateCourse />} /> */}
@@ -57,11 +78,14 @@ const App: React.FC = () => {
           <Route path="/checkout/:courseId" element={<Checkout />} />
           <Route path="/profile" element={<Profile />} />
           {/* Instructor Dashboard*/}
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/dashboard" element={<UserDashboard />} />
           <Route
             path="/instructor-management"
             element={<InstructorManagement />}
           >
             <Route index element={<Overview />} />
+
             <Route path="course" element={<Outlet />}>
               <Route index element={<InstructorCourseList />} />
               <Route path="create" element={<InstructorCreateCourse />} />
@@ -71,6 +95,23 @@ const App: React.FC = () => {
               />
             </Route>
           </Route>
+          {/* Supporter Dashboard*/}
+          <Route path="/supporter-management" element={<SupporterDashboard />}>
+            <Route index element={<SupporterOverview />}></Route>
+            <Route
+              path="instructor"
+              element={<SupporterManageInstructor />}
+            ></Route>
+            <Route path="learner" element={<Outlet />}>
+              <Route index element={<SupporterManageLearner />}></Route>
+              <Route
+                path="comment/:learnerId"
+                element={<SupporterManageLearnerComments />}
+              />
+            </Route>
+          </Route>
+
+          <Route path="*" element={<NotFound />} />
 
           {/* Topic Management */}
           <Route path="/instructor/topics" element={<TopicLayout />}>

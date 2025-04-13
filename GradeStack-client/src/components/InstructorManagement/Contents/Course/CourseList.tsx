@@ -240,13 +240,13 @@ const CourseList = () => {
                   <span className="text-xl font-bold text-white">
                     {formatVND(course.price)}
                   </span>
-                  {!course.isPublished && (
+
                     <Link to={`detail/${course.id}`}>
                       <button className="px-3 py-1 text-sm text-white bg-indigo-600 rounded hover:bg-indigo-500">
                         Details
                       </button>
                     </Link>
-                  )}
+
                   <div className="flex">
                     <button
                       onClick={() => handleDeleteClick(course.id)}

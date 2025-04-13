@@ -1,7 +1,7 @@
-import axios from "axios";
-import { RcFile } from "antd/es/upload";
+import { RcFile } from 'antd/es/upload';
+import axios from 'axios';
 
-const API_URL = "http://localhost:4000/api";
+const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 const api = axios.create({
   baseURL: API_URL,
@@ -36,7 +36,66 @@ export const authService = {
   },
 };
 
+export const supporterService = {
+  async getAllInstructor() {
+    const respone = await api.get("/supporter/instructors");
+    return respone.data;
+  },
+
+  async createInstructor(instructorData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    organization: string;
+    role: string;
+  }) {
+    const respone = await api.post(
+      "/supporter/create/instructor",
+      instructorData
+    );
+    return respone.data;
+  },
+
+  async updateUserStatus(id: string, status: { isBlocked: boolean }) {
+    const respone = await api.patch(
+      `/supporter/update-status/user/${id}`,
+      status
+    );
+    return respone.data;
+  },
+
+  async deleteInstructor(instructorId: string) {
+    const respone = await api.delete(
+      `/supporter/delete/instructor/${instructorId}`
+    );
+    return respone.data;
+  },
+
+  async getAllLearner() {
+    const respone = await api.get("/supporter/learners");
+    return respone.data;
+  },
+  
+  async warningLearner(learnerId: string, warningContent: string) {
+    console.log(learnerId);
+    
+    const respone = await api.patch(`/supporter/warning/learner/${learnerId}`, { warningContent });
+    return respone.data
+  },
+
+  async deleteLearner(learnerId: string) {
+    const respone = await api.delete(`/supporter/delete/learner/${learnerId}`);
+    return respone.data;
+  }
+}
+
 export const instructorService = {
+  async getInstructorById(instructorId: string) {
+    const respone = await api.get(`/instructors/${instructorId}`)
+    return respone.data
+  },
+
   async uploadVideo(file: RcFile) {
     const formData = new FormData();
     formData.append("video", file);
@@ -275,6 +334,25 @@ export const instructorService = {
       testData,
     });
     return response.data;
+  },
+};
+
+export const learnerService = {
+  async getAllInstructor() {
+    const respone = await api.get("/supporter/instructors");
+    return respone.data;
+  },
+  async getCourses() {
+    const respone = await api.get("/courses/");
+    return respone.data;
+  },
+  async getCoursebyCourseId(courseId: string) {
+    const respone = await api.get(`/courses/course/${courseId}`);
+    return respone.data;
+  },
+  async getAllCourses() {
+    const respone = await api.get("/courses/all");
+    return respone.data;
   },
 };
 
