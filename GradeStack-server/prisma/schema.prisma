@@ -28,6 +28,8 @@ model User {
 
   role Role @default(LEARNER)
 
+  warningCount Int? @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -49,8 +51,8 @@ model Instructor {
   userId String @id
 
   organization String
-  avatar       String
-  bio          String
+  avatar       String?
+  bio          String?
   socials      String[]
 
   createdAt DateTime @default(now())
@@ -427,4 +429,19 @@ model Certificate {
   certificateUrl String // Đường dẫn chứng chỉ (PDF hoặc hình ảnh)
 
   @@unique([learnerId, courseId]) // Đảm bảo mỗi học viên chỉ có một chứng chỉ cho mỗi khóa học
+}
+
+//meta data only
+model Order {
+  orderCode Int @id @unique
+
+  courseId     String
+  userId       String
+  instructorId String
+
+  amount Decimal
+  status String  @default("PENDING")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

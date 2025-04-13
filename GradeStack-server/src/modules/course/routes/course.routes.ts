@@ -4,7 +4,7 @@ import multer from 'multer';
 
 // Cấu hình multer để xử lý upload file
 const storage = multer.memoryStorage();
-const upload = multer({ 
+const upload = multer({
     storage,
     limits: {
         fileSize: 100 * 1024 * 1024, // Giới hạn kích thước file 100MB

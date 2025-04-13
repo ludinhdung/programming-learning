@@ -1,6 +1,7 @@
 import { PrismaClient, Role } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { AppError } from '../../../shared/middleware/error.middleware';
 
 const prisma = new PrismaClient();
 
@@ -16,7 +17,7 @@ export class AuthService {
         });
 
         if (existingUser) {
-            throw new Error('Email already exists');
+            throw new AppError('Email already exists', 400);
         }
 
         const hashedPassword = await bcrypt.hash(userData.password, 10);
@@ -51,17 +52,17 @@ export class AuthService {
         });
 
         if (!user) {
-            throw new Error('Invalid credentials');
+            throw new AppError('Invalid credentials', 401);
         }
 
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
 
         if (!isPasswordValid) {
-            throw new Error('Invalid credentials');
+            throw new AppError('Invalid credentials', 401);
         }
 
         if (user.isBlocked) {
-            throw new Error('Account is blocked');
+            throw new AppError('Account is blocked', 403);
         }
 
         const token = this.generateToken(user.id, user.role);
@@ -73,7 +74,7 @@ export class AuthService {
     private generateToken(userId: string, role: Role) {
         const secret = process.env.JWT_SECRET;
         if (!secret) {
-            throw new Error('JWT_SECRET is not configured');
+            throw new AppError('JWT_SECRET is not configured', 500);
         }
         return jwt.sign({ userId, role }, secret, { expiresIn: '1d' });
     }

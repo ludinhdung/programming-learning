@@ -103,3 +103,21 @@ button:focus-visible {
   -webkit-overflow-scrolling: touch;
 }
 
+
+::-webkit-scrollbar {
+  width: 12px; 
+}
+
+::-webkit-scrollbar-track {
+  background: #f0f0f0; 
+}
+
+::-webkit-scrollbar-thumb {
+  background: #bad9fc; 
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8297af; 
+}
+
+

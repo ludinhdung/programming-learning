@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -238,11 +239,8 @@ const CourseInformation: React.FC<CourseInformationProps> = ({
     <div className="p-2">
       <p className="text-sm text-gray-700">Platform Fee Information:</p>
       <ul className="list-disc pl-4 mt-1 text-sm text-gray-600">
-        <li>Platform fee: 20% of course price</li>
-        <li>Your earnings: 80% of course price</li>
-        <li>Example: If price is 1,000,000 VND</li>
-        <li>- Platform fee: 200,000 VND</li>
-        <li>- Your earnings: 800,000 VND</li>
+        <li>Platform fee: 15% of course price</li>
+        <li>Your earnings: 85% of course price</li>
       </ul>
     </div>
   );
@@ -2068,36 +2066,36 @@ const CreateCourse: React.FC = () => {
       }
     }
 
-    if (active === 2) {
-      // Kiểm tra số lượng module
-      if (modules.length < 3) {
-        message.error("You need at least 3 modules");
-        return;
-      }
+    // if (active === 2) {
+    //   // Kiểm tra số lượng module
+    //   if (modules.length < 3) {
+    //     message.error("You need at least 3 modules");
+    //     return;
+    //   }
 
-      // Đếm tổng số lesson và kiểm tra final test
-      let totalLessons = 0;
-      let hasFinalTest = false;
+    //   // Đếm tổng số lesson và kiểm tra final test
+    //   let totalLessons = 0;
+    //   let hasFinalTest = false;
 
-      modules.forEach((module) => {
-        totalLessons += module.lessons.length;
-        module.lessons.forEach((lesson) => {
-          if (lesson.lessonType === "FINAL_TEST") {
-            hasFinalTest = true;
-          }
-        });
-      });
+    //   modules.forEach((module) => {
+    //     totalLessons += module.lessons.length;
+    //     module.lessons.forEach((lesson) => {
+    //       if (lesson.lessonType === "FINAL_TEST") {
+    //         hasFinalTest = true;
+    //       }
+    //     });
+    //   });
 
-      if (totalLessons < 4) {
-        message.error("You need at least 4 lessons in total");
-        return;
-      }
+    //   if (totalLessons < 4) {
+    //     message.error("You need at least 4 lessons in total");
+    //     return;
+    //   }
 
-      if (!hasFinalTest) {
-        message.error("You need at least 1 final test");
-        return;
-      }
-    }
+    //   if (!hasFinalTest) {
+    //     message.error("You need at least 1 final test");
+    //     return;
+    //   }
+    // }
 
     if (active === 3) {
       handleCreateCourse();
