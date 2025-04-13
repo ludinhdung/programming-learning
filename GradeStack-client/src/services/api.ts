@@ -1,7 +1,7 @@
 import axios from "axios";
 import { RcFile } from "antd/es/upload";
 
-const API_URL = "http://localhost:3000/api";
+const API_URL = "http://localhost:4000/api";
 
 const api = axios.create({
   baseURL: API_URL,
@@ -71,6 +71,39 @@ export const instructorService = {
 
   async getTopics() {
     const response = await api.get(`/topics`);
+    return response.data;
+  },
+
+  async getTopicsByInstructor(instructorId: string) {
+    const response = await api.get(`/instructors/${instructorId}/topics`);
+    return response.data;
+  },
+
+  async getTopicById(topicId: string) {
+    const response = await api.get(`/topics/${topicId}`);
+    return response.data;
+  },
+
+  async createTopic(instructorId: string, topicData: {
+    name: string;
+    description: string;
+    thumbnail: string;
+  }) {
+    const response = await api.post(`/instructors/${instructorId}/topics`, topicData);
+    return response.data;
+  },
+
+  async updateTopic(topicId: string, topicData: {
+    name?: string;
+    description?: string;
+    thumbnail?: string;
+  }) {
+    const response = await api.put(`/topics/${topicId}`, topicData);
+    return response.data;
+  },
+
+  async deleteTopic(topicId: string) {
+    const response = await api.delete(`/topics/${topicId}`);
     return response.data;
   },
 
