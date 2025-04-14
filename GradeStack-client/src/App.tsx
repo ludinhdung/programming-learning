@@ -48,7 +48,7 @@ import UserDashboard from "./pages/UserDashboard/UserDashboard";
 
 import PracticeCode from "./pages/PracticeCode/PracticeCode";
 
-gitconst App: React.FC = () => {
+const App: React.FC = () => {
   return (
     <MantineProvider>
       <Router>
