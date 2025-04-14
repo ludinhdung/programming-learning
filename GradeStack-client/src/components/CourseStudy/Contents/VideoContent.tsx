@@ -17,12 +17,14 @@ import {
 const { Option } = Select;
 
 const VideoContainer = styled.div`
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
-  padding: 20px;
+  padding: 10px;
 
   .video-react {
     font-family: inherit;
+    border-radius: 10px;
+    overflow: hidden;
 
     .video-react-progress-control {
       position: relative;
