@@ -322,5 +322,11 @@ export const learnerService = {
     return respone.data;
   },
 };
+export const userService = {
+  async getMyEnrolledCourses(userId: string) {
+    const respone = await api.get(`/users/${userId}/enrollments`);
+    return respone.data;
+  },
+};
 
 export default api;
