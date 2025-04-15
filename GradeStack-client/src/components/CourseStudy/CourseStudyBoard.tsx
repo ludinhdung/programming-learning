@@ -88,6 +88,7 @@ export enum SupportedLanguage {
 }
 export interface FinalTestLesson {
   estimatedDuration?: number;
+  passingScore?: number;
   questions: {
     content: string;
     order: number;
