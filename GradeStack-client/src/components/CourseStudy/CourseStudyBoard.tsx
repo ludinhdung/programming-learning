@@ -438,6 +438,7 @@ const CourseStudyBoard: React.FC = () => {
           </div>
           <div className="px-10">
             <CourseDescription
+              lesson={currentLesson}
               course={course}
               comments={comments}
               users={users}

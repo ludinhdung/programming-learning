@@ -174,7 +174,11 @@ export class CourseService {
     const course = await prisma.course.findUnique({
       where: { id: courseId },
       include: {
-        CourseTopic: true,
+        CourseTopic: {
+          include: {
+            topic: true,
+          }
+        },
         instructor: {
           include: {
             user: {

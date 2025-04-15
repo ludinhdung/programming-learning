@@ -4,7 +4,7 @@
 # Environment Variables
 @baseUrl = http://localhost:3000/api
 @token = YOUR_JWT_TOKEN_HERE
-@topicId = 713bbb5f-cae1-4390-a722-c1b79b17b0e3
+@topicId = 32f583ea-7e96-4c73-b193-02a572b67832
 @instructorId = db870ae2-88b7-4c01-960f-2a4558bdb716
 
 # ===============================
