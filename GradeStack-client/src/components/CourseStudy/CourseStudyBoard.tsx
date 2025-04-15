@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import SideBar from "./SideBar";
 import CourseDescription from "./CourseDescription";
 import VideoContent from "./Contents/VideoContent";
-// import CodingContent from "./Contents/CodingContent";
 import FinalQuizContent from "./Contents/FinalQuizContent";
 import { useParams } from "react-router-dom";
 import { learnerService } from "../../services/api";
 import { Spin } from "antd";
 import PracticeCode from "../../pages/PracticeCode/PracticeCode";
+import { userService } from "../../services/api";
+
 export interface Course {
   id: string;
   title: string;
@@ -174,6 +175,13 @@ const comments: Comment[] = [
     replies: [],
   },
 ];
+
+interface EnrollmentRecord {
+  courseId: string;
+  enrolledAt: string;
+  progress: number;
+}
+
 const CourseStudyBoard: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const [course, setCourse] = useState<Course | null>(null);
@@ -184,7 +192,8 @@ const CourseStudyBoard: React.FC = () => {
     null
   );
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(true);
-
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
@@ -301,6 +310,31 @@ const CourseStudyBoard: React.FC = () => {
     fetchCourseData();
   }, [courseId]);
 
+useEffect(() => {
+  const checkEnrollmentStatus = async () => {
+    try {
+      const userData = localStorage.getItem("user");
+      if (!userData) return;
+
+      const user = JSON.parse(userData);
+      const response = await userService.getMyEnrolledCourses(user.id);
+      const enrolledCourses = response.data;
+      console.log("Enrolled courses:", enrolledCourses);
+      
+      const isEnrolled = enrolledCourses.some(
+        (enrollment: EnrollmentRecord) => enrollment.courseId === course?.id
+      );
+
+      console.log("Is enrolled:", isEnrolled);
+      setIsEnrolled(isEnrolled);
+    } catch (error) {
+      console.error("Error checking enrollment status:", error);
+    }
+  };
+
+  checkEnrollmentStatus();
+}, [courseId, course?.id]);
+  
   // Helper function to determine lesson type from API response
   const getLessonType = (lesson: any): LessonType => {
     // Handle string-based lessonType from API
@@ -315,6 +349,8 @@ const CourseStudyBoard: React.FC = () => {
 
     return LessonType.VIDEO;
   };
+
+  
 
   const renderLessonContent = () => {
     if (loading) {
@@ -390,6 +426,7 @@ const CourseStudyBoard: React.FC = () => {
             isSidebarVisible={isSidebarVisible}
             setIsSidebarVisible={setIsSidebarVisible}
             currentLesson={currentLesson}
+            isEnrolled={isEnrolled}
           />
         </div>
       )}
