@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Lesson } from "../CourseStudyBoard";
 import { Button, Progress } from "antd";
+import confetti from "canvas-confetti";
 
 interface FinalQuizContentProps {
   lesson: Lesson;
@@ -12,14 +13,65 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({ lesson }) => {
     [key: number]: number;
   }>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(
-    lesson.content.finalTest?.estimatedDuration || 30
-  );
+  const passingScore = lesson.content.finalTest?.passingScore || 70;
+
+  const initialTime = (lesson.content.finalTest?.estimatedDuration || 30) * 60;
+  const [timeLeft, setTimeLeft] = useState(initialTime);
 
   const questions = lesson.content.finalTest?.questions || [];
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
-  //lấy ra dc câu trả lời đã chọn tại cái question
+  // Format thời gian từ giây sang định dạng mm:ss
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
+  // Submit test
+  const handleSubmit = useCallback(() => {
+    setIsSubmitted(true);
+    const score = Math.round(
+      (Object.entries(selectedAnswers).filter(
+        ([qIndex, aIndex]) =>
+          questions[Number(qIndex)].answers[aIndex].isCorrect
+      ).length /
+        questions.length) *
+        100
+    );
+    if (score >= passingScore) {
+      fireConfetti();
+    }
+  }, [selectedAnswers, questions, passingScore]);
+
+  // Xử lý countdown timer
+  useEffect(() => {
+    if (!isSubmitted && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft((prevTime) => {
+          if (prevTime <= 1) {
+            clearInterval(timer);
+            handleSubmit();
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [isSubmitted, handleSubmit]);
+
+  // Thêm warning khi thời gian sắp hết
+  const getTimeColor = () => {
+    if (timeLeft <= 60) return "text-red-400";
+    if (timeLeft <= 180) return "text-yellow-400";
+    return "text-blue-400";
+  };
+
+  //lấy ra dc câu trả lời đã chọn tại question
   const handleAnswerSelect = (questionIndex: number, answerIndex: number) => {
     if (isSubmitted) return;
     setSelectedAnswers({
@@ -28,8 +80,20 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({ lesson }) => {
     });
   };
 
-  const handleSubmit = () => {
-    setIsSubmitted(true);
+  const handleRetry = () => {
+    setIsSubmitted(false);
+    setSelectedAnswers({});
+    setCurrentQuestionIndex(0);
+    setTimeLeft(initialTime);
+  };
+
+  const fireConfetti = () => {
+    confetti({
+      particleCount: 500,
+      spread: 150,
+      origin: { x: 0.6, y: 0.5 },
+      colors: ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"],
+    });
   };
 
   return (
@@ -46,7 +110,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({ lesson }) => {
               <div className="flex items-center gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-blue-400"
+                  className={`h-5 w-5 ${getTimeColor()}`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -58,9 +122,15 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({ lesson }) => {
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <div className="flex flex-col">
+                <div>
                   <div className="text-xs text-gray-400">Time Left</div>
-                  <div className="text-blue-400 font-semibold">{timeLeft}m</div>
+                  <div
+                    className={`font-semibold ${getTimeColor()} ${
+                      timeLeft <= 60 ? "animate-pulse" : ""
+                    }`}
+                  >
+                    {formatTime(timeLeft)}
+                  </div>
                 </div>
               </div>
             </div>
@@ -191,7 +261,10 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({ lesson }) => {
             <Button
               type="primary"
               onClick={handleSubmit}
-              disabled={isSubmitted}
+              disabled={
+                isSubmitted ||
+                Object.keys(selectedAnswers).length < questions.length
+              }
               className="bg-blue-500 border-none hover:bg-blue-600"
             >
               Submit Quiz
@@ -244,6 +317,35 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({ lesson }) => {
                 %
               </div>
             </div>
+          </div>
+
+          {/* Add Result Message and Retry Button */}
+          <div className="mt-6 text-center">
+            {Math.round(
+              (Object.entries(selectedAnswers).filter(
+                ([qIndex, aIndex]) =>
+                  questions[Number(qIndex)].answers[aIndex].isCorrect
+              ).length /
+                questions.length) *
+                100
+            ) >= passingScore ? (
+              <div className="text-green-400 text-xl font-bold mb-4">
+                🎉 Congratulations! You passed the quiz! 🎉
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="text-red-400 text-xl font-bold">
+                  Sorry, you didn't reach the passing score of {passingScore}%.
+                </div>
+                <Button
+                  type="primary"
+                  onClick={handleRetry}
+                  className="bg-blue-500 border-none hover:bg-blue-600"
+                >
+                  Retry Test
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}
