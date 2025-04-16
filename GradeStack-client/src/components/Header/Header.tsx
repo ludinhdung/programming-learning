@@ -37,7 +37,7 @@ const Header: React.FC = () => {
     { name: "Topics", href: "#" },
     { name: "Path", href: "#" },
     { name: "Features", href: "#" },
-    { name: "Blog", href: "#" },
+    { name: "Courses", href: "/courses" },
     { name: "Teams", href: "#" },
   ];
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
