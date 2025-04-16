@@ -15,15 +15,15 @@ const router = Router();
 const courseController = new CourseController();
 
 // Các route liên quan đến khóa học
-router.post('/instructors/:id/courses', courseController.createCourse);
-router.get('/instructors/:id/courses', courseController.getCourses);
-router.get('/instructors/:id/courses/full', courseController.getCoursesFullrelation);
-router.get('/instructors/:id/courses/:courseId', courseController.getCourse);
-router.put('/instructors/:id/courses/:courseId', courseController.updateCourse);
-router.delete('/instructors/:id/courses/:courseId', courseController.deleteCourse);
+router.post('/instructors/:id/courses',  courseController.createCourse);
+router.get('/instructors/:id/courses',  courseController.getCourses);
+router.get('/instructors/:id/courses/full',  courseController.getCoursesFullrelation);
+router.get('/instructors/:id/courses/:courseId',  courseController.getCourse);
+router.get('/courses/:courseId/full',  courseController.getCourseFullRelation);
+router.put('/instructors/:id/courses/:courseId',  courseController.updateCourse);
+router.delete('/instructors/:id/courses/:courseId',  courseController.deleteCourse);
 
 
 // Route upload video
-router.post('/upload/video', upload.single('video'), courseController.uploadVideo);
-
+router.post('/upload/video',  upload.single('video'), courseController.uploadVideo);
 export default router;
