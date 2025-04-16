@@ -1,5 +1,5 @@
-import { RcFile } from 'antd/es/upload';
 import axios from 'axios';
+
 
 const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 
@@ -91,11 +91,6 @@ export const supporterService = {
 }
 
 export const instructorService = {
-  async getInstructorById(instructorId: string) {
-    const respone = await api.get(`/instructors/${instructorId}`)
-    return respone.data
-  },
-
   async uploadVideo(file: RcFile) {
     const formData = new FormData();
     formData.append("video", file);
@@ -130,39 +125,6 @@ export const instructorService = {
 
   async getTopics() {
     const response = await api.get(`/topics`);
-    return response.data;
-  },
-
-  async getTopicsByInstructor(instructorId: string) {
-    const response = await api.get(`/instructors/${instructorId}/topics`);
-    return response.data;
-  },
-
-  async getTopicById(topicId: string) {
-    const response = await api.get(`/topics/${topicId}`);
-    return response.data;
-  },
-
-  async createTopic(instructorId: string, topicData: {
-    name: string;
-    description: string;
-    thumbnail: string;
-  }) {
-    const response = await api.post(`/instructors/${instructorId}/topics`, topicData);
-    return response.data;
-  },
-
-  async updateTopic(topicId: string, topicData: {
-    name?: string;
-    description?: string;
-    thumbnail?: string;
-  }) {
-    const response = await api.put(`/topics/${topicId}`, topicData);
-    return response.data;
-  },
-
-  async deleteTopic(topicId: string) {
-    const response = await api.delete(`/topics/${topicId}`);
     return response.data;
   },
 
@@ -336,7 +298,6 @@ export const instructorService = {
     return response.data;
   },
 };
-
 export const learnerService = {
   async getAllInstructor() {
     const respone = await api.get("/supporter/instructors");
