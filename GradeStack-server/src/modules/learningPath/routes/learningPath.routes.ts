@@ -11,6 +11,7 @@ router.get('/learning-paths/:learningPathId', learningPathController.getLearning
 // Instructor routes
 router.post('/instructors/:id/learning-paths', learningPathController.createLearningPath);
 router.get('/instructors/:id/learning-paths', learningPathController.getLearningPaths);
+router.get('/instructors/:id/learning-paths/:learningPathId', learningPathController.getLearningPath);
 router.put('/instructors/:id/learning-paths/:learningPathId', learningPathController.updateLearningPath);
 router.put('/instructors/:id/learning-paths/:learningPathId/courses-order', learningPathController.updateCoursesOrder);
 router.delete('/instructors/:id/learning-paths/:learningPathId', learningPathController.deleteLearningPath);

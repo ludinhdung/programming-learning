@@ -315,6 +315,8 @@ model Topic {
   name        String  @unique
   thumbnail   String?
   description String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   courses CourseTopic[]
 
@@ -333,13 +335,14 @@ model CourseTopic {
 }
 
 model LearningPath {
-  id               String               @id @default(uuid())
-  title            String
-  description      String?
-  thumbnail        String?
-  courses          LearningPathCourse[]
-  Instructor       Instructor?          @relation(fields: [instructorUserId], references: [userId])
-  instructorUserId String?
+  id                      String               @id @default(uuid())
+  title                   String
+  description             String?
+  thumbnail               String?
+  estimatedCompletionTime Int?                 // Estimated completion time in minutes
+  courses                 LearningPathCourse[]
+  Instructor              Instructor?          @relation(fields: [instructorUserId], references: [userId])
+  instructorUserId        String?
 }
 
 model LearningPathCourse {
