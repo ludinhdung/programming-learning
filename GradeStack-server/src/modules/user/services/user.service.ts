@@ -104,6 +104,7 @@ export class UserService {
           enrolledAt: true,
           course: {
             select: {
+              id: true,
               title: true,
               thumbnail: true,
               instructor: {

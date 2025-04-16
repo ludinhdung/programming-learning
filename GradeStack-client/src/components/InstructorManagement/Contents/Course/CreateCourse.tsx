@@ -1410,6 +1410,7 @@ const CourseStructure: React.FC<CourseStructureProps> = ({
                                       const answers = [
                                         ...(questions[qIndex].answers || []),
                                       ];
+                                      {/* Neu la answer dau tien thi set isCorrect = true va nguoc lai */}
                                       answers.push({
                                         content: "",
                                         isCorrect: answers.length === 0,

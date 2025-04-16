@@ -16,6 +16,7 @@ interface SideBarProps {
   currentLesson: Lesson | null;
   isSidebarVisible: boolean;
   setIsSidebarVisible: (isSidebarVisible: boolean) => void;
+  isEnrolled: boolean;
 }
 
 const SideBar: React.FC<SideBarProps> = ({
@@ -23,6 +24,7 @@ const SideBar: React.FC<SideBarProps> = ({
   setCurrentLesson,
   isSidebarVisible,
   setIsSidebarVisible,
+  isEnrolled,
 }) => {
   const getMenuItems = (modules: Module[]): MenuProps["items"] => {
     return modules.map((module, moduleIndex) => ({
@@ -34,6 +36,7 @@ const SideBar: React.FC<SideBarProps> = ({
       ),
       children: module.lessons.map((lesson, lessonIndex) => ({
         key: `lesson-${moduleIndex}-${lessonIndex}`,
+        disabled: !isEnrolled && !lesson.isPreview,
         icon:
           lesson.lessonType === LessonType.VIDEO ? (
             <PlayCircleOutlined />
@@ -44,8 +47,14 @@ const SideBar: React.FC<SideBarProps> = ({
           ),
         label: (
           <div
-            className="flex flex-col py-2"
-            onClick={() => setCurrentLesson(lesson, lessonIndex)}
+            className={`flex flex-col py-2 ${
+              !isEnrolled && !lesson.isPreview ? "cursor-not-allowed" : ""
+            }`}
+            onClick={() =>
+              isEnrolled || lesson.isPreview
+                ? setCurrentLesson(lesson, lessonIndex)
+                : null
+            }
           >
             <div
               className="text-sm truncate"
@@ -63,7 +72,13 @@ const SideBar: React.FC<SideBarProps> = ({
                 ? module.lessons[lessonIndex].title
                 : module.lessons[lessonIndex].title}
             </div>
-            <div className="text-xs text-gray-400 font-semibold flex items-center gap-4">
+            <div
+              className={`text-xs font-semibold flex items-center gap-4 ${
+                !isEnrolled && !lesson.isPreview
+                  ? "text-gray-600"
+                  : "text-gray-400"
+              }`}
+            >
               {lesson.lessonType === LessonType.VIDEO ? (
                 <>
                   Lesson: {lessonIndex + 1}

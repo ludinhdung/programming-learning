@@ -335,6 +335,12 @@ export const instructorService = {
     });
     return response.data;
   },
+
+  async getInstructorWallet(instructorId: string) {
+    const response = await api.get(`/instructors/${instructorId}/wallet`);
+    return response.data;
+  },
+  
 };
 
 export const learnerService = {
@@ -352,6 +358,12 @@ export const learnerService = {
   },
   async getAllCourses() {
     const respone = await api.get("/courses/all");
+    return respone.data;
+  },
+};
+export const userService = {
+  async getMyEnrolledCourses(userId: string) {
+    const respone = await api.get(`/users/${userId}/enrollments`);
     return respone.data;
   },
 };

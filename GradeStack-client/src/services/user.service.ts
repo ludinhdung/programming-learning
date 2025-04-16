@@ -62,7 +62,7 @@ interface ChangePasswordData {
     newPassword: string;
 }
 
-const userService = {
+ const userService = {
     async getMyProfile(userId: string): Promise<UserProfile> {
         try {
             const response = await api.get(`/users/${userId}`);
