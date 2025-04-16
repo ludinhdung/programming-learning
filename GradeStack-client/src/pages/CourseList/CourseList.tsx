@@ -1,21 +1,22 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Input, Checkbox, Button, message } from 'antd';
-import { ArrowRightOutlined, ArrowLeftOutlined } from '@ant-design/icons';
-import Header from '../../components/Header/Header';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Input, Checkbox, Button, message } from "antd";
+import { ArrowRightOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import Header from "../../components/Header/Header";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { Course } from '../../services/course.service'; // Updated import
-import courseService, { GetCoursesParams } from '../../services/course.service'; // Import course service
-import { debounce } from 'lodash';
-
+import { Course } from "../../services/course.service"; // Updated import
+import courseService, { GetCoursesParams } from "../../services/course.service"; // Import course service
+import { instructorService } from "../../services/api"; // Import instructor service
+import { debounce } from "lodash";
+import { formatVND } from "../../utils/formatCurrency";
 
 const CustomCheckbox = styled(Checkbox)`
-    .ant-checkbox-inner {
-      width: 14px;
-      height: 14px;
-      border: none;
-      border-radius: 0;
-    }
+  .ant-checkbox-inner {
+    width: 14px;
+    height: 14px;
+    border: none;
+    border-radius: 0;
+  }
 `;
 
 const StyledInput = styled(Input)`
@@ -25,7 +26,7 @@ const StyledInput = styled(Input)`
   }
 `;
 
-const LoadingBar = styled.div`
+export const LoadingBar = styled.div`
   position: fixed;
   top: 0;
   left: 0;
@@ -55,10 +56,16 @@ const LoadingBar = styled.div`
   }
 `;
 
+interface Topic {
+  id: string;
+  name: string;
+  description: string;
+  coursesCount: number;
+}
 
 const CourseList = () => {
-  const [searchInputValue, setSearchInputValue] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchInputValue, setSearchInputValue] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [selectedInstructors, setSelectedInstructors] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -67,22 +74,34 @@ const CourseList = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
-  const pageSize = 20; // Set page size to 20
+  const [topics, setTopics] = useState<
+    Array<{ id: string; name: string; count: number }>
+  >([]);
+  const pageSize = 20;
 
-  const topics = [
-    { id: '3f6caba7-681d-4660-a7e0-4643f8ffe45f', name: 'JavaScript', count: 25 },
-    { id: 'php', name: 'PHP', count: 32 },
-    { id: 'laravel', name: 'Laravel', count: 45 },
-    { id: 'vue', name: 'Vue', count: 18 },
-    { id: 'react', name: 'React', count: 20 },
-    { id: 'testing', name: 'Testing', count: 15 },
-  ];
+  // Fetch topics from API
+  useEffect(() => {
+    const fetchTopics = async () => {
+      try {
+        const response = await instructorService.getTopics();
+        const formattedTopics = response;
+
+        console.log(formattedTopics);
+        setTopics(formattedTopics);
+      } catch (error) {
+        console.error("Failed to fetch topics:", error);
+        message.error("Failed to load topics. Please try again later.");
+      }
+    };
+
+    fetchTopics();
+  }, []);
 
   const instructors = [
-    { id: '050c6223-9027-4d64-8f57-9e41afbb3908', name: 'Jon Josh', count: 42 },
-    { id: 'jeremy-mcpeak', name: 'Jeremy McPeak', count: 28 },
-    { id: 'simon-wardley', name: 'Simon Wardley', count: 15 },
-    { id: 'luke-downing', name: 'Luke Downing', count: 23 },
+    { id: "050c6223-9027-4d64-8f57-9e41afbb3908", name: "Jon Josh", count: 42 },
+    { id: "jeremy-mcpeak", name: "Jeremy McPeak", count: 28 },
+    { id: "simon-wardley", name: "Simon Wardley", count: 15 },
+    { id: "luke-downing", name: "Luke Downing", count: 23 },
   ];
 
   useEffect(() => {
@@ -93,8 +112,8 @@ const CourseList = () => {
         const params: GetCoursesParams = {
           page: currentPage,
           limit: pageSize,
-          sortBy: 'createdAt',
-          order: 'desc',
+          sortBy: "createdAt",
+          order: "desc",
         };
 
         if (selectedTopics.length > 0) {
@@ -131,17 +150,17 @@ const CourseList = () => {
   }, [currentPage, selectedTopics, selectedInstructors, searchQuery]);
 
   const handleTopicChange = (topicId: string) => {
-    setSelectedTopics(prev =>
+    setSelectedTopics((prev) =>
       prev.includes(topicId)
-        ? prev.filter(id => id !== topicId)
+        ? prev.filter((id) => id !== topicId)
         : [...prev, topicId]
     );
   };
 
   const handleInstructorChange = (instructorId: string) => {
-    setSelectedInstructors(prev =>
+    setSelectedInstructors((prev) =>
       prev.includes(instructorId)
-        ? prev.filter(id => id !== instructorId)
+        ? prev.filter((id) => id !== instructorId)
         : [...prev, instructorId]
     );
   };
@@ -166,7 +185,10 @@ const CourseList = () => {
 
   const showPreviousButton = currentPage > 1;
   const showNextButton = currentPage < totalPages;
-  const hasFilters = selectedTopics.length > 0 || selectedInstructors.length > 0 || searchQuery.trim() !== '';
+  const hasFilters =
+    selectedTopics.length > 0 ||
+    selectedInstructors.length > 0 ||
+    searchQuery.trim() !== "";
 
   const debouncedSetSearchQuery = useCallback(() => {
     const handler = debounce((searchValue: string) => {
@@ -177,7 +199,10 @@ const CourseList = () => {
     return handler;
   }, []);
 
-  const debouncedHandler = useMemo(() => debouncedSetSearchQuery(), [debouncedSetSearchQuery]);
+  const debouncedHandler = useMemo(
+    () => debouncedSetSearchQuery(),
+    [debouncedSetSearchQuery]
+  );
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -187,7 +212,7 @@ const CourseList = () => {
 
   // Handle search when user presses Enter
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       setSearchQuery(searchInputValue);
       setCurrentPage(1); // Reset to first page when searching
     }
@@ -197,8 +222,8 @@ const CourseList = () => {
   const handleResetSearch = () => {
     setSelectedTopics([]);
     setSelectedInstructors([]);
-    setSearchInputValue('');
-    setSearchQuery('');
+    setSearchInputValue("");
+    setSearchQuery("");
     setCurrentPage(1);
   };
 
@@ -208,22 +233,32 @@ const CourseList = () => {
 
   const selectedFilters = [
     searchQuery.trim() ? `"${searchQuery}"` : null,
-    ...selectedTopics.map(topicId => topics.find(topic => topic.id === topicId)?.name),
-    ...selectedInstructors.map(instructorId => instructors.find(instructor => instructor.id === instructorId)?.name)
-  ].filter(Boolean).join(', ');
+    ...selectedTopics.map(
+      (topicId) => topics.find((topic) => topic.id === topicId)?.name
+    ),
+    ...selectedInstructors.map(
+      (instructorId) =>
+        instructors.find((instructor) => instructor.id === instructorId)?.name
+    ),
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   const formatCourseForDisplay = (course: Course) => {
     const instructorName = course.instructor?.user
       ? `${course.instructor.user.firstName} ${course.instructor.user.lastName}`
-      : 'Unknown Instructor';
+      : "Unknown Instructor";
 
     return {
       ...course,
       instructor: {
         name: instructorName,
-        avatar: 'https://laracasts.nyc3.digitaloceanspaces.com/members/avatars/253739.jpg?v=352', // Default avatar
+        avatar:
+          "https://laracasts.nyc3.digitaloceanspaces.com/members/avatars/253739.jpg?v=352", // Default avatar
       },
-      thumbnail: course.thumbnail || 'https://s3-sgn09.fptcloud.com/codelearnstorage/files/thumbnails/csharp-fullstack_8_63694c3f5e9d48d2b826de8ccb411b82.png', // Default thumbnail
+      thumbnail:
+        course.thumbnail ||
+        "https://s3-sgn09.fptcloud.com/codelearnstorage/files/thumbnails/csharp-fullstack_8_63694c3f5e9d48d2b826de8ccb411b82.png", // Default thumbnail
     };
   };
 
@@ -242,9 +277,144 @@ const CourseList = () => {
             <div className="flex">
               <StyledInput
                 size="large"
-                variant='borderless'
+                variant="borderless"
                 placeholder="Search for courses..."
-                prefix={<svg className='ml-2 mr-4' width="18" viewBox="0 0 27 27" fill="none"><rect x="2.92578" y="2.92603" width="2.92599" height="2.92599" className="fill-current"></rect><rect y="5.85205" width="2.92599" height="2.92599" className="fill-current"></rect><rect y="8.77783" width="2.92599" height="2.92599" className="fill-current"></rect><rect y="11.7041" width="2.92599" height="2.92599" className="fill-current"></rect><rect x="14.6289" y="2.92603" width="2.92599" height="2.92599" className="fill-current"></rect><rect x="14.6289" y="14.6301" width="2.92599" height="2.92599" className="fill-current"></rect><rect x="17.5547" y="17.5562" width="2.92599" height="2.92599" className="fill-current"></rect><rect x="20.4824" y="20.4819" width="2.92599" height="2.92599" className="fill-current"></rect><rect x="23.4082" y="23.408" width="2.92599" height="2.92599" className="fill-current"></rect><rect x="2.92578" y="14.6301" width="2.92599" height="2.92599" className="fill-current"></rect><rect x="5.85156" width="2.92599" height="2.92599" className="fill-current"></rect><rect x="8.7793" width="2.92599" height="2.92599" className="fill-current"></rect><rect x="11.7051" width="2.92599" height="2.92599" className="fill-current"></rect><rect x="5.85156" y="17.5562" width="2.92599" height="2.92599" className="fill-current"></rect><rect x="8.7793" y="17.5562" width="2.92599" height="2.92599" className="fill-current"></rect><rect x="11.7051" y="17.5562" width="2.92599" height="2.92599" className="fill-current"></rect><rect x="17.5547" y="5.85205" width="2.92599" height="2.92599" className="fill-current"></rect><rect x="17.5547" y="8.77783" width="2.92599" height="2.92599" className="fill-current"></rect><rect x="17.5547" y="11.7041" width="2.92599" height="2.92599" className="fill-current"></rect></svg>}
+                prefix={
+                  <svg
+                    className="ml-2 mr-4"
+                    width="18"
+                    viewBox="0 0 27 27"
+                    fill="none"
+                  >
+                    <rect
+                      x="2.92578"
+                      y="2.92603"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      y="5.85205"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      y="8.77783"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      y="11.7041"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      x="14.6289"
+                      y="2.92603"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      x="14.6289"
+                      y="14.6301"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      x="17.5547"
+                      y="17.5562"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      x="20.4824"
+                      y="20.4819"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      x="23.4082"
+                      y="23.408"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      x="2.92578"
+                      y="14.6301"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      x="5.85156"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      x="8.7793"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      x="11.7051"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      x="5.85156"
+                      y="17.5562"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      x="8.7793"
+                      y="17.5562"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      x="11.7051"
+                      y="17.5562"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      x="17.5547"
+                      y="5.85205"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      x="17.5547"
+                      y="8.77783"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                    <rect
+                      x="17.5547"
+                      y="11.7041"
+                      width="2.92599"
+                      height="2.92599"
+                      className="fill-current"
+                    ></rect>
+                  </svg>
+                }
                 className="rounded-none bg-[#1c2936] border-none text-white hover:bg-[#243447] p-2 mb-4 w-full"
                 value={searchInputValue}
                 onChange={handleSearchInputChange}
@@ -254,34 +424,47 @@ const CourseList = () => {
           </div>
 
           <div className="mb-8">
-            <h3 className="text-gray-400 text-sm font-semibold uppercase mb-2">Topics</h3>
+            <h3 className="text-gray-400 text-sm font-semibold uppercase mb-2">
+              Topics
+            </h3>
             <div className="space-y-2 border border-blue-500 border-opacity-15 p-4">
               {topics.map((topic) => (
-                <div key={topic.id} className="flex items-center justify-between ">
+                <div
+                  key={topic.id}
+                  className="flex items-center justify-between "
+                >
                   <CustomCheckbox
                     checked={selectedTopics.includes(topic.id)}
                     onChange={() => handleTopicChange(topic.id)}
                   >
                     <span className="ml-2 text-white text-[13.5px] font-medium">
-                      {topic.name} ({topic.count})
+                      {topic.name} ({topic.count || 0})
                     </span>
-                  </CustomCheckbox>;
+                  </CustomCheckbox>
+                  ;
                 </div>
               ))}
             </div>
           </div>
 
           <div>
-            <h3 className="text-gray-400 text-sm font-semibold uppercase mb-2">Instructors</h3>
+            <h3 className="text-gray-400 text-sm font-semibold uppercase mb-2">
+              Instructors
+            </h3>
             <div className="space-y-2 border border-blue-500 border-opacity-15 p-4">
               {instructors.map((instructor) => (
-                <div key={instructor.id} className="flex items-center justify-between">
+                <div
+                  key={instructor.id}
+                  className="flex items-center justify-between"
+                >
                   <CustomCheckbox
                     checked={selectedInstructors.includes(instructor.id)}
                     onChange={() => handleInstructorChange(instructor.id)}
                     className="text-gray-400 hover:text-white [&>.ant-checkbox-inner]:rounded-none [&>.ant-checkbox-inner]:border-gray-500"
                   >
-                    <span className="ml-2 text-white text-[13.5px] font-medium">{instructor.name} ({instructor.count})</span>
+                    <span className="ml-2 text-white text-[13.5px] font-medium">
+                      {instructor.name} ({instructor.count})
+                    </span>
                   </CustomCheckbox>
                 </div>
               ))}
@@ -311,7 +494,10 @@ const CourseList = () => {
           ) : courses.length === 0 ? (
             <div className="text-center text-white py-12">
               <h3 className="text-2xl font-bold mb-4">No courses found</h3>
-              <p>Try adjusting your search filters or check back later for new courses.</p>
+              <p>
+                Try adjusting your search filters or check back later for new
+                courses.
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -355,7 +541,7 @@ const CourseList = () => {
                         </div>
                         <div className="flex gap-4 mt-2">
                           <p className="text-[#3b82f6] text-lg font-bold">
-                            {course.price.toLocaleString('vi-VN')} đ
+                            {formatVND(course.price)}
                           </p>
                         </div>
                       </div>
