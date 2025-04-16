@@ -177,7 +177,7 @@ export class CourseService {
         CourseTopic: {
           include: {
             topic: true,
-          }
+          },
         },
         instructor: {
           include: {

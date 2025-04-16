@@ -316,6 +316,9 @@ model Topic {
   thumbnail   String?
   description String?
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   courses CourseTopic[]
 
   Instructor       Instructor? @relation(fields: [instructorUserId], references: [userId])
