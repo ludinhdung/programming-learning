@@ -15,10 +15,10 @@ import imageUploadRouter from './shared/routes/image-upload.routes';
 import supporterRouter from "./modules/supporter/routes/supporter.routes";
 import { setupSwagger } from './shared/config/swagger';
 import { errorHandler } from './shared/middleware/error.middleware';
-import courseRoutes from './modules/courses/routes/course.routes';
 import practiceCodeRoutes from './modules/practice-code/routes/coding-exercise.routes';
 import bodyParser from 'body-parser';
 import checkoutRoutes from './modules/checkout/routes/checkout.routes';
+import coursesRouter from './modules/courses/routes/course.routes';
 import noteRoutes from './modules/note/note.route';
 import { commentRoutes } from './modules/comment';
 
@@ -44,9 +44,10 @@ app.use('/api', moduleRouter);
 app.use('/api', learningPathRouter);
 app.use('/api', certificateRouter);
 
+app.use('/api/courses', coursesRouter)
+
 app.use('/api/images', imageUploadRouter);
 app.use("/api/supporter", supporterRouter);
-app.use('/api/courses', courseRoutes);
 app.use('/api/practice-code', practiceCodeRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api', noteRoutes);
