@@ -2,8 +2,8 @@
 # ===============================
 
 # Environment Variables
-@baseUrl = http://localhost:4000/api
-@instructorId = b2a0180f-bcf0-40d7-99c1-405ab4bbaebe
+@baseUrl = http://localhost:3000/api
+@instructorId = 70b23b50-e518-45cd-9619-8182b2bc68fc
 @topicId = 18f99113-7dcf-4489-b981-86c6275aa63d
 @token = YOUR_JWT_TOKEN_HERE
 @userId = 7c8a9b0d-1e2f-3g4h-5i6j-7k8l9m0n1o2p
@@ -34,8 +34,8 @@ Content-Type: application/json
 
 {
   "userData": {
-    "email": "duongthanhphu123r@example.com",
-    "password": "123123",
+    "email": "new.1234instructor@example.com",
+    "password": "securePassword123",
     "firstName": "Jane",
     "lastName": "Smith"
   },
@@ -98,6 +98,31 @@ Authorization: Bearer {{token}}
 # Returns all students enrolled in an instructor's courses
 GET {{baseUrl}}/instructors/{{instructorId}}/students
 Authorization: Bearer {{token}}
+
+### Upload Instructor Avatar
+# Uploads a profile image for an instructor
+POST {{baseUrl}}/instructors/{{instructorId}}/avatar
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="video"; filename="css.mp4"
+Content-Type: video/mp4
+
+< C:\Users\duong\Downloads\css.mp4
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="moduleId"
+
+{{moduleId}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lessonId"
+
+{{lessonId}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="videoLessonId"
+
+{{videoLessonId}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### Convert User to Instructor
 # Converts an existing user account to an instructor account

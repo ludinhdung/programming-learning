@@ -706,69 +706,6 @@ export class CourseService extends CourseBaseService<
         });
     }
     
-    /**
-     * Tạo một object chứa các mối quan hệ cần include khi truy vấn khóa học
-     */
-    private getCourseIncludeRelations(): Prisma.CourseInclude {
-        return {
-            instructor: {
-                include: {
-                    user: {
-                        select: {
-                            firstName: true,
-                            lastName: true,
-                            email: true,
-                        }
-                    }
-                }
-            },
-            CourseTopic: {
-                include: {
-                    topic: true
-                }
-            },
-            modules: {
-                orderBy: [
-                    {
-                        order: 'asc'
-                    }
-                ],
-                include: {
-                    lessons: {
-                        orderBy: [
-                            {
-                                createdAt: 'desc'
-                            }
-                        ],
-                        include: {
-                            video: true,
-                            coding: true,
-                            finalTest: {
-                                include: {
-                                    questions: {
-                                        include: {
-                                            answers: true
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            _count: {
-                select: {
-                    EnrolledCourse: true
-                }
-            }
-        };
-    }
-
-    /**
-     * Lấy danh sách khóa học của một giảng viên với đầy đủ thông tin liên quan
-     * @param instructorId ID của giảng viên
-     * @returns Danh sách khóa học
-     */
     async getFullRelationCourses(instructorId: string) {
         return prisma.course.findMany({
             where: {
@@ -777,28 +714,54 @@ export class CourseService extends CourseBaseService<
                 }
             },
             orderBy: { createdAt: 'desc' },
-            include: this.getCourseIncludeRelations()
+            include: {
+                instructor: {
+                    include: {
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                email: true,
+                            }
+                        }
+                    }
+                },
+                CourseTopic: {
+                    include: {
+                        topic: true
+                    }
+                },
+                modules: {
+                    orderBy: {
+                        order: 'asc'
+                    },
+                    include: {
+                        lessons: {
+                            orderBy: {
+                                createdAt: 'desc'
+                            },
+                            include: {
+                                video: true,
+                                coding: true,
+                                finalTest: {
+                                    include: {
+                                        questions: {
+                                            include: {
+                                                answers: true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                _count: {
+                    select: {
+                        EnrolledCourse: true
+                    }
+                }
+            }
         });
-    }
-
-    /**
-     * Lấy thông tin chi tiết của một khóa học cụ thể bao gồm các mối quan hệ liên quan
-     * @param courseId ID của khóa học cần lấy thông tin
-     * @returns Thông tin chi tiết của khóa học hoặc null nếu không tìm thấy
-     */
-    async getCourseWithFullRelations(courseId: string) {
-        const course = await prisma.course.findUnique({
-            where: {
-                id: courseId
-            },
-            include: this.getCourseIncludeRelations()
-        });
-
-        if (!course) {
-            throw { status: 404, message: `Không tìm thấy khóa học với id ${courseId}` };
-        }
-
-        return course;
     }
 }
-

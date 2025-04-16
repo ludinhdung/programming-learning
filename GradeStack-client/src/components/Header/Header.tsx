@@ -34,8 +34,8 @@ interface User {
 
 const Header: React.FC = () => {
   const navItems = [
-    { name: "Topics", href: "/topics" },
-    { name: "Learning Paths", href: "/learning-paths" },
+    { name: "Topics", href: "#" },
+    { name: "Path", href: "#" },
     { name: "Features", href: "#" },
     { name: "Blog", href: "#" },
     { name: "Teams", href: "#" },

@@ -25,34 +25,36 @@ const SigninForm: React.FC<SigninFormProps> = ({
 
       const response = await authService.login(email, password);
 
+
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
       localStorage.setItem("role", response.data.user.role);
 
       // Redirect based on user role
-      const redirectWithMessage = () => {
-        message.success("Login successfully! Redirecting...", 1.5);
-        setTimeout(() => {
-          switch (response.data.user.role) {
-            case "INSTRUCTOR":
-              window.location.href = "/instructor-management";
-              break;
-            case "INSTRUCTOR_LEAD":
-              window.location.href = "/instructor-lead-dashboard";
-              break;
-            case "ADMIN":
-              window.location.href = "/admin-dashboard";
-              break;
-            case "LEARNER":
-              window.location.href = "/";
-              break;
-            default:
-              window.location.href = "/";
-              break;
-          }
-        }, 1500);
-      };
+     const redirectWithMessage = () => {
+       message.success("Login successfully! Redirecting...", 1.5);
+       setTimeout(() => {
+         switch (response.data.user.role) {
+           case "INSTRUCTOR":
+             window.location.href = "/instructor-management";
+             break;
+           case "INSTRUCTOR_LEAD":
+             window.location.href = "/instructor-lead-dashboard";
+             break;
+           case "ADMIN":
+             window.location.href = "/admin-dashboard";
+             break;
+           case "LEARNER":
+             window.location.href = "/";
+             break;
+           default:
+             window.location.href = "/";
+             break;
+         }
+       }, 1500);
+     };
       redirectWithMessage();
+      
     } catch (error: any) {
       message.error(error.response?.data?.message || "Login failed");
     } finally {
