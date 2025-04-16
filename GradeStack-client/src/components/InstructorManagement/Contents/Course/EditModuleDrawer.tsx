@@ -183,10 +183,14 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
   //Create lesson
   const handleCreateLessonSubmit = async (values: any) => {
     try {
+      // Calculate new order based on existing lessons
+      const newOrder = editingModule.lessons.length + 1;
+
       const lessonData = {
         title: values.title,
         description: values.description,
         isPreview: values.isPreview || false,
+        order: newOrder,
       };
 
       let response;
@@ -204,6 +208,7 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
           // Format response cho video lesson
           response = {
             ...response,
+            order: newOrder,
             content: {
               video: {
                 url: videoInfo?.videoUrl || "",
@@ -228,6 +233,7 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
             // Format response cho coding lesson
             response = {
               ...response,
+              order: newOrder,
               content: {
                 coding: {
                   language: values.language,
@@ -260,6 +266,7 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
             );
             response = {
               ...response,
+              order: newOrder,
               content: {
                 finalTest: {
                   questions: values.questions.map((q: any, index: number) => ({
@@ -285,12 +292,31 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
         ...editingModule,
         lessons: [...editingModule.lessons, response],
       };
-      setEditingModule(updatedModule);
 
-      // Gọi onSave để cập nhật state ở CourseDetail
-      onSave(updatedModule);
+      // Tính toán duration mới
+      const totalDuration = updatedModule.lessons.reduce(
+        (total, lesson) => total + (lesson.video?.duration || 0),
+        0
+      );
+
+      // Cập nhật trên server
+      await instructorService.updateModule(updatedModule.id, {
+        title: updatedModule.title,
+        description: updatedModule.description,
+        videoDuration: totalDuration,
+      });
+
+      // Quan trọng: Cập nhật module với duration mới trước khi gửi về CourseDetail
+      const updatedModuleWithDuration = {
+        ...updatedModule,
+        videoDuration: totalDuration,
+      };
+
+      setEditingModule(updatedModuleWithDuration);
+      onSave(updatedModuleWithDuration);
 
       message.success("Lesson created successfully");
+
       form.resetFields();
       setActiveLessonKeys(
         activeLessonKeys.filter((key) => key !== "new-lesson")
@@ -302,10 +328,7 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
   };
 
   // Delete lesson
-  const confirm = () =>
-    new Promise((resolve) => {
-      setTimeout(() => resolve(null), 3000);
-    });
+
   const handleDeleteLesson = async (lessonId: string, lessonIndex: number) => {
     try {
       await instructorService.deleteLesson(lessonId);

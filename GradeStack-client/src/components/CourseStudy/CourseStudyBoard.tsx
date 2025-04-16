@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import SideBar from "./SideBar";
 import CourseDescription from "./CourseDescription";
 import VideoContent from "./Contents/VideoContent";
-// import CodingContent from "./Contents/CodingContent";
 import FinalQuizContent from "./Contents/FinalQuizContent";
 import { useParams } from "react-router-dom";
 import { learnerService } from "../../services/api";
 import { Spin } from "antd";
 import PracticeCode from "../../pages/PracticeCode/PracticeCode";
+import { userService } from "../../services/api";
+
 export interface Course {
   id: string;
   title: string;
@@ -88,6 +89,7 @@ export enum SupportedLanguage {
 }
 export interface FinalTestLesson {
   estimatedDuration?: number;
+  passingScore?: number;
   questions: {
     content: string;
     order: number;
@@ -173,6 +175,24 @@ const comments: Comment[] = [
     replies: [],
   },
 ];
+
+interface EnrollmentRecord {
+  enrolledAt: string;
+  course: {
+    id: string;
+    title: string;
+    thumbnail: string;
+    instructor?: {
+      avatar?: string;
+      user?: {
+        firstName: string;
+        lastName: string;
+      };
+    };
+  };
+  progress: number;
+}
+
 const CourseStudyBoard: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const [course, setCourse] = useState<Course | null>(null);
@@ -183,6 +203,7 @@ const CourseStudyBoard: React.FC = () => {
     null
   );
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(true);
+  const [isEnrolled, setIsEnrolled] = useState(false);
 
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -193,7 +214,6 @@ const CourseStudyBoard: React.FC = () => {
         }
 
         const response = await learnerService.getCoursebyCourseId(courseId);
-        console.log("Course data:", response);
 
         // Transform API data to match Course interface
         const courseData: Course = {
@@ -285,9 +305,6 @@ const CourseStudyBoard: React.FC = () => {
               }))
             : [],
         };
-
-        // Log the transformed course data
-        console.log("Transformed course data:", courseData);
         setCourse(courseData);
       } catch (err) {
         console.error("Error fetching course:", err);
@@ -299,6 +316,37 @@ const CourseStudyBoard: React.FC = () => {
 
     fetchCourseData();
   }, [courseId]);
+
+  useEffect(() => {
+    const checkEnrollmentStatus = async () => {
+      try {
+        const userData = localStorage.getItem("user");
+        if (!userData) return;
+
+        const user = JSON.parse(userData);
+        const response = await userService.getMyEnrolledCourses(user.id);
+        const enrolledCourses = response.data;
+        console.log("Enrolled courses:", enrolledCourses);
+
+        console.log("Course ID:", course?.id);
+        console.log(
+          "Enrolled course IDs:",
+          enrolledCourses.map((e) => e.course.id)
+        );
+
+        const isEnrolled = enrolledCourses.some(
+          (enrollment: EnrollmentRecord) => enrollment.course.id === course?.id
+        );
+
+        console.log("Is enrolled:", isEnrolled);
+        setIsEnrolled(isEnrolled);
+      } catch (error) {
+        console.error("Error checking enrollment status:", error);
+      }
+    };
+
+    checkEnrollmentStatus();
+  }, [courseId, course?.id]);
 
   // Helper function to determine lesson type from API response
   const getLessonType = (lesson: any): LessonType => {
@@ -389,6 +437,7 @@ const CourseStudyBoard: React.FC = () => {
             isSidebarVisible={isSidebarVisible}
             setIsSidebarVisible={setIsSidebarVisible}
             currentLesson={currentLesson}
+            isEnrolled={isEnrolled}
           />
         </div>
       )}
@@ -437,6 +486,7 @@ const CourseStudyBoard: React.FC = () => {
           </div>
           <div className="px-10">
             <CourseDescription
+              lesson={currentLesson}
               course={course}
               comments={comments}
               users={users}

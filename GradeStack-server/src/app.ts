@@ -20,7 +20,7 @@ import bodyParser from 'body-parser';
 import checkoutRoutes from './modules/checkout/routes/checkout.routes';
 import noteRoutes from './modules/note/note.route';
 import { commentRoutes } from './modules/comment';
-
+import coursesRouter from './modules/courses/routes/course.routes';
 const app = express();
 
 app.use(cors());
@@ -42,6 +42,8 @@ app.use('/api', videoLessonRouter);
 app.use('/api', moduleRouter);
 app.use('/api', learningPathRouter);
 app.use('/api', certificateRouter);
+
+app.use("/api/courses", coursesRouter);
 
 app.use('/api/images', imageUploadRouter);
 app.use("/api/supporter", supporterRouter);
