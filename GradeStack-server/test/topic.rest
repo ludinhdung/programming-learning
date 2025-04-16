@@ -5,7 +5,7 @@
 @baseUrl = http://localhost:3000/api
 @token = YOUR_JWT_TOKEN_HERE
 @topicId = 32f583ea-7e96-4c73-b193-02a572b67832
-@instructorId = db870ae2-88b7-4c01-960f-2a4558bdb716
+@instructorId = c385feda-2e95-47a1-aa81-8e64b0310691
 
 # ===============================
 # TOPIC CRUD OPERATIONS

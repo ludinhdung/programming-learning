@@ -177,8 +177,19 @@ const comments: Comment[] = [
 ];
 
 interface EnrollmentRecord {
-  courseId: string;
   enrolledAt: string;
+  course: {
+    id: string;
+    title: string;
+    thumbnail: string;
+    instructor?: {
+      avatar?: string;
+      user?: {
+        firstName: string;
+        lastName: string;
+      };
+    };
+  };
   progress: number;
 }
 
@@ -193,7 +204,7 @@ const CourseStudyBoard: React.FC = () => {
   );
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(true);
   const [isEnrolled, setIsEnrolled] = useState(false);
-  
+
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
@@ -203,7 +214,6 @@ const CourseStudyBoard: React.FC = () => {
         }
 
         const response = await learnerService.getCoursebyCourseId(courseId);
-        console.log("Course data:", response);
 
         // Transform API data to match Course interface
         const courseData: Course = {
@@ -295,9 +305,6 @@ const CourseStudyBoard: React.FC = () => {
               }))
             : [],
         };
-
-        // Log the transformed course data
-        console.log("Transformed course data:", courseData);
         setCourse(courseData);
       } catch (err) {
         console.error("Error fetching course:", err);
@@ -310,31 +317,37 @@ const CourseStudyBoard: React.FC = () => {
     fetchCourseData();
   }, [courseId]);
 
-useEffect(() => {
-  const checkEnrollmentStatus = async () => {
-    try {
-      const userData = localStorage.getItem("user");
-      if (!userData) return;
+  useEffect(() => {
+    const checkEnrollmentStatus = async () => {
+      try {
+        const userData = localStorage.getItem("user");
+        if (!userData) return;
 
-      const user = JSON.parse(userData);
-      const response = await userService.getMyEnrolledCourses(user.id);
-      const enrolledCourses = response.data;
-      console.log("Enrolled courses:", enrolledCourses);
-      
-      const isEnrolled = enrolledCourses.some(
-        (enrollment: EnrollmentRecord) => enrollment.courseId === course?.id
-      );
+        const user = JSON.parse(userData);
+        const response = await userService.getMyEnrolledCourses(user.id);
+        const enrolledCourses = response.data;
+        console.log("Enrolled courses:", enrolledCourses);
 
-      console.log("Is enrolled:", isEnrolled);
-      setIsEnrolled(isEnrolled);
-    } catch (error) {
-      console.error("Error checking enrollment status:", error);
-    }
-  };
+        console.log("Course ID:", course?.id);
+        console.log(
+          "Enrolled course IDs:",
+          enrolledCourses.map((e) => e.course.id)
+        );
 
-  checkEnrollmentStatus();
-}, [courseId, course?.id]);
-  
+        const isEnrolled = enrolledCourses.some(
+          (enrollment: EnrollmentRecord) => enrollment.course.id === course?.id
+        );
+
+        console.log("Is enrolled:", isEnrolled);
+        setIsEnrolled(isEnrolled);
+      } catch (error) {
+        console.error("Error checking enrollment status:", error);
+      }
+    };
+
+    checkEnrollmentStatus();
+  }, [courseId, course?.id]);
+
   // Helper function to determine lesson type from API response
   const getLessonType = (lesson: any): LessonType => {
     // Handle string-based lessonType from API
@@ -349,8 +362,6 @@ useEffect(() => {
 
     return LessonType.VIDEO;
   };
-
-  
 
   const renderLessonContent = () => {
     if (loading) {

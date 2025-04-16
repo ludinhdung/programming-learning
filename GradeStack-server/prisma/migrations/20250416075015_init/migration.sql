@@ -239,6 +239,8 @@ CREATE TABLE "Topic" (
     "name" TEXT NOT NULL,
     "thumbnail" TEXT,
     "description" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     "instructorUserId" TEXT,
 
     CONSTRAINT "Topic_pkey" PRIMARY KEY ("id")
