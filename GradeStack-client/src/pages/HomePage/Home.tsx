@@ -12,11 +12,11 @@ import RotatingText from "../../components/React-bitsComponents/RotatingText";
 import CodeEditorImage from "../../assets/CodeEditor.svg";
 
 interface Course {
+  id: string;
   title: string;
-  author: string;
-  authorAvatar: string;
   thumbnail: string;
   href: string;
+  instructor: Instructor;
 }
 
 interface Instructor {
@@ -557,12 +557,12 @@ const Home: React.FC = () => {
               }}
             >
               {courses.map((course, index) => (
-                <div
+                <a
                   key={index}
                   className="group flex h-[min-content] aspect-[1/.7] lg:h-auto lg:aspect-auto lg:max-w-none series-card"
                 >
                   <a
-                    href={course.href}
+                    href={`/course-study/${course.id}`}
                     className="panel relative transition-colors duration-300 px-4 lg:px-5 py-4 flex-1 overflow-hidden text-center aspect-square bg-slate-800 rounded-lg hover:bg-blue-800"
                   >
                     <header className="flex flex-col items-center justify-center text-center h-[9.38rem]">
@@ -571,11 +571,11 @@ const Home: React.FC = () => {
                       </h2>
                       <div className="flex text-gray-400 text-sm items-center">
                         <img
-                          src={course.authorAvatar}
-                          alt={`${course.author}'s avatar`}
+                          src={course.instructor.avatar}
+                          alt={`${course.instructor.user.firstName} ${course.instructor.user.lastName}'s avatar`}
                           className="w-[22px] h-[22px] rounded-full mr-2"
                         />
-                        <span className="font-bold">with {course.author}</span>
+                        <span className="font-bold">with {course.instructor.user.firstName}</span>
                       </div>
                     </header>
                     <img
@@ -586,7 +586,7 @@ const Home: React.FC = () => {
                       style={{ width: "15.3rem" }}
                     />
                   </a>
-                </div>
+                </a>
               ))}
             </div>
           </div>

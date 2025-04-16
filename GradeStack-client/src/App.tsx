@@ -18,7 +18,7 @@ import CourseList from "./pages/CourseList/CourseList";
 import CourseDetail from "./pages/Courses/CourseDetail";
 import Topics from "./pages/Topics/Topics";
 import LearningPaths from "./pages/LearningPaths/LearningPaths";
-import LearningPathDetail from './pages/LearningPaths/LearningPathDetail';
+import LearningPathDetail from "./pages/LearningPaths/LearningPathDetail";
 import Checkout from "./pages/Checkout/Checkout";
 import Profile from "./pages/Profile/Profile";
 // import CreateCourse from "./pages/CreateCourse/CreateCourse";
@@ -38,6 +38,7 @@ import LearningPathList from "./pages/InstructorDashboard/LearningPaths/Learning
 import CreateLearningPath from "./pages/InstructorDashboard/LearningPaths/CreateLearningPath";
 import EditLearningPath from "./pages/InstructorDashboard/LearningPaths/EditLearningPath";
 import LearningPathLayout from "./pages/InstructorDashboard/LearningPaths/LearningPathLayout";
+import InstructorMonetization from "./components/InstructorManagement/Contents/Monetization";
 // Supporter Dashboard
 import SupporterDashboard from "./pages/SupporterDashboard/SupporterDashboard";
 import SupporterOverview from "./components/SupporterManagement/Contents/Overview";
@@ -74,7 +75,10 @@ const App: React.FC = () => {
           <Route path="/courses/:courseId" element={<CourseDetail />} />
           <Route path="/topics" element={<Topics />} />
           <Route path="/learning-paths" element={<LearningPaths />} />
-          <Route path="/learning-paths/:pathId" element={<LearningPathDetail />} />
+          <Route
+            path="/learning-paths/:pathId"
+            element={<LearningPathDetail />}
+          />
           <Route path="/checkout/:courseId" element={<Checkout />} />
           <Route path="/profile" element={<Profile />} />
           {/* Instructor Dashboard*/}
@@ -94,6 +98,7 @@ const App: React.FC = () => {
                 element={<InstructorCourseDetail />}
               />
             </Route>
+            <Route path="monetization" element={<InstructorMonetization />} />
           </Route>
           {/* Supporter Dashboard*/}
           <Route path="/supporter-management" element={<SupporterDashboard />}>
@@ -119,14 +124,17 @@ const App: React.FC = () => {
             <Route path="create" element={<CreateTopic />} />
             <Route path=":id/edit" element={<EditTopic />} />
           </Route>
-          
+
           {/* Learning Path Management */}
-          <Route path="/instructor/learning-paths" element={<LearningPathLayout />}>
+          <Route
+            path="/instructor/learning-paths"
+            element={<LearningPathLayout />}
+          >
             <Route index element={<LearningPathList />} />
             <Route path="create" element={<CreateLearningPath />} />
             <Route path=":id/edit" element={<EditLearningPath />} />
           </Route>
-          
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

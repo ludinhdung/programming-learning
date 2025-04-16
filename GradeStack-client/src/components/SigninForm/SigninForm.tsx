@@ -44,7 +44,7 @@ const SigninForm: React.FC<SigninFormProps> = ({
               window.location.href = "/admin-dashboard";
               break;
             case "LEARNER":
-              window.location.href = "/";
+              window.location.href = "/dashboard";
               break;
             default:
               window.location.href = "/";

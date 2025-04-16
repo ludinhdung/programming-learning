@@ -9,7 +9,7 @@ import type {
   BookmarkRecord,
   PurchaseRecord
 } from '../../services/user.service';
-
+import { formatVND } from '../../utils/formatCurrency';
 const { Sider, Content } = Layout;
 
 const Profile: FC = () => {
@@ -339,7 +339,7 @@ const Profile: FC = () => {
                                 <Button 
                                   type="text" 
                                   className="text-[#3b82f6] hover:text-[#60a5fa] hover:bg-[#1a1f2e]"
-                                  href={`/course/${enrollment.course.id}`}
+                                  href={`/courses/${enrollment.course.id}`}
                                 >
                                   Continue Learning
                                 </Button>
@@ -422,7 +422,7 @@ const Profile: FC = () => {
                                       <h3 className="text-white text-lg font-semibold mb-2">{purchase.course.title}</h3>
                                       <div className="flex flex-wrap gap-2">
                                         <Tag className="rounded-full px-3 py-1 border-0 bg-[#1e293f] text-[#3b82f6] font-medium">
-                                          ${purchase.price.toLocaleString()}
+                                          {formatVND(purchase.price)}
                                         </Tag>
                                         {purchase.status && (
                                           <Tag 
@@ -457,7 +457,7 @@ const Profile: FC = () => {
                                 <Button 
                                   type="primary" 
                                   size="middle"
-                                  href={`/course/${purchase.course.id}`}
+                                  href={`/courses/${purchase.course.id}`}
                                   className="bg-[#3b82f6] hover:bg-[#2563eb] border-0 shadow-sm"
                                   icon={<BookOutlined />}
                                 >
@@ -465,7 +465,7 @@ const Profile: FC = () => {
                                 </Button>
                                 <Button 
                                   size="middle"
-                                  href={`/receipts/${purchase.id}`}
+                                  href={`/receipts/${purchase.course.id}`}
                                   className="border-[#3b4452] text-[#bad9fc] hover:text-white hover:border-[#5e7597] bg-transparent"
                                   icon={<CreditCardOutlined />}
                                 >
