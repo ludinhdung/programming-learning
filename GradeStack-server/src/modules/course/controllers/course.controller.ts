@@ -220,6 +220,27 @@ export class CourseController {
     };
 
     /**
+     * Get a single course by ID with full relation data
+     */
+    public getCourseFullRelation = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { courseId } = req.params;
+            
+            // Use the getFullRelationCourses method but filter for a specific course
+            const course = await this.courseService.getCourseWithFullRelations(courseId);
+            
+            if (!course) {
+                res.status(404).json({ message: 'Course not found' });
+                return;
+            }
+            
+            res.status(200).json(course);
+        } catch (error: any) {
+            this.handleError(res, error);
+        }
+    };
+    
+    /**
      * Update a video lesson
      */
     public updateVideoLesson = async (req: Request, res: Response): Promise<void> => {
