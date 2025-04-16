@@ -68,7 +68,7 @@ export class R2StorageService {
       fs.writeFileSync(tempFilePath, buffer);
 
       // Sử dụng đường dẫn tuyệt đối của ffprobe
-      const ffprobePath = "/opt/homebrew/bin/ffprobe";
+      const ffprobePath = "ffprobe";
 
       // Use ffprobe to get video duration
       const { stdout } = await execPromise(

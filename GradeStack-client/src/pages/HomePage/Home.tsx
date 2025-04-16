@@ -351,6 +351,8 @@ const Home: React.FC = () => {
     const fetchCourses = async () => {
       try {
         const response = await learnerService.getCourses();
+        console.log("course", response.data);
+        
         setCourses(response.data);
       } catch (error) {
         console.error("Error fetching courses:", error);
@@ -479,7 +481,7 @@ const Home: React.FC = () => {
                 className="block"
                 href={`/instructors/${instructor.userId}`}
               >
-                <figure className="relative group overflow-hidden h-full flex">
+                <figure className="relative group overflow-hidden h-full flex rounded-lg">
                   <img
                     loading="lazy"
                     className="transition-all duration-300 w-full h-full"
