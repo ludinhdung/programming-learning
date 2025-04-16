@@ -4,6 +4,7 @@ export interface LearningPathBaseDTO {
   title: string;
   description?: string | null;
   thumbnail?: string | null;
+  estimatedCompletionTime?: number | null;
 }
 
 export interface LearningPathDTO extends LearningPathBaseDTO {
@@ -30,6 +31,7 @@ export interface UpdateLearningPathDTO {
   title?: string;
   description?: string | null;
   thumbnail?: string | null;
+  estimatedCompletionTime?: number | null;
   courseIds?: string[]; // Course IDs
 }
 
