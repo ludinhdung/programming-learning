@@ -20,6 +20,7 @@ import bodyParser from 'body-parser';
 import checkoutRoutes from './modules/checkout/routes/checkout.routes';
 import noteRoutes from './modules/note/note.route';
 import { commentRoutes } from './modules/comment';
+import workshopRouter from './modules/workshop/routes/workshop.routes';
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use('/api', topicRouter);
 app.use('/api', lessonRouter);
 app.use('/api', videoLessonRouter);
 app.use('/api', moduleRouter);
+// Áp dụng routes cho learning path
 app.use('/api', learningPathRouter);
 app.use('/api', certificateRouter);
 
@@ -49,6 +51,8 @@ app.use('/api/practice-code', practiceCodeRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api', noteRoutes);
 app.use('/api/comments', commentRoutes);
+// Áp dụng routes cho workshop
+app.use('/api', workshopRouter);
 
 app.use(errorHandler);
 
