@@ -74,7 +74,7 @@ const InstructorWorkshopList = () => {
   };
 
   useEffect(() => {
-    if (user && user.role === 'INSTRUCTOR') {
+    if (user && user.role === 'INSTRUCTOR_LEAD') {
       loadWorkshops();
     }
   }, [user, page]);
@@ -142,18 +142,18 @@ const InstructorWorkshopList = () => {
     setDeleteWorkshopId(null);
   };
 
-  if (!user || user.role !== 'INSTRUCTOR') {
-    return (
-      <div style={{ padding: '24px 0' }}>
-        <Alert
-          message="Cảnh báo"
-          description="Bạn không có quyền truy cập trang này."
-          type="warning"
-          showIcon
-        />
-      </div>
-    );
-  }
+  // if (!user || user.role !== 'INSTRUCTOR_LEAD') {
+  //   return (
+  //     <div style={{ padding: '24px 0' }}>
+  //       <Alert
+  //         message="Cảnh báo"
+  //         description="Bạn không có quyền truy cập trang này."
+  //         type="warning"
+  //         showIcon
+  //       />
+  //     </div>
+  //   );
+  // }
 
   return (
     <div style={{ padding: '24px 0' }}>
@@ -165,7 +165,7 @@ const InstructorWorkshopList = () => {
         <Button 
           type="primary" 
           icon={<PlusOutlined />}
-          onClick={() => navigate('/instructor/workshops/create')}
+          onClick={() => navigate('/instructor-lead-management/workshops/create')}
         >
           Tạo Workshop mới
         </Button>
@@ -287,12 +287,12 @@ const InstructorWorkshopList = () => {
                     <Button
                       type="text"
                       icon={<EyeOutlined />}
-                      onClick={() => navigate(`/workshops/${workshop.id}`)}
+                      onClick={() => navigate(`/instructor-lead-management/workshops/${workshop.id}`)}
                     />
                     <Button
                       type="text"
                       icon={<EditOutlined />}
-                      onClick={() => navigate(`/instructor/workshops/edit/${workshop.id}`)}
+                      onClick={() => navigate(`/instructor-lead-management/workshops/${workshop.id}/edit`)}
                     />
                     <Button
                       type="text"
