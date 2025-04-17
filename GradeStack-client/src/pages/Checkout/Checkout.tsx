@@ -6,6 +6,7 @@ import styled from "styled-components";
 import Header from '../../components/Header/Header';
 import { courseService, CourseDetail } from '../../services/course.service';
 import { paymentService, CreatePaymentRequest } from '../../services/payment.service';
+import { formatVND } from '../../utils/formatCurrency';
 
 // Styled Input similar to CourseList
 const StyledInput = styled(Input)`
@@ -70,12 +71,12 @@ export const Checkout: React.FC = () => {
         courseName: course.title
       };
 
-      console.log("Payment request payload:", paymentData); 
+      console.log("Payment request payload:", paymentData);
 
       const response = await paymentService.createPayment(paymentData);
 
-      console.log("Payment response:", response); 
-      
+      console.log("Payment response:", response);
+
       if (response.checkoutUrl) {
         window.location.href = response.checkoutUrl;
       } else {
@@ -157,7 +158,7 @@ export const Checkout: React.FC = () => {
                 </div>
                 <div className="flex items-center mt-4 space-x-4">
                   <p className="text-xl font-semibold text-[#3b82f6]">
-                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(course.price))}
+                    {formatVND(course.price)}
                   </p>
                 </div>
               </div>
@@ -216,7 +217,7 @@ export const Checkout: React.FC = () => {
                 onClick={handlePayment}
                 className="bg-[#1b55ac] text-[#fff] text-md font-medium rounded-none hover:border-[#1b55ac] hover:bg-[#1c2e48]"
               >
-                <span className="mr-2"><LockOutlined /></span> Pay {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(course.price))}
+                <span className="mr-2"><LockOutlined /></span> Pay {formatVND(course.price)}
               </Button>
             </div>
           </div>

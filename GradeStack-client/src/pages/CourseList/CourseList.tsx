@@ -4,9 +4,9 @@ import { ArrowRightOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import Header from "../../components/Header/Header";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { Course } from "../../services/course.service"; // Updated import
-import courseService, { GetCoursesParams } from "../../services/course.service"; // Import course service
-import { instructorService } from "../../services/api"; // Import instructor service
+import { Course } from "../../services/course.service";
+import courseService, { GetCoursesParams } from "../../services/course.service";
+import { instructorService, supporterService } from "../../services/api";
 import { debounce } from "lodash";
 import { formatVND } from "../../utils/formatCurrency";
 
@@ -56,10 +56,14 @@ export const LoadingBar = styled.div`
   }
 `;
 
-interface Topic {
+interface Instructor {
   id: string;
-  name: string;
-  description: string;
+  userId: string;
+  avatar?: string;
+  user: {
+    firstName: string;
+    lastName: string;
+  };
   coursesCount: number;
 }
 
@@ -77,6 +81,7 @@ const CourseList = () => {
   const [topics, setTopics] = useState<
     Array<{ id: string; name: string; count: number }>
   >([]);
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
   const pageSize = 20;
 
   // Fetch topics from API
@@ -97,12 +102,20 @@ const CourseList = () => {
     fetchTopics();
   }, []);
 
-  const instructors = [
-    { id: "050c6223-9027-4d64-8f57-9e41afbb3908", name: "Jon Josh", count: 42 },
-    { id: "jeremy-mcpeak", name: "Jeremy McPeak", count: 28 },
-    { id: "simon-wardley", name: "Simon Wardley", count: 15 },
-    { id: "luke-downing", name: "Luke Downing", count: 23 },
-  ];
+  // Fetch instructors from API
+  useEffect(() => {
+    const fetchInstructors = async () => {
+      try {
+        const response = await supporterService.getAllInstructor();
+        setInstructors(response.data || []);
+      } catch (error) {
+        console.error("Failed to fetch instructors:", error);
+        message.error("Failed to load instructors. Please try again later.");
+      }
+    };
+
+    fetchInstructors();
+  }, []);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -238,7 +251,7 @@ const CourseList = () => {
     ),
     ...selectedInstructors.map(
       (instructorId) =>
-        instructors.find((instructor) => instructor.id === instructorId)?.name
+        instructors.find((instructor) => instructor.userId === instructorId)?.user.firstName
     ),
   ]
     .filter(Boolean)
@@ -438,7 +451,7 @@ const CourseList = () => {
                     onChange={() => handleTopicChange(topic.id)}
                   >
                     <span className="ml-2 text-white text-[13.5px] font-medium">
-                      {topic.name} ({topic.count || 0})
+                      {topic.name}
                     </span>
                   </CustomCheckbox>
                   ;
@@ -454,16 +467,16 @@ const CourseList = () => {
             <div className="space-y-2 border border-blue-500 border-opacity-15 p-4">
               {instructors.map((instructor) => (
                 <div
-                  key={instructor.id}
+                  key={instructor.userId}
                   className="flex items-center justify-between"
                 >
                   <CustomCheckbox
-                    checked={selectedInstructors.includes(instructor.id)}
-                    onChange={() => handleInstructorChange(instructor.id)}
+                    checked={selectedInstructors.includes(instructor.userId)}
+                    onChange={() => handleInstructorChange(instructor.userId)}
                     className="text-gray-400 hover:text-white [&>.ant-checkbox-inner]:rounded-none [&>.ant-checkbox-inner]:border-gray-500"
                   >
                     <span className="ml-2 text-white text-[13.5px] font-medium">
-                      {instructor.name} ({instructor.count})
+                      {`${instructor.user.firstName} ${instructor.user.lastName}`}
                     </span>
                   </CustomCheckbox>
                 </div>

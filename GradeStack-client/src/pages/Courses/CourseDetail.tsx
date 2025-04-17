@@ -1,11 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../../components/Header/Header';
-import { Button } from 'antd';
+import { Button, Modal } from 'antd';
 import styled from "styled-components";
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import userService from '../../services/user.service';
+import { formatVND } from '../../utils/formatCurrency';
+import SigninForm from '../../components/SigninForm/SigninForm';
 
 // Styled components
+export const LoadingBar = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(to right, #1b55ac, #3b82f6);
+  z-index: 9999;
+  animation: loading 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+
+  @keyframes loading {
+    0% {
+      transform: translateX(-100%);
+      opacity: 0.7;
+    }
+    40% {
+      transform: translateX(10%);
+      opacity: 1;
+    }
+    70% {
+      transform: translateX(50%);
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+`;
+
 const StyledButton = styled(Button)`
   &.ant-btn {
     background-color: #29324a;
@@ -29,6 +62,7 @@ interface CourseData {
     price: string;
     duration: number;
     thumbnail: string;
+    updatedAt: string;
     instructor: {
         userId: string;
         organization: string;
@@ -41,6 +75,11 @@ interface CourseData {
             email: string;
         }
     };
+    CourseTopic: Array<{
+        topic: {
+            name: string;
+        }
+    }>;
     modules: Array<{
         id: string;
         title: string;
@@ -68,13 +107,55 @@ interface CourseData {
     }>;
 }
 
+interface EnrollmentRecord {
+    course: {
+        id: string;
+    };
+}
+
 const CourseDetail: React.FC = () => {
     const { courseId } = useParams<{ courseId: string }>();
     const [courseData, setCourseData] = useState<CourseData | null>(null);
     const [loading, setLoading] = useState(true);
+    const [showLoading, setShowLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [expandedSections, setExpandedSections] = useState<string[]>([]);
+    const [isEnrolled, setIsEnrolled] = useState(false);
+    const [showLoginModal, setShowLoginModal] = useState(false);
+    const [lastAttemptedAction, setLastAttemptedAction] = useState<'buy' | 'bookmark' | null>(null);
 
+    const checkAuth = () => {
+        const userData = localStorage.getItem("user");
+        return !!userData;
+    };
+
+    const handleBuyClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (!checkAuth()) {
+            setLastAttemptedAction('buy');
+            setShowLoginModal(true);
+            return;
+        }
+        window.location.href = `/checkout/${courseId}`;
+    };
+
+    const handleBookmarkClick = () => {
+        if (!checkAuth()) {
+            setLastAttemptedAction('bookmark');
+            setShowLoginModal(true);
+            return;
+        }
+        // Add your bookmark logic here
+    };
+
+    const handleLoginSuccess = () => {
+        setShowLoginModal(false);
+        if (lastAttemptedAction === 'buy') {
+            window.location.href = `/courses/${courseId}`;
+        } else if (lastAttemptedAction === 'bookmark') {
+            handleBookmarkClick();
+        }
+    };
 
     const getSocialIcon = (url: string) => {
         if (url.includes('twitter.com') || url.includes('x.com')) {
@@ -119,22 +200,50 @@ const CourseDetail: React.FC = () => {
 
     useEffect(() => {
         const fetchCourseData = async () => {
+            setLoading(true);
+            setShowLoading(true);
             try {
-                setLoading(true);
                 const response = await axios.get(`http://localhost:4000/api/courses/${courseId}/full`);
                 setCourseData(response.data);
                 setExpandedSections(response.data.modules.map((module: { id: string }) => module.id));
+                setLoading(false);
+
+                setTimeout(() => {
+                    setShowLoading(false);
+                }, 2000);
             } catch (err) {
                 setError('Failed to load course data. Please try again later.');
                 console.error('Error fetching course data:', err);
-            } finally {
                 setLoading(false);
+                setShowLoading(false);
             }
         };
 
         if (courseId) {
             fetchCourseData();
         }
+    }, [courseId]);
+
+    useEffect(() => {
+        const checkEnrollmentStatus = async () => {
+            try {
+                const userData = localStorage.getItem("user");
+                if (!userData) return;
+
+                const user = JSON.parse(userData);
+                const enrolledCourses = await userService.getMyEnrolledCourses(user.id);
+
+                const isEnrolled = enrolledCourses.some(
+                    (enrollment: EnrollmentRecord) => enrollment.course.id === courseId
+                );
+
+                setIsEnrolled(isEnrolled);
+            } catch (error) {
+                console.error("Error checking enrollment status:", error);
+            }
+        };
+
+        checkEnrollmentStatus();
     }, [courseId]);
 
     const toggleSection = (sectionId: string) => {
@@ -148,7 +257,7 @@ const CourseDetail: React.FC = () => {
     const formatDuration = (seconds: number) => {
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
-        return `${hours}h ${minutes}m`;
+        return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
     };
 
     if (loading) {
@@ -169,6 +278,7 @@ const CourseDetail: React.FC = () => {
 
     return (
         <>
+            {showLoading && <LoadingBar />}
             <Header />
             <main className="container mx-auto px-20 pb-20 p-16 bg-[#0a1321]">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -225,14 +335,72 @@ const CourseDetail: React.FC = () => {
                                     {courseData.description}
                                 </p>
                                 <div className="mt-6 flex space-x-4">
-                                    <StyledButton type="primary" className="bg-[#3b8ff2] flex items-center space-x-2 py-5 px-4">
-                                        <svg width="14" viewBox="0 0 14 15" fill="none" className="shrink-0"><rect x="0.928711" y="4.10059" width="10.2" height="6.8" className="fill-current"></rect><rect x="0.928467" y="0.700195" width="3.4" height="13.6" className="fill-current"></rect><rect x="0.928711" y="10.9004" width="3.4" height="3.4" className="fill-current"></rect><rect x="4.28223" y="2.40039" width="3.4" height="3.4" className="fill-current"></rect><rect x="4.28223" y="9.2002" width="3.4" height="3.4" className="fill-current"></rect><rect x="7.68066" y="7.5" width="3.4" height="3.4" className="fill-current"></rect><rect x="7.68066" y="4.10059" width="3.4" height="3.4" className="fill-current"></rect><rect x="9.66895" y="5.80078" width="3.4" height="3.4" className="fill-current"></rect><rect x="0.928711" y="2.40039" width="6.8" height="3.4" className="fill-current"></rect><rect x="0.928711" y="9.2002" width="6.8" height="3.4" className="fill-current"></rect></svg>
-                                        <span>Play Course</span>
-                                    </StyledButton>
-                                    <StyledButton type="primary" className="flex items-center space-x-2 py-5 px-4">
-                                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="relative inline-block shrink-0"><rect y="10" width="5" height="5" className="fill-current"></rect><rect x="9.99902" y="10" width="5" height="5" className="fill-current"></rect><rect y="6.99902" width="5" height="5" className="fill-current"></rect><rect x="9.99951" y="6.99902" width="5" height="5" className="fill-current"></rect><path fillRule="evenodd" clipRule="evenodd" d="M5.00049 2H2.22271V4.22222H0.000488281V7H5.00049V2Z" className="fill-current"></path><path fillRule="evenodd" clipRule="evenodd" d="M12.7774 2H9.99951V7H14.9995V4.22222H12.7774V2Z" className="fill-current"></path><rect x="5" width="5" height="7" className="fill-current"></rect><rect x="5" y="5" width="5" height="5" className="fill-current"></rect></svg>
+                                    {isEnrolled ? (
+                                        <StyledButton
+                                            type="primary"
+                                            className="bg-[#3b8ff2] flex items-center space-x-2 py-5 px-4"
+                                            onClick={() => window.location.href = `/course-study/${courseId}`}
+                                        >
+                                            <svg width="14" viewBox="0 0 14 15" fill="none" className="shrink-0">
+                                                <rect x="0.928711" y="4.10059" width="10.2" height="6.8" className="fill-current"></rect>
+                                                <rect x="0.928467" y="0.700195" width="3.4" height="13.6" className="fill-current"></rect>
+                                                <rect x="0.928711" y="10.9004" width="3.4" height="3.4" className="fill-current"></rect>
+                                                <rect x="4.28223" y="2.40039" width="3.4" height="3.4" className="fill-current"></rect>
+                                                <rect x="4.28223" y="9.2002" width="3.4" height="3.4" className="fill-current"></rect>
+                                                <rect x="7.68066" y="7.5" width="3.4" height="3.4" className="fill-current"></rect>
+                                                <rect x="7.68066" y="4.10059" width="3.4" height="3.4" className="fill-current"></rect>
+                                                <rect x="9.66895" y="5.80078" width="3.4" height="3.4" className="fill-current"></rect>
+                                                <rect x="0.928711" y="2.40039" width="6.8" height="3.4" className="fill-current"></rect>
+                                                <rect x="0.928711" y="9.2002" width="6.8" height="3.4" className="fill-current"></rect>
+                                            </svg>
+                                            <span>Play Course</span>
+                                        </StyledButton>
+                                    ) : (
+                                        <StyledButton
+                                            type="primary"
+                                            className="bg-[#3b8ff2] flex items-center space-x-2 py-5 px-4"
+                                            onClick={handleBuyClick}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clipRule="evenodd" />
+                                            </svg>
+                                            <span>Buy Now - {formatVND(courseData.price)}</span>
+                                        </StyledButton>
+                                    )}
+                                    <StyledButton
+                                        type="primary"
+                                        className="flex items-center space-x-2 py-5 px-4"
+                                        onClick={handleBookmarkClick}
+                                    >
+                                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="relative inline-block shrink-0">
+                                            <rect y="10" width="5" height="5" className="fill-current"></rect>
+                                            <rect x="9.99902" y="10" width="5" height="5" className="fill-current"></rect>
+                                            <rect y="6.99902" width="5" height="5" className="fill-current"></rect>
+                                            <rect x="9.99951" y="6.99902" width="5" height="5" className="fill-current"></rect>
+                                            <path fillRule="evenodd" clipRule="evenodd" d="M5.00049 2H2.22271V4.22222H0.000488281V7H5.00049V2Z" className="fill-current"></path>
+                                            <path fillRule="evenodd" clipRule="evenodd" d="M12.7774 2H9.99951V7H14.9995V4.22222H12.7774V2Z" className="fill-current"></path>
+                                            <rect x="5" width="5" height="7" className="fill-current"></rect>
+                                            <rect x="5" y="5" width="5" height="5" className="fill-current"></rect>
+                                        </svg>
                                         <span>Add to Bookmark</span>
                                     </StyledButton>
+                                </div>
+                                <div className="flex flex-wrap items-center mt-4">
+                                    <span className="text-white text-[9px] font-medium mr-2 mb-2 inline-block border-2 border-[#14202e] px-4 py-1">
+                                        Last Updated: {new Date(courseData.updatedAt).toLocaleDateString("en-US", {
+                                            month: "short",
+                                            day: "numeric",
+                                            year: "numeric",
+                                        })}
+                                    </span>
+                                    {courseData.CourseTopic.map((courseTopic) => (
+                                        <span
+                                            key={courseTopic.topic.name}
+                                            className="text-white text-[9px] font-medium mr-2 mb-2 inline-block border-2 border-[#14202e] px-4 py-1"
+                                        >
+                                            {courseTopic.topic.name}
+                                        </span>
+                                    ))}
                                 </div>
                             </div>
                             <div className="w-full md:w-1/3">
@@ -244,7 +412,7 @@ const CourseDetail: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="mb-4 flex flex-wrap items-center justify-start space-x-6 text-xs text-white font-medium">
+                        <div className="mb-4 border border-[#14202e] p-4 bg-[#14202e] flex flex-wrap items-center justify-start space-x-6 text-xs text-white font-medium">
                             <span className="flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="mr-2 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
@@ -259,7 +427,7 @@ const CourseDetail: React.FC = () => {
                             </span>
                         </div>
 
-                        {/* Episodes Section */}
+                        {/* Lessons Section */}
                         <div className="mt-8">
                             {courseData.modules.map((module) => (
                                 <div key={module.id}>
@@ -287,11 +455,11 @@ const CourseDetail: React.FC = () => {
                                         {module.lessons.map((lesson) => (
                                             <div
                                                 key={lesson.id}
-                                                className={`mb-4 rounded-none bg-[#14202e] p-4 border border-transparent ${!lesson.isPreview ? 'opacity-60' : ''} cursor-pointer transition-all duration-500 ease-in-out hover:border-[#1b55ac]`}
+                                                className={`mb-4 rounded-none bg-[#14202e] p-4 border border-transparent ${!lesson.isPreview && !isEnrolled ? 'opacity-60' : ''} cursor-pointer transition-all duration-500 ease-in-out hover:border-[#1b55ac]`}
                                             >
                                                 <div className="flex items-center">
                                                     <div className="mr-4 flex-shrink-0 rounded-full border-4 border-[#0a1321] p-4 text-center w-16 h-16 flex items-center justify-center">
-                                                        {lesson.isPreview ? (
+                                                        {lesson.isPreview || isEnrolled ? (
                                                             <span className="text-xl font-bold text-white">{lesson.order}</span>
                                                         ) : (
                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
@@ -311,8 +479,10 @@ const CourseDetail: React.FC = () => {
                                                                 <path fillRule="evenodd" clipRule="evenodd" d="M15.1534 0.09375H6.73483V1.77746H6.30548H3.36741V3.46116H1.68371V6.82858H0V15.2471H1.68371V18.6145H2.0878H3.36741V20.2982H6.73483V21.9819H15.1534V20.2982H16.8371H18.5208V18.6145H20.2045V15.2471H20.4907H21.8882V6.82858H20.4907H20.2045V3.46116H18.5208V1.77746H15.1534V0.09375ZM11.6808 11.4585V5.1444H9.57609V11.4585V13.5632H15.8902V11.4585H11.6808Z" className="fill-current" />
                                                             </svg>
                                                             {formatDuration(lesson.duration)}
-                                                            {lesson.isPreview && (
-                                                                <span className="ml-4 p-1 text-[#3b82f6] bg-[#1c2432]">Free to Learn!</span>
+                                                            {(isEnrolled || (!isEnrolled && lesson.isPreview)) && (
+                                                                <span className="ml-4 p-1 text-[#3b82f6] bg-[#1c2432]">
+                                                                    {isEnrolled ? '' : 'Free to Learn!'}
+                                                                </span>
                                                             )}
                                                         </div>
                                                     </div>
@@ -326,6 +496,20 @@ const CourseDetail: React.FC = () => {
                     </div>
                 </div>
             </main>
+
+            <Modal
+                open={showLoginModal}
+                onCancel={() => setShowLoginModal(false)}
+                footer={null}
+                width={500}
+                className="auth-modal"
+            >
+                <SigninForm
+                    onSwitchForm={() => { }}
+                    onForgotPassword={() => { }}
+                    onLoginSuccess={handleLoginSuccess}
+                />
+            </Modal>
         </>
     );
 };
