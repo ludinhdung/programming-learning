@@ -177,7 +177,6 @@ const Topics: FC = () => {
   return (
     <div className="min-h-screen bg-[#0d1118] ">
       <Header />
-      
       <div className="container mx-[25px] px-4 py-8 ">
         {/* Topics Header */}
         <div className="mb-12">

@@ -3,65 +3,123 @@
 
 # Environment Variables
 @baseUrl = http://localhost:4000/api
-@token = YOUR_JWT_TOKEN_HERE
-@topicId = 713bbb5f-cae1-4390-a722-c1b79b17b0e3
-@instructorId = 6f315ddf-698f-4fbf-adb9-bd868816fa7e
+@instructorLeadToken = YOUR_INSTRUCTOR_LEAD_TOKEN_HERE
+@instructorToken = YOUR_INSTRUCTOR_TOKEN_HERE
+@learnerToken = YOUR_LEARNER_TOKEN_HERE
+@adminToken = YOUR_ADMIN_TOKEN_HERE
+
+# Thay đổi các ID này sau khi chạy topic-mock.ts
+@instructorLeadId = YOUR_INSTRUCTOR_LEAD_ID_HERE
+@regularInstructorId = YOUR_REGULAR_INSTRUCTOR_ID_HERE
+@topicId1 = YOUR_TOPIC_ID1_HERE
+@topicId2 = YOUR_TOPIC_ID2_HERE
+@topicId3 = YOUR_TOPIC_ID3_HERE
+@topicId4 = YOUR_TOPIC_ID4_HERE
+@topicId5 = YOUR_TOPIC_ID5_HERE
 
 # ===============================
-# TOPIC CRUD OPERATIONS
+# PUBLIC ROUTES - Không cần xác thực
 # ===============================
 
 ### Get all topics
 # Returns a list of all available topics with their instructors
 GET {{baseUrl}}/topics
-Authorization: Bearer {{token}}
 
 ### Get a specific topic by ID
 # Returns detailed information about a specific topic including related courses
-GET {{baseUrl}}/topics/{{topicId}}
-Authorization: Bearer {{token}}
+GET {{baseUrl}}/topics/{{topicId1}}
 
-### Create a new topic (Instructor only)
-# Creates a new topic in the system
-POST {{baseUrl}}/instructors/{{instructorId}}/topics
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-  "name": "DevOps",
-  "description": "A set of practices that combines software development (Dev) and IT operations (Ops) to shorten the development life cycle.",
-  "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/0/05/Devops-toolchain.svg"
-}
-
-### Update a topic (Instructor/Admin only)
-# Updates an existing topic's information
-PUT {{baseUrl}}/topics/{{topicId}}
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "name": "Advanced Machine Learning",
-    "description": "Dive deep into advanced machine learning concepts including deep learning and reinforcement learning",
-    "thumbnail": "https://example.com/thumbnails/advanced-ml.jpg"
-}
-
-### Delete a topic (Admin only)
-# Permanently removes a topic from the system
-DELETE {{baseUrl}}/topics/{{topicId}}
-Authorization: Bearer {{token}}
-
-### Get courses by topic
-# Returns all courses associated with a specific topic
-GET {{baseUrl}}/topics/{{topicId}}/courses
-Authorization: Bearer {{token}}
-
-### Get popular topics
-# Returns a list of the most popular topics based on enrollment counts
-GET {{baseUrl}}/topics/popular
-Authorization: Bearer {{token}}
+### Get topics with courses
+# Returns all topics with their associated courses
+GET {{baseUrl}}/topics/with-courses
 
 ### Get topics by instructor
 # Returns all topics created by a specific instructor
-# chưa được implement
-GET {{baseUrl}}/instructors/{{instructorId}}/topics
-Authorization: Bearer {{token}}
+GET {{baseUrl}}/instructors/{{instructorLeadId}}/topics
+
+# ===============================
+# PROTECTED ROUTES - Chỉ INSTRUCTOR_LEAD mới có quyền
+# ===============================
+
+### Create a new topic (INSTRUCTOR_LEAD only)
+# Creates a new topic in the system
+POST {{baseUrl}}/instructors/{{instructorLeadId}}/topics
+Authorization: Bearer {{instructorLeadToken}}
+Content-Type: application/json
+
+{
+  "name": "Cloud Computing",
+  "description": "Learn about cloud infrastructure, services, and deployment models",
+  "thumbnail": "https://example.com/thumbnails/cloud-computing.jpg"
+}
+
+### Update a topic (INSTRUCTOR_LEAD only)
+# Updates an existing topic's information
+PUT {{baseUrl}}/instructors/{{instructorLeadId}}/topics/{{topicId1}}
+Authorization: Bearer {{instructorLeadToken}}
+Content-Type: application/json
+
+{
+  "name": "Advanced Frontend Development",
+  "description": "Dive deep into advanced frontend concepts including modern frameworks and best practices",
+  "thumbnail": "https://example.com/thumbnails/advanced-frontend.jpg"
+}
+
+### Delete a topic (INSTRUCTOR_LEAD only)
+# Permanently removes a topic from the system
+DELETE {{baseUrl}}/instructors/{{instructorLeadId}}/topics/{{topicId2}}
+Authorization: Bearer {{instructorLeadToken}}
+
+# ===============================
+# TEST CASES - Kiểm tra quyền truy cập
+# ===============================
+
+### Thử tạo topic với INSTRUCTOR thường (sẽ bị từ chối)
+POST {{baseUrl}}/instructors/{{regularInstructorId}}/topics
+Authorization: Bearer {{instructorToken}}
+Content-Type: application/json
+
+{
+  "name": "Machine Learning",
+  "description": "Explore machine learning algorithms and applications",
+  "thumbnail": "https://example.com/thumbnails/ml.jpg"
+}
+
+### Thử cập nhật topic với INSTRUCTOR thường (sẽ bị từ chối)
+PUT {{baseUrl}}/instructors/{{regularInstructorId}}/topics/{{topicId3}}
+Authorization: Bearer {{instructorToken}}
+Content-Type: application/json
+
+{
+  "name": "Updated Topic Name",
+  "description": "This update should be rejected",
+  "thumbnail": "https://example.com/thumbnails/reject.jpg"
+}
+
+### Thử xóa topic với LEARNER (sẽ bị từ chối)
+DELETE {{baseUrl}}/instructors/{{regularInstructorId}}/topics/{{topicId4}}
+Authorization: Bearer {{learnerToken}}
+
+### Thử cập nhật topic với ADMIN (phụ thuộc vào việc bạn có cho phép ADMIN quản lý topics không)
+PUT {{baseUrl}}/instructors/{{instructorLeadId}}/topics/{{topicId5}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Admin Updated Topic",
+  "description": "This may be allowed depending on your implementation",
+  "thumbnail": "https://example.com/thumbnails/admin-update.jpg"
+}
+
+# ===============================
+# HƯỚNG DẪN SỬ DỤNG
+# ===============================
+# 1. Chạy file topic-mock.ts để tạo dữ liệu mẫu:
+#    - ts-node test/mockData/topic-mock.ts
+# 
+# 2. Sau khi chạy, cập nhật các biến môi trường ở trên với ID được tạo ra
+# 
+# 3. Để lấy token JWT:
+#    - Đăng nhập vào hệ thống với vai trò tương ứng
+#    - Sao chép token JWT từ phản hồi đăng nhập
+#    - Dán token vào biến môi trường tương ứng ở trên

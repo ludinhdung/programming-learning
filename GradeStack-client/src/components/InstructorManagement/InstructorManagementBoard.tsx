@@ -10,7 +10,7 @@ interface InstructorManagementBoardProps {
 const InstructorManagementBoard: React.FC<InstructorManagementBoardProps> = ({ children }) => {
   return (
     <div className="flex min-h-screen bg-zinc-900">
-      
+      <Header/>
       <div className="flex w-full max-w-[2000px] mx-auto mt-16">
         <div className="hidden md:block fixed top-20 h-[calc(100vh-4rem)]">
           <Sidebar />

@@ -46,15 +46,19 @@ const CreateLearningPath: React.FC = () => {
 
         const user = JSON.parse(userData);
         
+        // Kiểm tra role
+        if (user.role !== 'INSTRUCTOR_LEAD') {
+          message.error('Chỉ Instructor Lead mới có quyền thực hiện chức năng này');
+          navigate('/dashboard');
+          return;
+        }
+        
         // Xác định instructorId từ dữ liệu người dùng
         let instructorId;
-        if (user.instructor && user.instructor.userId) {
-          instructorId = user.instructor.userId;
-        } else if (user.instructorId) {
-          instructorId = user.instructorId;
-        } else if (user.id && user.role === 'INSTRUCTOR') {
+        if (user.id && user.role === 'INSTRUCTOR_LEAD') {
           instructorId = user.id;
         }
+        console.log(instructorId);
 
         if (!instructorId) {
           message.error('Không tìm thấy thông tin instructor');
@@ -179,13 +183,20 @@ const CreateLearningPath: React.FC = () => {
 
       const user = JSON.parse(userData);
       
+      // Kiểm tra role
+      if (user.role !== 'INSTRUCTOR_LEAD') {
+        message.error('Chỉ Instructor Lead mới có quyền thực hiện chức năng này');
+        navigate('/dashboard');
+        return;
+      }
+      
       // Xác định instructorId từ dữ liệu người dùng
       let instructorId;
       if (user.instructor && user.instructor.id) {
         instructorId = user.instructor.id;
       } else if (user.instructorId) {
         instructorId = user.instructorId;
-      } else if (user.id && user.role === 'INSTRUCTOR') {
+      } else if (user.id && (user.role === 'INSTRUCTOR' || user.role === 'INSTRUCTOR_LEAD')) {
         instructorId = user.id;
       }
 
@@ -207,7 +218,7 @@ const CreateLearningPath: React.FC = () => {
       await learningPathService.createLearningPath(instructorId, learningPathData);
       
       message.success('Tạo Learning Path thành công');
-      navigate('/instructor/learning-paths');
+      navigate('/instructor-lead-management/learning-paths');
     } catch (error: any) {
       console.error('Lỗi khi tạo Learning Path:', error);
       message.error(error.response?.data?.message || 'Không thể tạo Learning Path');
@@ -223,7 +234,7 @@ const CreateLearningPath: React.FC = () => {
           <div className="flex items-center">
             <Button
               icon={<ArrowLeftOutlined />}
-              onClick={() => navigate('/instructor/learning-paths')}
+              onClick={() => navigate('/instructor-lead-management/learning-paths')}
               style={{ marginRight: 16 }}
               type="text"
             />
@@ -483,7 +494,7 @@ const CreateLearningPath: React.FC = () => {
                 Tạo Learning Path
               </Button>
               <Button 
-                onClick={() => navigate('/instructor/learning-paths')}
+                onClick={() => navigate('/instructor-lead-management/learning-paths')}
                 disabled={loading || uploading}
               >
                 Hủy

@@ -29,15 +29,15 @@ import InstructorCourseList from "./components/InstructorManagement/Contents/Cou
 import InstructorCreateCourse from "./components/InstructorManagement/Contents/Course/CreateCourse";
 import InstructorCourseDetail from "./components/InstructorManagement/Contents/Course/CourseDetail";
 // Topic Management
-import TopicList from "./pages/InstructorDashboard/Topics/TopicList";
-import CreateTopic from "./pages/InstructorDashboard/Topics/CreateTopic";
-import EditTopic from "./pages/InstructorDashboard/Topics/EditTopic";
-import TopicLayout from "./pages/InstructorDashboard/Topics/TopicLayout";
+import TopicList from "./pages/InstructorLeadDashboard/Topics/TopicList";
+import CreateTopic from "./pages/InstructorLeadDashboard/Topics/CreateTopic";
+import EditTopic from "./pages/InstructorLeadDashboard/Topics/EditTopic";
+import TopicLayout from "./pages/InstructorLeadDashboard/Topics/TopicLayout";
 // Learning Path Management
-import LearningPathList from "./pages/InstructorDashboard/LearningPaths/LearningPathList";
-import CreateLearningPath from "./pages/InstructorDashboard/LearningPaths/CreateLearningPath";
-import EditLearningPath from "./pages/InstructorDashboard/LearningPaths/EditLearningPath";
-import LearningPathLayout from "./pages/InstructorDashboard/LearningPaths/LearningPathLayout";
+import LearningPathList from "./pages/InstructorLeadDashboard/LearningPaths/LearningPathList";
+import CreateLearningPath from "./pages/InstructorLeadDashboard/LearningPaths/CreateLearningPath";
+import EditLearningPath from "./pages/InstructorLeadDashboard/LearningPaths/EditLearningPath";
+import LearningPathLayout from "./pages/InstructorLeadDashboard/LearningPaths/LearningPathLayout";
 // Supporter Dashboard
 import SupporterDashboard from "./pages/SupporterDashboard/SupporterDashboard";
 import SupporterOverview from "./components/SupporterManagement/Contents/Overview";
@@ -48,7 +48,19 @@ import UserDashboard from "./pages/UserDashboard/UserDashboard";
 
 import PracticeCode from "./pages/PracticeCode/PracticeCode";
 
-gitconst App: React.FC = () => {
+// Workshop
+import WorkshopListPage from "./pages/workshop/WorkshopListPage";
+import WorkshopDetailPage from "./pages/workshop/WorkshopDetailPage";
+import InstructorWorkshopListPage from "./pages/InstructorLeadDashboard/Workshops/InstructorWorkshopListPage";
+import CreateWorkshopPage from "./pages/InstructorLeadDashboard/Workshops/CreateWorkshopPage";
+import EditWorkshopPage from "./pages/InstructorLeadDashboard/Workshops/EditWorkshopPage";
+import WorkshopManagementLayout from "./pages/InstructorLeadDashboard/Workshops/WorkshopLayout";
+import WorkshopLayout from "./pages/workshop/WorkshopLayout";
+
+// Instructor Lead Dashboard
+import InstructorLeadDashboard from "./pages/InstructorLeadDashboard/InstructorLeadDashboard";
+
+const App: React.FC = () => {
   return (
     <MantineProvider>
       <Router>
@@ -80,39 +92,63 @@ gitconst App: React.FC = () => {
           {/* Instructor Dashboard*/}
           <Route path="/profile" element={<Profile />} />
           <Route path="/dashboard" element={<UserDashboard />} />
-          <Route
-            path="/instructor-management"
-            element={<InstructorManagement />}
-          >
+          <Route path="/instructor-management" element={<InstructorManagement />}>
             <Route index element={<Overview />} />
 
             <Route path="course" element={<Outlet />}>
               <Route index element={<InstructorCourseList />} />
               <Route path="create" element={<InstructorCreateCourse />} />
-              <Route
-                path="detail/:courseId"
-                element={<InstructorCourseDetail />}
-              />
+              <Route path="detail/:courseId" element={<InstructorCourseDetail />} />
+            </Route>
+            
+            <Route path="workshops" element={<WorkshopManagementLayout />}>
+              <Route index element={<InstructorWorkshopListPage />} />
+              <Route path="create" element={<CreateWorkshopPage />} />
+              <Route path="edit/:workshopId" element={<EditWorkshopPage />} />
             </Route>
           </Route>
           {/* Supporter Dashboard*/}
           <Route path="/supporter-management" element={<SupporterDashboard />}>
             <Route index element={<SupporterOverview />}></Route>
-            <Route
-              path="instructor"
-              element={<SupporterManageInstructor />}
-            ></Route>
+            <Route path="instructor" element={<SupporterManageInstructor />}></Route>
             <Route path="learner" element={<Outlet />}>
               <Route index element={<SupporterManageLearner />}></Route>
-              <Route
-                path="comment/:learnerId"
-                element={<SupporterManageLearnerComments />}
-              />
+              <Route path="comment/:learnerId" element={<SupporterManageLearnerComments />} />
             </Route>
           </Route>
 
           <Route path="*" element={<NotFound />} />
+          {/* Instructor Lead Dashboard */}
+          <Route path="/instructor-lead-management" element={<InstructorLeadDashboard />}>
+            <Route index element={<Overview />} />
+            
+            <Route path="course" element={<Outlet />}>
+              <Route index element={<InstructorCourseList />} />
+              <Route path="create" element={<InstructorCreateCourse />} />
+              <Route path="detail/:courseId" element={<InstructorCourseDetail />} />
+            </Route>
+            
+            <Route path="topics" element={<TopicLayout />}>
+              <Route path="create" element={<CreateTopic />} />
+              <Route path=":id/edit" element={<EditTopic />} />
+            </Route>
 
+            <Route path="topic-management" element={<TopicLayout />}>
+              <Route index element={<TopicList />} />
+            </Route>
+            
+            <Route path="learning-paths" element={<LearningPathLayout />}>
+              <Route index element={<LearningPathList />} />
+              <Route path="create" element={<CreateLearningPath />} />
+              <Route path=":id/edit" element={<EditLearningPath />} />
+            </Route>
+            
+            <Route path="workshops" element={<WorkshopManagementLayout />}>
+              <Route index element={<InstructorWorkshopListPage />} />
+              <Route path="create" element={<CreateWorkshopPage />} />
+              <Route path="edit/:workshopId" element={<EditWorkshopPage />} />
+            </Route>
+          </Route>
           {/* Topic Management */}
           <Route path="/instructor/topics" element={<TopicLayout />}>
             <Route index element={<TopicList />} />
@@ -125,6 +161,12 @@ gitconst App: React.FC = () => {
             <Route index element={<LearningPathList />} />
             <Route path="create" element={<CreateLearningPath />} />
             <Route path=":id/edit" element={<EditLearningPath />} />
+          </Route>
+          
+          {/* Workshop Management - Chỉ giữ lại route cho người dùng xem danh sách workshop */}
+          <Route path="/workshops" element={<WorkshopLayout />}>
+            <Route index element={<WorkshopListPage />} />
+            <Route path=":workshopId" element={<WorkshopDetailPage />} />
           </Route>
           
           <Route path="*" element={<NotFound />} />
