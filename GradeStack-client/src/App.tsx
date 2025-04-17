@@ -72,7 +72,7 @@ const App: React.FC = () => {
           <Route path="/admin" element={<AdminDashboard />} />
           {/* <Route path="/create-course" element={<CreateCourse />} /> */}
           <Route path="/courses" element={<CourseList />} />
-          <Route path="/courses/:courseId" element={<CourseDetail />} />
+          <Route path="/courses/:courseId" element={<CourseDetail  />} />
           <Route path="/topics" element={<Topics />} />
           <Route path="/learning-paths" element={<LearningPaths />} />
           <Route
