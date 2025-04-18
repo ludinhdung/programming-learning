@@ -244,6 +244,10 @@ export const instructorService = {
     const response = await api.delete(`/instructors/${id}/courses/${courseId}`);
     return response.data;
   },
+  async toggleCoursePublishStatus(id: string, courseId: string, isPublished: boolean) {
+    const response = await api.patch(`/instructors/${id}/courses/${courseId}/publish-status`, { isPublished });
+    return response.data;
+  },
 
   //Module
   async createModule(

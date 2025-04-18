@@ -11,7 +11,7 @@ const { Option } = Select;
 // Định nghĩa interface cho Learning Path
 interface LearningPath {
   id: string;
-  title: string; // Trường này tương ứng với 'name' trong UI
+  title: string;
   description: string | null;
   thumbnail: string | null;
   estimatedCompletionTime: number | null; // Thời gian hoàn thành dự kiến (phút)
@@ -85,15 +85,6 @@ const LearningPathList: React.FC = () => {
     try {
       setDeleteLoading(learningPathId);
       
-      // Kiểm tra xem learning path có khóa học liên kết không
-      const learningPath = learningPaths.find(lp => lp.id === learningPathId);
-      const courseCount = learningPath?.courses?.length || 0;
-      
-      if (courseCount > 0) {
-        message.error(`Không thể xóa learning path này vì có ${courseCount} khóa học liên kết`);
-        return;
-      }
-      
       // Lấy ID người dùng hiện tại từ localStorage
       const userData = localStorage.getItem('user');
       if (!userData) {
@@ -109,7 +100,7 @@ const LearningPathList: React.FC = () => {
         instructorId = user.instructor.userId;
       } else if (user.instructorId) {
         instructorId = user.instructorId;
-      } else if (user.id && user.role === 'INSTRUCTOR') {
+      } else if (user.id && user.role === 'INSTRUCTOR_LEAD') {
         instructorId = user.id;
       }
 
@@ -188,7 +179,7 @@ const LearningPathList: React.FC = () => {
     })
     .sort((a, b) => {
       // Sắp xếp theo trường được chọn
-      if (sortField === 'name') {
+      if (sortField === 'title') {
         return sortOrder === 'ascend'
           ? a.title.localeCompare(b.title)
           : b.title.localeCompare(a.title);
@@ -205,8 +196,8 @@ const LearningPathList: React.FC = () => {
       } else {
         // Mặc định sắp xếp theo updatedAt
         return sortOrder === 'ascend'
-          ? new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
-          : new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+          ? new Date(a.updatedAt || '').getTime() - new Date(b.updatedAt || '').getTime()
+          : new Date(b.updatedAt || '').getTime() - new Date(a.updatedAt || '').getTime();
       }
     });
 
@@ -242,9 +233,9 @@ const LearningPathList: React.FC = () => {
     {
       title: 'Tên Learning Path',
       dataIndex: 'title',
-      key: 'name',
+      key: 'title',
       sorter: (a: LearningPath, b: LearningPath) => a.title.localeCompare(b.title),
-      sortOrder: sortField === 'name' ? sortOrder : null,
+      sortOrder: sortField === 'title' ? sortOrder : null,
     },
     {
       title: 'Mô tả',
@@ -326,18 +317,18 @@ const LearningPathList: React.FC = () => {
           description={
             <span>
               {searchText
-                ? 'Không tìm thấy learning path nào phù hợp'
-                : 'Chưa có learning path nào. Hãy tạo learning path đầu tiên!'}
+                ? 'No learning paths found matching your search'
+                : 'No learning paths created yet. Create your first learning path!'}
             </span>
           }
           image={Empty.PRESENTED_IMAGE_SIMPLE}
         >
           <Button
             type="primary"
-            onClick={() => navigate('/instructor/learning-paths/create')}
+            onClick={() => navigate('/instructor-lead-management/learning-paths/create')}
             icon={<PlusOutlined />}
           >
-            Tạo Learning Path mới
+            Create New Learning Path
           </Button>
         </Empty>
       );
@@ -353,7 +344,7 @@ const LearningPathList: React.FC = () => {
                 cover={
                   <div style={{ height: 140, overflow: 'hidden' }}>
                     <img
-                      alt={learningPath.name}
+                      alt={learningPath.title}
                       src={learningPath.thumbnail || '/placeholder-image.jpg'}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -367,15 +358,15 @@ const LearningPathList: React.FC = () => {
                     key="edit"
                     type="text"
                     icon={<EditOutlined />}
-                    onClick={() => navigate(`/instructor/learning-paths/${learningPath.id}/edit`)}
+                    onClick={() => navigate(`/instructor-lead-management/learning-paths/${learningPath.id}/edit`)}
                   >
-                    Sửa
+                    Edit
                   </Button>,
                   <Popconfirm
                     key="delete"
-                    title="Bạn có chắc chắn muốn xóa learning path này?"
+                    title="Are you sure you want to delete this learning path?"
                     onConfirm={() => handleDelete(learningPath.id)}
-                    okText="Có"
+                    okText="Yes"
                     cancelText="Không"
                     okButtonProps={{ loading: deleteLoading === learningPath.id }}
                   >
@@ -436,21 +427,21 @@ const LearningPathList: React.FC = () => {
       <Card
         title={
           <div className="flex justify-between items-center">
-            <Title level={4} className="m-0">Quản lý Learning Path</Title>
+            <Title level={4} className="m-0">Learning Path Management</Title>
             <Space>
               <Button 
                 type="primary" 
                 icon={<PlusOutlined />} 
-                onClick={() => navigate('/instructor/learning-paths/create')}
+                onClick={() => navigate('/instructor-lead-management/learning-paths/create')}
               >
-                Tạo Learning Path mới
+                Create New Learning Path
               </Button>
               <Button 
                 icon={<ReloadOutlined />} 
                 onClick={() => fetchLearningPaths()}
                 loading={loading}
               >
-                Làm mới
+                Refresh
               </Button>
             </Space>
           </div>
@@ -463,21 +454,21 @@ const LearningPathList: React.FC = () => {
               icon={<AppstoreOutlined />}
               onClick={() => handleViewModeChange('grid')}
             >
-              Lưới
+              Grid
             </Button>
             <Button 
               type={viewMode === 'table' ? 'primary' : 'default'}
               icon={<UnorderedListOutlined />}
               onClick={() => handleViewModeChange('table')}
             >
-              Bảng
+              Table
             </Button>
           </Space>
         }
       >
         <div className="flex flex-wrap gap-4 mb-4">
           <Input
-            placeholder="Tìm kiếm learning path..."
+            placeholder="Search learning path..."
             prefix={<SearchOutlined />}
             onChange={handleSearchChange}
             style={{ width: 250 }}
@@ -485,15 +476,15 @@ const LearningPathList: React.FC = () => {
           />
           
           <Select
-            placeholder="Lọc theo số khóa học"
+            placeholder="Filter by course count"
             style={{ width: 200 }}
             onChange={handleCourseCountFilterChange}
             value={courseCountFilter}
           >
-            <Option value="all">Tất cả learning path</Option>
-            <Option value="none">Chưa có khóa học</Option>
-            <Option value="few">1-3 khóa học</Option>
-            <Option value="many">Trên 3 khóa học</Option>
+            <Option value="all">All learning paths</Option>
+            <Option value="none">No courses</Option>
+            <Option value="few">1-3 courses</Option>
+            <Option value="many">Over 3 courses</Option>
           </Select>
         </div>
         
@@ -515,7 +506,7 @@ const LearningPathList: React.FC = () => {
               onChange: handlePageChange,
               showSizeChanger: true,
               pageSizeOptions: ['8', '16', '24', '32'],
-              showTotal: (total) => `Tổng cộng ${total} learning path`,
+              showTotal: (total) => `Total ${total} learning paths`,
             }}
           />
         )}

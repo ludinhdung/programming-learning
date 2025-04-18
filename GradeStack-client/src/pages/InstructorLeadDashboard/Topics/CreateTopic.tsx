@@ -109,7 +109,7 @@ const CreateTopic: React.FC = () => {
         instructorId = user.instructor.id;
       } else if (user.instructorId) {
         instructorId = user.instructorId;
-      } else if (user.id && user.role === 'INSTRUCTOR') {
+      } else if (user.id && user.role === 'INSTRUCTOR_LEAD') {
         instructorId = user.id;
       }
 
@@ -141,7 +141,7 @@ const CreateTopic: React.FC = () => {
       form.resetFields();
       setFileList([]);
       setImageUrl('');
-      navigate('/instructor/topics');
+      navigate('/instructor-lead-management/topics');
     } catch (error: any) {
       console.error('Lỗi khi tạo chủ đề:', error);
       message.error(error.response?.data?.message || 'Không thể tạo chủ đề');
@@ -160,7 +160,7 @@ const CreateTopic: React.FC = () => {
             <Button 
               icon={<ArrowLeftOutlined />} 
               type="text"
-              onClick={() => navigate('/instructor/topics')}
+              onClick={() => navigate('/instructor-lead-management/topics')}
               className="mr-2"
             />
             <Title level={4} className="m-0">Tạo Chủ Đề Mới</Title>
@@ -316,7 +316,7 @@ const CreateTopic: React.FC = () => {
               Tạo Chủ Đề
             </Button>
             <Button 
-              onClick={() => navigate('/instructor/topics')}
+              onClick={() => navigate('/instructor-lead-management/topics')}
               disabled={loading || uploading}
             >
               Hủy

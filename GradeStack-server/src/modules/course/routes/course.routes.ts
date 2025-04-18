@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { CourseController } from '../controllers/course.controller';
 import multer from 'multer';
+import { authenticate, authorize } from '../../../shared/middleware/auth.middleware';
+import { Role } from '@prisma/client';
+
 
 // Cấu hình multer để xử lý upload file
 const storage = multer.memoryStorage();
@@ -26,4 +29,13 @@ router.delete('/instructors/:id/courses/:courseId',  courseController.deleteCour
 
 // Route upload video
 router.post('/upload/video',  upload.single('video'), courseController.uploadVideo);
+
+// Route cập nhật trạng thái xuất bản khóa học
+router.patch(
+    '/instructors/:id/courses/:courseId/publish-status',
+    authenticate,
+    authorize(Role.INSTRUCTOR),
+    courseController.toggleCoursePublishStatus
+);
+
 export default router;

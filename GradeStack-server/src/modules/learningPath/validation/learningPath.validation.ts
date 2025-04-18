@@ -5,6 +5,7 @@ export const learningPathBaseSchema = z.object({
   title: z.string().min(3, 'Tiêu đề lộ trình học phải có ít nhất 3 ký tự'),
   description: z.string().min(10, 'Mô tả lộ trình học phải có ít nhất 10 ký tự').optional(),
   thumbnail: z.string().url('URL thumbnail không hợp lệ').nullable().optional(),
+  estimatedCompletionTime: z.number().int().positive('Thời gian dự kiến phải là số nguyên dương').nullable().optional(),
 });
 
 // Create learning path validation schema

@@ -3,9 +3,10 @@
 
 # Environment Variables
 @baseUrl = http://localhost:4000/api
-@instructorId = cdb86371-a59a-42d2-b939-8f00503a3232
-@token = YOUR_JWT_TOKEN_HERE
-@topicId = 534458b6-c2d5-4508-86ff-2c33450615c3
+@instructorId = ef6da5d6-ea1b-4c23-9c3a-2e880c035d25
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlZjZkYTVkNi1lYTFiLTRjMjMtOWMzYS0yZTg4MGMwMzVkMjUiLCJyb2xlIjoiSU5TVFJVQ1RPUiIsImlhdCI6MTc0NDk2MzczMCwiZXhwIjoxNzQ1MDUwMTMwfQ.bYrlKyN0a6goW0Tfz4IYL9J3nLnb3OaE44Vsa7ZLNwU
+@topicId = aa909955-7bd0-47a3-bb0b-1b0ab80a37a7
 @courseId = 6d2d6fb8-c785-40ca-a685-b2397ca2743e
 @moduleId = 9b6b9e70-b223-461e-bc94-177a0a4c6417
 @lessonId = 92403a52-e00b-4e10-a1d0-82eb83793729

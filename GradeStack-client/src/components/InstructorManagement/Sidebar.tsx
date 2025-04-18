@@ -159,21 +159,6 @@ const Sidebar = () => {
       href: "/instructor-management/course",
     },
     {
-      icon: MdCategory,
-      text: "Topics",
-      href: "/instructor/topics",
-    },
-    {
-      icon: MdTimeline,
-      text: "Learning Paths",
-      href: "/instructor/learning-paths",
-    },
-    {
-      icon: MdEvent,
-      text: "Workshops",
-      href: "/instructor-management/workshops",
-    },
-    {
       icon: MdAnalytics,
       text: "Analytics",
       href: "/instructor-management/analytics",

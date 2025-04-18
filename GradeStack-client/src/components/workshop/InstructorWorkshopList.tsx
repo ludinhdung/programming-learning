@@ -14,7 +14,8 @@ import {
   Space, 
   Row, 
   Col,
-  Empty
+  Empty,
+  message
 } from 'antd';
 import { 
   PlusOutlined, 
@@ -34,7 +35,7 @@ import { useAuth } from '../../hooks/useAuth';
  */
 const InstructorWorkshopList = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const [user, setUser] = useState<any>(null);
   
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -50,6 +51,33 @@ const InstructorWorkshopList = () => {
   /**
    * Tải danh sách workshop của instructor
    */
+
+  useEffect(() => {
+    try {
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        message.error('Vui lòng đăng nhập để xem danh sách workshop');
+        navigate('/login');
+        return;
+      }
+      
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+    } catch (error) {
+      console.error('Lỗi khi đọc dữ liệu user:', error);
+      message.error('Không thể đọc thông tin người dùng');
+      navigate('/login');
+    }
+  }, []);
+
+  // useEffect cho loadWorkshops cần phụ thuộc vào user state mới
+  useEffect(() => {
+    if (user && user.role === 'INSTRUCTOR_LEAD') {
+      loadWorkshops();
+    }
+  }, [user, page]);
+
+
   const loadWorkshops = async () => {
     if (!user) return;
     
@@ -73,11 +101,7 @@ const InstructorWorkshopList = () => {
     }
   };
 
-  useEffect(() => {
-    if (user && user.role === 'INSTRUCTOR') {
-      loadWorkshops();
-    }
-  }, [user, page]);
+
 
   /**
    * Định dạng ngày giờ
@@ -142,22 +166,14 @@ const InstructorWorkshopList = () => {
     setDeleteWorkshopId(null);
   };
 
-  if (!user || user.role !== 'INSTRUCTOR') {
-    return (
-      <div style={{ padding: '24px 0' }}>
-        <Alert
-          message="Cảnh báo"
-          description="Bạn không có quyền truy cập trang này."
-          type="warning"
-          showIcon
-        />
-      </div>
-    );
-  }
+  const handleEditWorkshop = (workshopId: string) => {
+    navigate(`/instructor-lead-management/workshops/${workshopId}/edit`);
+  };
+
 
   return (
     <div style={{ padding: '24px 0' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, 'color': 'white' }}>
         <Typography.Title level={2}>
           Quản lý Workshop
         </Typography.Title>
@@ -165,7 +181,7 @@ const InstructorWorkshopList = () => {
         <Button 
           type="primary" 
           icon={<PlusOutlined />}
-          onClick={() => navigate('/instructor/workshops/create')}
+          onClick={() => navigate('/instructor-lead-management/workshops/create')}
         >
           Tạo Workshop mới
         </Button>
@@ -287,12 +303,12 @@ const InstructorWorkshopList = () => {
                     <Button
                       type="text"
                       icon={<EyeOutlined />}
-                      onClick={() => navigate(`/workshops/${workshop.id}`)}
+                      onClick={() => navigate(`/instructor-lead-management/workshops/${workshop.id}`)}
                     />
                     <Button
                       type="text"
                       icon={<EditOutlined />}
-                      onClick={() => navigate(`/instructor/workshops/edit/${workshop.id}`)}
+                      onClick={() => handleEditWorkshop(workshop.id)}
                     />
                     <Button
                       type="text"

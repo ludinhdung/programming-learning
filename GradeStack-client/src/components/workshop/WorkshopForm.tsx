@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Form,
@@ -13,7 +13,8 @@ import {
   Row,
   Col,
   Spin,
-  Space
+  Space,
+  message
 } from 'antd';
 import type { FormInstance } from 'antd';
 import dayjs from 'dayjs';
@@ -25,10 +26,12 @@ import { CreateWorkshopDto, UpdateWorkshopDto, Workshop } from '../../types/work
  * Component form tạo và chỉnh sửa workshop
  */
 const WorkshopForm = () => {
-  const { workshopId } = useParams<{ workshopId: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const isEditMode = Boolean(workshopId);
+  const [user, setUser] = useState<any>(null);
+  const isEditMode = Boolean(id);
+
+
   
   // Form state
   const [title, setTitle] = useState<string>('');
@@ -46,16 +49,37 @@ const WorkshopForm = () => {
   // Form instance
   const [form] = Form.useForm();
 
+  // Thêm một trạng thái mới để theo dõi quá trình khởi tạo
+  const [initializing, setInitializing] = useState(true);
+
   /**
    * Tải thông tin workshop khi ở chế độ chỉnh sửa
    */
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (!userData) {
+      message.error('Vui lòng đăng nhập để xem danh sách workshop');
+      navigate('/login');
+      return;
+    }
+
+    const parsedUser = JSON.parse(userData);
+    setUser(parsedUser);
+    setInitializing(false); // Đánh dấu đã khởi tạo xong
+  }, []);
+
   useEffect(() => {
     const loadWorkshop = async () => {
-      if (!isEditMode || !workshopId) return;
+      console.log('id', id);
+      if (!isEditMode || !id) return;
+
+      console.log('isEditMode', isEditMode);
+      
       
       try {
         setFormLoading(true);
-        const workshop: Workshop = await workshopService.getWorkshopById(workshopId);
+        const workshop: Workshop = await workshopService.getWorkshopById(id);
         
         // Điền thông tin workshop vào form
         form.setFieldsValue({
@@ -81,7 +105,7 @@ const WorkshopForm = () => {
     };
     
     loadWorkshop();
-  }, [isEditMode, workshopId, form]);
+  }, [isEditMode, id, form]);
 
   /**
    * Xác thực form - sử dụng Ant Design Form validation
@@ -108,7 +132,7 @@ const WorkshopForm = () => {
       setLoading(true);
       setError(null);
       
-      if (isEditMode && workshopId) {
+      if (isEditMode && id) {
         // Cập nhật workshop
         const updateData: UpdateWorkshopDto = {
           title: values.title,
@@ -118,7 +142,7 @@ const WorkshopForm = () => {
           type: values.type
         };
         
-        await workshopService.updateWorkshop(user.id, workshopId, updateData);
+        await workshopService.updateWorkshop(user.id, id, updateData);
         setSuccessMessage('Cập nhật workshop thành công!');
       } else {
         // Tạo workshop mới
@@ -153,7 +177,7 @@ const WorkshopForm = () => {
       
       // Chuyển hướng sau 1.5 giây
       setTimeout(() => {
-        navigate('/instructor/workshops');
+        navigate('/instructor-lead-management/workshops');
       }, 1500);
     } catch (err: any) {
       console.error('Lỗi khi lưu workshop:', err);
@@ -167,7 +191,16 @@ const WorkshopForm = () => {
     console.log('Form validation failed:', errorInfo);
   };
 
-  if (!user || user.role !== 'INSTRUCTOR') {
+  // Thêm điều kiện kiểm tra initializing
+  if (initializing) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (!user || user.role !== 'INSTRUCTOR_LEAD') {
     return (
       <div style={{ padding: '24px 0' }}>
         <Alert
@@ -318,7 +351,7 @@ const WorkshopForm = () => {
               <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
                 <Space>
                   <Button 
-                    onClick={() => navigate('/instructor/workshops')}
+                    onClick={() => navigate('/instructor-lead-management/workshops')}
                     disabled={loading}
                   >
                     Hủy

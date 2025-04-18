@@ -37,12 +37,12 @@ const InstructorLeadManagementBoard: React.FC<InstructorLeadManagementBoardProps
         <div className={`hidden md:block fixed top-16 h-[calc(100vh-4rem)] transition-all duration-300 ${isSidebarCollapsed ? 'w-20' : 'w-64'}`}>
           <Sidebar />
         </div>
-        {/* Main content
+        Main content
         <div className={`w-full transition-all duration-300 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'} pt-2 px-4`}>
           <div className="min-h-[calc(100vh-5rem)]">
             {children || <Outlet />}
           </div>
-        </div> */}
+        </div>
       </div>
     </div>
   );

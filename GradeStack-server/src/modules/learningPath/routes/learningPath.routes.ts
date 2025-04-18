@@ -13,9 +13,9 @@ router.get('/learning-paths', learningPathController.getAllLearningPaths);
 router.get('/learning-paths/:learningPathId', learningPathController.getLearningPath);
 
 /**
- * Routes cho INSTRUCTOR và INSTRUCTOR_LEAD
+ * Routes chỉ cho INSTRUCTOR_LEAD
  * - Yêu cầu xác thực (authenticate)
- * - Yêu cầu quyền INSTRUCTOR hoặc INSTRUCTOR_LEAD (authorize)
+ * - Yêu cầu quyền INSTRUCTOR_LEAD (authorize)
  * - Kiểm tra quyền sở hữu tài nguyên (checkResourceOwnership)
  * - Kiểm tra quyền sở hữu learning path cụ thể (checkSpecificResourceOwnership)
  */
@@ -24,7 +24,7 @@ router.get('/learning-paths/:learningPathId', learningPathController.getLearning
 router.post(
     '/instructors/:id/learning-paths', 
     authenticate, 
-    authorize(Role.INSTRUCTOR, Role.INSTRUCTOR_LEAD, Role.ADMIN),
+    authorize(Role.INSTRUCTOR_LEAD),
     checkResourceOwnership(),
     learningPathController.createLearningPath
 );
@@ -33,7 +33,7 @@ router.post(
 router.get(
     '/instructors/:id/learning-paths', 
     authenticate, 
-    authorize(Role.INSTRUCTOR, Role.INSTRUCTOR_LEAD, Role.ADMIN),
+    authorize(Role.INSTRUCTOR_LEAD),
     checkResourceOwnership(),
     learningPathController.getLearningPaths
 );
@@ -42,7 +42,7 @@ router.get(
 router.get(
     '/instructors/:id/learning-paths/:learningPathId', 
     authenticate, 
-    authorize(Role.INSTRUCTOR, Role.INSTRUCTOR_LEAD, Role.ADMIN),
+    authorize(Role.INSTRUCTOR_LEAD),
     checkResourceOwnership(),
     checkSpecificResourceOwnership('learningPath'),
     learningPathController.getLearningPath
@@ -52,7 +52,7 @@ router.get(
 router.put(
     '/instructors/:id/learning-paths/:learningPathId', 
     authenticate, 
-    authorize(Role.INSTRUCTOR, Role.INSTRUCTOR_LEAD, Role.ADMIN),
+    authorize(Role.INSTRUCTOR_LEAD),
     checkResourceOwnership(),
     checkSpecificResourceOwnership('learningPath'),
     learningPathController.updateLearningPath
@@ -62,7 +62,7 @@ router.put(
 router.put(
     '/instructors/:id/learning-paths/:learningPathId/courses-order', 
     authenticate, 
-    authorize(Role.INSTRUCTOR, Role.INSTRUCTOR_LEAD, Role.ADMIN),
+    authorize(Role.INSTRUCTOR_LEAD),
     checkResourceOwnership(),
     checkSpecificResourceOwnership('learningPath'),
     learningPathController.updateCoursesOrder
@@ -72,7 +72,7 @@ router.put(
 router.delete(
     '/instructors/:id/learning-paths/:learningPathId', 
     authenticate, 
-    authorize(Role.INSTRUCTOR, Role.INSTRUCTOR_LEAD, Role.ADMIN),
+    authorize(Role.INSTRUCTOR_LEAD),
     checkResourceOwnership(),
     checkSpecificResourceOwnership('learningPath'),
     learningPathController.deleteLearningPath

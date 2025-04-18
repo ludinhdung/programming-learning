@@ -91,7 +91,7 @@ async function createMockData(): Promise<void> {
     // Tạo người dùng LEARNER
     const learnerUser = await prisma.user.create({
       data: {
-        email: 'learner@example.com',
+        email: 'learner1@example.com',
         firstName: faker.person.firstName(),
         lastName: faker.person.lastName(),
         password: hashedPassword,

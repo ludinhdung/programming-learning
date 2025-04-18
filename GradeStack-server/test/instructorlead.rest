@@ -1,7 +1,7 @@
 # Kiểm thử API cho INSTRUCTOR_LEAD
 @baseUrl = http://localhost:4000/api
 @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1MjgzNDUxZC1mNjViLTQ3NTYtYjUzZC0xNTMxMmQ5ZTFkZjIiLCJyb2xlIjoiSU5TVFJ1Q1RPUiIsImlhdCI6MTc0NDY0Njc2MywiZXhwIjoxNzQ0NzMzMTYzfQ.zZz8oZXWEa-NGxJf0fAMF_iQb-pPlaMXteT2nFwNZPk
-@instructorLeadId = 5283451d-f65b-4756-b53d-15312d9e1df2
+@instructorLeadId = d2c013c4-ff13-4527-a297-45f6c5ce9421
 @learningPathId = 23af0614-cefe-45dd-b187-d2be247f8036
 @workshopId = 7e4fe40a-084d-4441-ad07-6cf93f331905
 @courseId1 = bca1eddc-92b0-48f8-b3a3-15c2a6dfc6f6

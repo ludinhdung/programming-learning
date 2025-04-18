@@ -20,6 +20,7 @@ const TopicList: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'ascend' | 'descend'>('descend');
   const [courseCountFilter, setCourseCountFilter] = useState<string>('all');
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [instructorId, setInstructorId] = useState<string>('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,20 +41,20 @@ const TopicList: React.FC = () => {
       console.log('User data:', user);
       
       // Kiểm tra cấu trúc dữ liệu user
-      let instructorId;
+      let id;
       if (user.instructor && user.instructor.id) {
-        instructorId = user.instructor.id;
+        id = user.instructor.id;
       } else if (user.id) {
-        instructorId = user.id;
+        id = user.id;
       } else {
         message.error('Không tìm thấy ID của instructor');
-        console.error('Cấu trúc dữ liệu user không chứa instructorId:', user);
+        console.error('Cấu trúc dữ liệu user không chứa id:', user);
         return;
       }
       
-      console.log('Instructor ID being used:', instructorId);
-      
-      const response = await topicService.getTopicsByInstructor(instructorId);
+      console.log('Instructor ID being used:', id);
+      setInstructorId(id);
+      const response = await topicService.getTopicsByInstructor(id);
       console.log('Topics response:', response);
       setTopics(response);
     } catch (error: any) {
@@ -79,7 +80,7 @@ const TopicList: React.FC = () => {
       }
       
       // Gọi API xóa chủ đề
-      const response = await topicService.deleteTopic(topicId);
+      const response = await topicService.deleteTopic(instructorId, topicId);
       console.log('Kết quả xóa:', response);
       
       message.success('Xóa chủ đề thành công');
@@ -221,7 +222,7 @@ const TopicList: React.FC = () => {
           <Button 
             type="primary" 
             icon={<EditOutlined />} 
-            onClick={() => navigate(`/instructor/topics/${record.id}/edit`)}
+            onClick={() => navigate(`/instructor-lead-management/topics/${record.id}/edit`)}
           >
             Sửa
           </Button>
@@ -286,7 +287,7 @@ const TopicList: React.FC = () => {
                   <Button 
                     type="text" 
                     icon={<EditOutlined />} 
-                    onClick={() => navigate(`/instructor/topics/${topic.id}/edit`)}
+                    onClick={() => navigate(`/instructor-lead-management/topics/${topic.id}/edit`)}
                   >
                     Sửa
                   </Button>,
@@ -352,7 +353,7 @@ const TopicList: React.FC = () => {
               <Button 
                 type="primary" 
                 icon={<PlusOutlined />} 
-                onClick={() => navigate('/instructor/topics/create')}
+                onClick={() => navigate('/instructor-lead-management/topics/create')}
               >
                 Tạo chủ đề mới
               </Button>

@@ -5,18 +5,21 @@ import { LessonService } from '../../lesson/services/lesson.service';
 import { VideoLessonService } from '../../videoLesson/services/videoLesson.service';
 import { r2StorageService, UploadedFile } from '../../../shared/services/r2-storage.service';
 import { createCourseSchema, updateCourseSchema } from '../validation/course.validation';
+import { CertifierService } from '../../../shared/services/certificate.service';
 
 export class CourseController {
     private courseService: CourseService;
     private moduleService: ModuleService;
     private lessonService: LessonService;
     private videoLessonService: VideoLessonService;
+    private certificateService: CertifierService;
 
     constructor() {
         this.courseService = new CourseService();
         this.moduleService = new ModuleService();
         this.lessonService = new LessonService();
         this.videoLessonService = new VideoLessonService();
+        this.certificateService = new CertifierService();
     }
 
     /**
@@ -268,4 +271,97 @@ export class CourseController {
             this.handleError(res, error);
         }
     };
+
+    /**
+     * Cập nhật trạng thái xuất bản của khóa học
+     */
+    public toggleCoursePublishStatus = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { id, courseId } = req.params;
+            const { isPublished } = req.body;
+            
+            // Validate dữ liệu đầu vào
+            if (isPublished === undefined) {
+                res.status(400).json({ message: 'Thiếu trường isPublished' });
+                return;
+            }
+            
+            // Xử lý cập nhật trạng thái
+            let updatedCourse;
+            
+            if (isPublished) {
+                updatedCourse = await this.courseService.publishCourse(courseId);
+            } else {
+                updatedCourse = await this.courseService.unpublishCourse(courseId);
+            }
+            
+            res.status(200).json({
+                message: `Khóa học đã được ${isPublished ? 'xuất bản' : 'hủy xuất bản'} thành công`,
+                data: updatedCourse
+            });
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
+
+    /**
+     * Lấy thông tin chứng chỉ từ Certifier.io
+     */
+    public getCertificate = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { certificateId } = req.params;
+            const certificate = await this.certificateService.getCertificate(certificateId);
+            res.status(200).json(certificate);
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
+
+    /**
+    * Tạo chứng chỉ khi học viên hoàn thành khóa học
+    */
+    public generateCertificate = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { learnerId, courseId } = req.params;
+      
+      // Tạo chứng chỉ với email
+      const certificate = await this.certificateService.generateCertificate(
+        learnerId,
+        courseId
+      );
+      
+      res.status(201).json({
+        message: 'Chứng chỉ đã được tạo và gửi đến email của học viên',
+        certificate
+      });
+    } catch (error) {
+      this.handleError(res, error);
+    }
+    };
+
+    /**
+     * Lấy danh sách chứng chỉ của học viên
+     */
+    public getLearnerCertificates = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { learnerId } = req.params;
+            const certificates = await this.certificateService.getLearnerCertificates(learnerId);
+            res.status(200).json(certificates);
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    }
+
+    /**
+     * Lấy danh sách chứng chỉ của khóa học
+     */
+    public getCourseCertificates = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { publicId } = req.params;
+            const certificates = await this.certificateService.getCertificate(publicId);
+            res.status(200).json(certificates);
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    }
 }

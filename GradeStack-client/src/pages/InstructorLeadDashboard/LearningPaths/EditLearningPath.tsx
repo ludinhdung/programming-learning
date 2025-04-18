@@ -62,7 +62,7 @@ const EditLearningPath: React.FC = () => {
         
         if (!id) {
           message.error('Không tìm thấy ID của Learning Path');
-          navigate('/instructor/learning-paths');
+          navigate('/instructor-lead-management/learning-paths');
           return;
         }
 
@@ -82,7 +82,7 @@ const EditLearningPath: React.FC = () => {
           instructorId = user.instructor.userId;
         } else if (user.instructorId) {
           instructorId = user.instructorId;
-        } else if (user.id && user.role === 'INSTRUCTOR') {
+        } else if (user.id && user.role === 'INSTRUCTOR_LEAD') {
           instructorId = user.id;
         }
 
@@ -140,7 +140,7 @@ const EditLearningPath: React.FC = () => {
       } catch (error: any) {
         console.error('Lỗi khi tải dữ liệu:', error);
         message.error('Không thể tải thông tin Learning Path');
-        navigate('/instructor/learning-paths');
+        navigate('/instructor-lead-management/learning-paths');
       } finally {
         setInitialLoading(false);
       }
@@ -267,7 +267,7 @@ const EditLearningPath: React.FC = () => {
         instructorId = user.instructor.id;
       } else if (user.instructorId) {
         instructorId = user.instructorId;
-      } else if (user.id && user.role === 'INSTRUCTOR') {
+      } else if (user.id && user.role === 'INSTRUCTOR_LEAD') {
         instructorId = user.id;
       }
 
@@ -289,7 +289,7 @@ const EditLearningPath: React.FC = () => {
       await learningPathService.updateLearningPath(instructorId, id, learningPathData);
       
       message.success('Cập nhật Learning Path thành công');
-      navigate('/instructor/learning-paths');
+      navigate('/instructor-lead-management/learning-paths');
     } catch (error: any) {
       console.error('Lỗi khi cập nhật Learning Path:', error);
       message.error(error.response?.data?.message || 'Không thể cập nhật Learning Path');
@@ -313,7 +313,7 @@ const EditLearningPath: React.FC = () => {
           <div className="flex items-center">
             <Button
               icon={<ArrowLeftOutlined />}
-              onClick={() => navigate('/instructor/learning-paths')}
+              onClick={() => navigate('/instructor-lead-management/learning-paths')}
               style={{ marginRight: 16 }}
               type="text"
             />
@@ -571,7 +571,7 @@ const EditLearningPath: React.FC = () => {
                 Cập nhật Learning Path
               </Button>
               <Button 
-                onClick={() => navigate('/instructor/learning-paths')}
+                onClick={() => navigate('/instructor-lead-management/learning-paths')}
                 disabled={loading || uploading}
               >
                 Hủy

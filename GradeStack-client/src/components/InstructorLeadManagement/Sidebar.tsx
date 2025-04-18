@@ -166,6 +166,11 @@ const Sidebar = () => {
     },
     {
       icon: MdGroups,
+      text: "Topic",
+      href: "/instructor-lead-management/topics",
+    },
+    {
+      icon: MdGroups,
       text: "Community",
       href: "/instructor-lead-management/community",
     }

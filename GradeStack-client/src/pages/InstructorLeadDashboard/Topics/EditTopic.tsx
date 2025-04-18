@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import type { RcFile, UploadFile, UploadProps } from 'antd/es/upload/interface';
 import topicService from '../../../services/topicService';
 import mediaService from '../../../services/mediaService';
+import { useAuth } from '../../../hooks/useAuth';
 
 const { TextArea } = Input;
 const { Title } = Typography;
@@ -18,6 +19,8 @@ const EditTopic: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const [instructorId, setInstructorId] = useState<string>('');
 
   useEffect(() => {
     if (id) {
@@ -28,6 +31,32 @@ const EditTopic: React.FC = () => {
   const fetchTopic = async (topicId: string) => {
     try {
       setFetchingTopic(true);
+      // Lấy thông tin người dùng
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        message.error('Vui lòng đăng nhập để thực hiện chức năng này');
+        navigate('/login');
+        return;
+      }
+
+      const user = JSON.parse(userData);
+      
+      // Xác định instructorId từ dữ liệu người dùng
+      let id;
+      if (user.instructor && user.instructor.userId) {
+        id = user.instructor.userId;
+      } else if (user.id) {
+        id = user.id;
+      } else if (user.id && user.role === 'INSTRUCTOR_LEAD') {
+        id = user.id;
+      }
+
+      if (!id) {
+        message.error('Không tìm thấy thông tin instructor');
+        return;
+      }
+      setInstructorId(id);
+
       const topic = await topicService.getTopicById(topicId);
       
       form.setFieldsValue({
@@ -168,7 +197,7 @@ const EditTopic: React.FC = () => {
         thumbnail: thumbnailUrl
       });
       
-      const response = await topicService.updateTopic(id, {
+      const response = await topicService.updateTopic(instructorId, id, {
         name: values.name,
         description: values.description,
         thumbnail: thumbnailUrl
@@ -178,7 +207,7 @@ const EditTopic: React.FC = () => {
       message.success('Cập nhật chủ đề thành công');
       
       // Chuyển hướng về trang danh sách chủ đề
-      navigate('/instructor/topics');
+      navigate('/instructor-lead-management/topics');
     } catch (error: any) {
       console.error('Lỗi khi cập nhật chủ đề:', error);
       message.error(error.response?.data?.message || 'Không thể cập nhật chủ đề');
@@ -210,7 +239,7 @@ const EditTopic: React.FC = () => {
             <Button 
               icon={<ArrowLeftOutlined />} 
               type="text"
-              onClick={() => navigate('/instructor/topics')}
+              onClick={() => navigate('/instructor-lead-management/topics')}
               className="mr-2"
             />
             <Title level={4} className="m-0">Chỉnh sửa chủ đề</Title>
@@ -361,7 +390,7 @@ const EditTopic: React.FC = () => {
               Cập nhật chủ đề
             </Button>
             <Button 
-              onClick={() => navigate('/instructor/topics')}
+              onClick={() => navigate('/instructor-lead-management/topics')}
               disabled={loading || uploading}
             >
               Hủy bỏ
