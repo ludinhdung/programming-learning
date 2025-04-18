@@ -280,7 +280,7 @@ const CourseDetail: React.FC = () => {
         <>
             {showLoading && <LoadingBar />}
             <Header />
-            <main className="container mx-auto px-20 pb-20 p-16 bg-[#0a1321]">
+            <main className=" mx-auto px-20 pb-20 p-16 bg-[#0a1321]">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Instructor Profile - Left Column */}
                     <div className="md:col-span-1 w-[390px]">
