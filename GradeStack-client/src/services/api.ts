@@ -392,4 +392,15 @@ export const userService = {
   },
 };
 
+export const courseVerificationService = {
+  async publishCourse(courseId: string) {
+    const response = await api.patch(`/courses/verify/${courseId}/publish`);
+    return response.data;
+  },
+  async getCoursebyCourseId(courseId: string) {
+    const respone = await api.get(`/courses/course/${courseId}`);
+    return respone.data;
+  },
+};
+
 export default api;

@@ -333,48 +333,48 @@ const CourseStudyBoard: React.FC = () => {
     }
   };
 
-const checkEnrollmentStatus = async () => {
-  try {
-    const userData = localStorage.getItem("user");
-    if (!userData || !courseId) return;
+  const checkEnrollmentStatus = async () => {
+    try {
+      const userData = localStorage.getItem("user");
+      if (!userData || !courseId) return;
 
-    const user = JSON.parse(userData);
+      const user = JSON.parse(userData);
 
-    const response = await userService.getMyEnrolledCourses(user.id);
-    const enrolledCourses = response.data;
+      const response = await userService.getMyEnrolledCourses(user.id);
+      const enrolledCourses = response.data;
 
-    const currentEnrollment = enrolledCourses.find(
-      (enrollment: EnrollmentRecord) => enrollment.course.id === courseId
-    );
+      const currentEnrollment = enrolledCourses.find(
+        (enrollment: EnrollmentRecord) => enrollment.course.id === courseId
+      );
 
-    if (currentEnrollment) {
-      setIsEnrolled(true);
+      if (currentEnrollment) {
+        setIsEnrolled(true);
 
-      // Lấy progress trực tiếp từ API progress
-      try {
-        const progressResponse = await learnerService.getCourseProgress(
-          user.id,
-          courseId
-        );
-        if (
-          progressResponse.data &&
-          typeof progressResponse.data.progress === "number"
-        ) {
-          setProgress(progressResponse.data.progress);
-        } else {
+        // Lấy progress trực tiếp từ API progress
+        try {
+          const progressResponse = await learnerService.getCourseProgress(
+            user.id,
+            courseId
+          );
+          if (
+            progressResponse.data &&
+            typeof progressResponse.data.progress === "number"
+          ) {
+            setProgress(progressResponse.data.progress);
+          } else {
+            setProgress(currentEnrollment.progress);
+          }
+        } catch (progressError) {
+          console.error("Error fetching progress:", progressError);
           setProgress(currentEnrollment.progress);
         }
-      } catch (progressError) {
-        console.error("Error fetching progress:", progressError);
-        setProgress(currentEnrollment.progress);
       }
+      setIsEnrolled(!!currentEnrollment);
+    } catch (error) {
+      console.error("Error checking enrollment status:", error);
     }
-    setIsEnrolled(!!currentEnrollment);
-  } catch (error) {
-    console.error("Error checking enrollment status:", error);
-  }
-};
-  
+  };
+
   useEffect(() => {
     checkEnrollmentStatus();
   }, [courseId]);
