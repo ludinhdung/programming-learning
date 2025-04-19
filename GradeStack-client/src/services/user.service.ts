@@ -121,6 +121,26 @@ const userService = {
             console.error('Error changing password:', error);
             throw error;
         }
+    },
+
+    async checkBookmarkStatus(userId: string, courseId: string): Promise<boolean> {
+        try {
+            const response = await api.get(`/users/${userId}/bookmarks/${courseId}/status`);
+            return response.data.isBookmarked;
+        } catch (error) {
+            console.error(`Error checking bookmark status for course ${courseId}:`, error);
+            throw error;
+        }
+    },
+
+    async addBookmark(userId: string, courseId: string): Promise<{ success: boolean; message: string }> {
+        try {
+            const response = await api.post(`/users/${userId}/bookmarks`, { courseId });
+            return response.data;
+        } catch (error) {
+            console.error(`Error adding bookmark for course ${courseId}:`, error);
+            throw error;
+        }
     }
 };
 

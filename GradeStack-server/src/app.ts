@@ -24,6 +24,7 @@ import workshopRouter from './modules/workshop/routes/workshop.routes';
 // Import route cho module admin
 import { adminRoute } from './modules/admin';
 
+import coursesRouter from './modules/courses/routes/course.routes';
 const app = express();
 
 app.use(cors());
@@ -46,6 +47,8 @@ app.use('/api', moduleRouter);
 // Áp dụng routes cho learning path
 app.use('/api', learningPathRouter);
 app.use('/api', certificateRouter);
+
+app.use("/api/courses", coursesRouter);
 
 app.use('/api/images', imageUploadRouter);
 app.use("/api/supporter", supporterRouter);

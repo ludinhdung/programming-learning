@@ -37,7 +37,9 @@ const Header: React.FC = () => {
     { name: "Topics", href: "/topics" },
     { name: "Learning Paths", href: "/learning-paths" },
     { name: "Workshops", href: "/workshops" },
-
+    { name: "Features", href: "#" },
+    { name: "Courses", href: "/courses" },
+    { name: "Teams", href: "#" },
   ];
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -89,7 +91,7 @@ const Header: React.FC = () => {
 
   const profileMenu = [
     { name: "My Home", href: "/#" },
-    { name: "Settings", href: "/settings" },
+    { name: "My Profile", href: "/profile" },
     { name: "Logout", onClick: handleLogout },
   ];
 

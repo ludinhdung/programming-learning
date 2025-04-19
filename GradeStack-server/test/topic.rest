@@ -3,6 +3,7 @@
 
 # Environment Variables
 @baseUrl = http://localhost:4000/api
+
 @instructorLeadToken = YOUR_INSTRUCTOR_LEAD_TOKEN_HERE
 @instructorToken = YOUR_INSTRUCTOR_TOKEN_HERE
 @learnerToken = YOUR_LEARNER_TOKEN_HERE
@@ -16,6 +17,12 @@
 @topicId3 = YOUR_TOPIC_ID3_HERE
 @topicId4 = YOUR_TOPIC_ID4_HERE
 @topicId5 = YOUR_TOPIC_ID5_HERE
+
+@token = YOUR_JWT_TOKEN_HERE
+
+@topicId = 713bbb5f-cae1-4390-a722-c1b79b17b0e3
+@instructorId = 6f315ddf-698f-4fbf-adb9-bd868816fa7e
+
 
 # ===============================
 # PUBLIC ROUTES - Không cần xác thực

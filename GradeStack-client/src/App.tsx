@@ -21,7 +21,7 @@ import CourseList from "./pages/CourseList/CourseList";
 import CourseDetail from "./pages/Courses/CourseDetail";
 import Topics from "./pages/Topics/Topics";
 import LearningPaths from "./pages/LearningPaths/LearningPaths";
-import LearningPathDetail from './pages/LearningPaths/LearningPathDetail';
+import LearningPathDetail from "./pages/LearningPaths/LearningPathDetail";
 import Checkout from "./pages/Checkout/Checkout";
 import Profile from "./pages/Profile/Profile";
 // import CreateCourse from "./pages/CreateCourse/CreateCourse";
@@ -41,6 +41,7 @@ import LearningPathList from "./pages/InstructorLeadDashboard/LearningPaths/Lear
 import CreateLearningPath from "./pages/InstructorLeadDashboard/LearningPaths/CreateLearningPath";
 import EditLearningPath from "./pages/InstructorLeadDashboard/LearningPaths/EditLearningPath";
 import LearningPathLayout from "./pages/InstructorLeadDashboard/LearningPaths/LearningPathLayout";
+import InstructorMonetization from "./components/InstructorManagement/Contents/Monetization";
 // Supporter Dashboard
 import SupporterDashboard from "./pages/SupporterDashboard/SupporterDashboard";
 import SupporterOverview from "./components/SupporterManagement/Contents/Overview";
@@ -98,10 +99,13 @@ const App: React.FC = () => {
           <Route path="/admin-dashboard" element={<AdminRouteGuard><AdminDashboard /></AdminRouteGuard>} />
           {/* <Route path="/create-course" element={<CreateCourse />} /> */}
           <Route path="/courses" element={<CourseList />} />
-          <Route path="/courses/:courseId" element={<CourseDetail />} />
+          <Route path="/courses/:courseId" element={<CourseDetail  />} />
           <Route path="/topics" element={<Topics />} />
           <Route path="/learning-paths" element={<LearningPaths />} />
-          <Route path="/learning-paths/:pathId" element={<LearningPathDetail />} />
+          <Route
+            path="/learning-paths/:pathId"
+            element={<LearningPathDetail />}
+          />
           <Route path="/checkout/:courseId" element={<Checkout />} />
 
           {/* Instructor Dashboard*/}
@@ -114,7 +118,7 @@ const App: React.FC = () => {
               <Route path="create" element={<InstructorCreateCourse />} />
               <Route path="detail/:courseId" element={<InstructorCourseDetail />} />
             </Route>
-
+            <Route path="monetization" element={<InstructorMonetization />} />
           </Route>
 
           {/* Instructor Lead Dashboard */}
@@ -164,7 +168,7 @@ const App: React.FC = () => {
             <Route path=":workshopId" element={<WorkshopDetailPage />} />
             <Route path=":workshopId/preview" element={<WorkshopPreviewPage />} />
           </Route>
-          
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

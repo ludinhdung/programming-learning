@@ -6,11 +6,13 @@ import { message } from "antd";
 type SigninFormProps = {
   onSwitchForm: () => void;
   onForgotPassword: () => void;
+  onLoginSuccess?: () => void;
 };
 
 const SigninForm: React.FC<SigninFormProps> = ({
   onSwitchForm,
   onForgotPassword,
+  onLoginSuccess,
 }) => {
   const [loading, setLoading] = useState(false);
 
@@ -29,9 +31,12 @@ const SigninForm: React.FC<SigninFormProps> = ({
       localStorage.setItem("user", JSON.stringify(response.data.user));
       localStorage.setItem("role", response.data.user.role);
 
-      // Redirect based on user role
-      const redirectWithMessage = () => {
-        message.success("Login successfully! Redirecting...", 1.5);
+      message.success("Login successfully!", 1.5);
+
+      if (onLoginSuccess) {
+        onLoginSuccess();
+      } else {
+        // Default redirect based on user role
         setTimeout(() => {
           switch (response.data.user.role) {
             case "INSTRUCTOR":
@@ -44,17 +49,21 @@ const SigninForm: React.FC<SigninFormProps> = ({
               window.location.href = "/admin-dashboard";
               break;
             case "LEARNER":
-              window.location.href = "/";
+              window.location.href = "/dashboard";
               break;
             default:
               window.location.href = "/";
               break;
           }
         }, 1500);
-      };
-      redirectWithMessage();
-    } catch (error: any) {
-      message.error(error.response?.data?.message || "Login failed");
+      }
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        message.error(axiosError.response?.data?.message || "Login failed");
+      } else {
+        message.error("Login failed");
+      }
     } finally {
       setLoading(false);
     }
