@@ -10,6 +10,7 @@ import type {
   PurchaseRecord
 } from '../../services/user.service';
 import { formatVND } from '../../utils/formatCurrency';
+import { Link } from 'react-router-dom';
 const { Sider, Content } = Layout;
 
 const Profile: FC = () => {
@@ -200,7 +201,7 @@ const Profile: FC = () => {
                           children: (
                             <Card className="bg-[#13151f] border-0 shadow-md mb-6 rounded-lg overflow-hidden">
                               <Form layout="vertical">
-                                <Form.Item 
+                                <Form.Item
                                   label={<span className="text-[#bad9fc]">First Name</span>}
                                   className="mb-6"
                                 >
@@ -210,7 +211,7 @@ const Profile: FC = () => {
                                     className="rounded-none bg-[#1c2936] border-none text-white hover:bg-[#243447] p-1 mb-4 w-full"
                                   />
                                 </Form.Item>
-                                <Form.Item 
+                                <Form.Item
                                   label={<span className="text-[#bad9fc]">Last Name</span>}
                                   className="mb-6"
                                 >
@@ -221,13 +222,13 @@ const Profile: FC = () => {
                                   />
                                 </Form.Item>
                                 <div className="flex justify-end">
-                                  <Button 
+                                  <Button
                                     type="primary"
                                     className="mr-2 bg-[#3b82f6] hover:bg-[#2563eb] border-0"
                                   >
                                     Update Profile
                                   </Button>
-                                  <Button 
+                                  <Button
                                     onClick={() => setEditableProfile({})}
                                     className="border-[#3b4452] text-[#bad9fc] hover:text-white hover:border-[#5e7597] bg-transparent"
                                   >
@@ -244,7 +245,7 @@ const Profile: FC = () => {
                           children: (
                             <Card className="bg-[#13151f] border-0 shadow-md rounded-lg overflow-hidden">
                               <Form layout="vertical" onFinish={handleChangePassword}>
-                                <Form.Item 
+                                <Form.Item
                                   label={<span className="text-[#bad9fc]">Current Password</span>}
                                   required
                                   name="oldPassword"
@@ -257,7 +258,7 @@ const Profile: FC = () => {
                                     className="rounded-none bg-[#1c2936] border-none text-white hover:bg-[#243447] p-1 mb-4 w-full"
                                   />
                                 </Form.Item>
-                                <Form.Item 
+                                <Form.Item
                                   label={<span className="text-[#bad9fc]">New Password</span>}
                                   required
                                   name="newPassword"
@@ -271,9 +272,9 @@ const Profile: FC = () => {
                                   />
                                 </Form.Item>
                                 <Form.Item>
-                                  <Button 
-                                    type="primary" 
-                                    htmlType="submit" 
+                                  <Button
+                                    type="primary"
+                                    htmlType="submit"
                                     loading={loadingChangePassword}
                                     className="bg-[#3b82f6] hover:bg-[#2563eb] border-0"
                                   >
@@ -309,8 +310,9 @@ const Profile: FC = () => {
                                 <div className="w-20 h-20 bg-[#1e2736] rounded-lg flex items-center justify-center shrink-0">
                                   <BookOutlined className="text-2xl text-[#3b82f6]" />
                                 </div>
-                                <div className="flex-1">
-                                  <h3 className="text-white text-lg font-semibold mb-1">{enrollment.course.title}</h3>
+                                <div className="flex-1"> <h3 className="text-lg font-semibold text-white hover:text-[#3b82f6] transition-colors">
+                                  {enrollment.course.title}
+                                </h3>
                                   <div className="flex items-center text-[#94a3b8] mb-3">
                                     <Avatar size="small" className="mr-2 bg-[#3b82f6]">
                                       {enrollment.course.instructor.user.firstName.charAt(0)}
@@ -324,8 +326,8 @@ const Profile: FC = () => {
                                       <div className="flex items-center gap-2 w-full">
                                         <span>Progress:</span>
                                         <div className="w-full bg-[#1e2736] h-2 rounded-full overflow-hidden">
-                                          <div 
-                                            className="bg-[#3b82f6] h-full rounded-full" 
+                                          <div
+                                            className="bg-[#3b82f6] h-full rounded-full"
                                             style={{ width: `${Number(enrollment.progress)}%` }}
                                           />
                                         </div>
@@ -336,8 +338,8 @@ const Profile: FC = () => {
                                 </div>
                               </div>
                               <div className="bg-[#1e2736] py-2 px-4 flex justify-end">
-                                <Button 
-                                  type="text" 
+                                <Button
+                                  type="text"
                                   className="text-[#3b82f6] hover:text-[#60a5fa] hover:bg-[#1a1f2e]"
                                   href={`/courses/${enrollment.course.id}`}
                                 >
@@ -381,8 +383,8 @@ const Profile: FC = () => {
                                 </div>
                               </div>
                               <div className="bg-[#1e2736] py-2 px-4 flex justify-end">
-                                <Button 
-                                  type="text" 
+                                <Button
+                                  type="text"
                                   className="text-[#f59e0b] hover:text-[#fbbf4c] hover:bg-[#1a1f2e]"
                                   href={`/course/${bookmark.course.id}`}
                                 >
@@ -408,7 +410,7 @@ const Profile: FC = () => {
                           <p className="text-[#94a3b8] text-center py-4">You haven't made any purchases yet.</p>
                         ) : (
                           purchases.map((purchase) => (
-                            <div 
+                            <div
                               key={purchase.id}
                               className="bg-[#13151f] rounded-lg overflow-hidden shadow-md border border-[#1e2736]"
                             >
@@ -425,10 +427,10 @@ const Profile: FC = () => {
                                           {formatVND(purchase.price)}
                                         </Tag>
                                         {purchase.status && (
-                                          <Tag 
+                                          <Tag
                                             className={`rounded-full px-3 py-1 border-0 font-medium
-                                              ${purchase.status === 'completed' 
-                                                ? 'bg-[#0f2d1e] text-[#10b981]' 
+                                              ${purchase.status === 'completed'
+                                                ? 'bg-[#0f2d1e] text-[#10b981]'
                                                 : purchase.status === 'pending'
                                                   ? 'bg-[#3f2f10] text-[#f59e0b]'
                                                   : 'bg-[#2c1216] text-[#ef4444]'
@@ -454,8 +456,8 @@ const Profile: FC = () => {
                                 </div>
                               </div>
                               <div className="bg-[#1e2736] py-3 px-5 flex flex-wrap gap-3 justify-end">
-                                <Button 
-                                  type="primary" 
+                                <Button
+                                  type="primary"
                                   size="middle"
                                   href={`/courses/${purchase.course.id}`}
                                   className="bg-[#3b82f6] hover:bg-[#2563eb] border-0 shadow-sm"
@@ -463,7 +465,7 @@ const Profile: FC = () => {
                                 >
                                   Go to Course
                                 </Button>
-                                <Button 
+                                <Button
                                   size="middle"
                                   href={`/receipts/${purchase.course.id}`}
                                   className="border-[#3b4452] text-[#bad9fc] hover:text-white hover:border-[#5e7597] bg-transparent"

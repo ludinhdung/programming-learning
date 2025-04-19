@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Badge, Button, Loader } from "@mantine/core";
-import { MdAccessTime, MdVideoLibrary, MdCheck, MdClose, MdPeople } from "react-icons/md";
+import { MdAccessTime, MdVideoLibrary, MdCheck, MdClose } from "react-icons/md";
 import { formatVND } from "../../../../utils/formatCurrency";
 import { message } from 'antd';
 import courseVerificationService from '../../../../services/courseVerification.service';
@@ -15,15 +15,18 @@ interface Course {
     thumbnail: string;
     createdAt: string;
     updatedAt: string;
-    modules: Array<{
-        lessons: Array<{
+    modules: {
+        id: string;
+        title: string;
+        lessons: {
             id: string;
             title: string;
-            duration: number;
-        }>;
-    }>;
-    _count?: {
-        EnrolledCourse: number;
+        }[];
+    }[];
+    _count: {
+        students: number;
+        modules: number;
+        lessons: number;
     };
 }
 
