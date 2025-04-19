@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Course, Comment, User, Lesson } from "./CourseStudyBoard";
-import { Tabs } from "antd";
+import { message, Tabs } from "antd";
 import type { TabsProps } from "antd";
 import { Input, Select, Button, Tooltip } from "antd";
 import styled from "styled-components";
@@ -209,6 +209,9 @@ interface CourseDescriptionProps {
   course: Course;
   comments: Comment[];
   users: User[];
+  onUpdateProgress: (progress: number) => Promise<void>;
+  progress: number;
+  isEnrolled: boolean;
 }
 
 const onChange = (key: string) => {
@@ -220,7 +223,48 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
   course,
   comments,
   users,
+  onUpdateProgress,
+  progress,
+  isEnrolled,
+  
 }) => {
+  const handleMarkAsComplete = async () => {
+    if (!isEnrolled || !lesson) {
+      message.warning("Please enroll in the course first!");
+      return;
+    }
+
+    const currentProgress = typeof progress === "number" ? progress : 0;
+    const totalLessons = course.modules.reduce(
+      (total, module) => total + module.lessons.length,
+      0
+    );
+
+    // Tính số bài học đã hoàn thành dựa trên progress hiện tại
+    const completedLessons = Math.floor((currentProgress * totalLessons) / 100);
+
+    // Tính progress mới (mỗi bài học = 100/totalLessons)
+    const progressPerLesson = 100 / totalLessons;
+    const newProgress = Math.min(
+      (completedLessons + 1) * progressPerLesson,
+      100
+    );
+
+    console.log({
+      totalLessons,
+      completedLessons,
+      progressPerLesson,
+      currentProgress,
+      newProgress,
+    });
+
+    if (!isNaN(newProgress) && newProgress > currentProgress) {
+      await onUpdateProgress(Math.round(newProgress));
+    } else {
+      message.info("This lesson has already been completed!");
+    }
+  };
+
   const renderTab1Content = () => {
     if (!lesson) return null;
 
@@ -290,7 +334,11 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
             <div className="flex items-center justify-center bg-gray-400 w-1.5 h-1.5 "></div>
 
             <div className="flex space-x-4">
-              <button className="flex items-center opacity-90 bg-gray-700 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+              <button
+                onClick={handleMarkAsComplete}
+                disabled={!isEnrolled}
+                className="flex items-center opacity-90 bg-gray-700 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"

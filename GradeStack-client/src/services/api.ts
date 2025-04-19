@@ -370,7 +370,7 @@ export const learnerService = {
     progress: number
   ) {
     const response = await api.put(
-      `/learner/${learnerId}/courses/${courseId}/progress`,
+      `/progress/learner/${learnerId}/courses/${courseId}/progress`,
       {
         progress,
       }
@@ -380,7 +380,7 @@ export const learnerService = {
 
   async getCourseProgress(learnerId: string, courseId: string) {
     const response = await api.get(
-      `/learner/${learnerId}/courses/${courseId}/progress`
+      `/progress/learner/${learnerId}/courses/${courseId}/progress`
     );
     return response.data;
   },

@@ -205,7 +205,7 @@ const CourseStudyBoard: React.FC = () => {
   );
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(true);
   const [isEnrolled, setIsEnrolled] = useState(false);
-  
+  const [progress, setProgress] = useState<number>(0);
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
@@ -318,37 +318,66 @@ const CourseStudyBoard: React.FC = () => {
     fetchCourseData();
   }, [courseId]);
 
-  useEffect(() => {
-    const checkEnrollmentStatus = async () => {
+  const handleUpdateProgress = async (newProgress: number) => {
+    try {
+      const userData = localStorage.getItem("user");
+      if (!userData || !courseId) return;
+
+      const user = JSON.parse(userData);
+      await learnerService.updateCourseProgress(user.id, courseId, newProgress);
+      setProgress(newProgress);
+      message.success("Progress updated successfully!");
+    } catch (error) {
+      console.error("Error updating progress:", error);
+      message.error("Failed to update progress");
+    }
+  };
+
+const checkEnrollmentStatus = async () => {
+  try {
+    const userData = localStorage.getItem("user");
+    if (!userData || !courseId) return;
+
+    const user = JSON.parse(userData);
+
+    const response = await userService.getMyEnrolledCourses(user.id);
+    const enrolledCourses = response.data;
+
+    const currentEnrollment = enrolledCourses.find(
+      (enrollment: EnrollmentRecord) => enrollment.course.id === courseId
+    );
+
+    if (currentEnrollment) {
+      setIsEnrolled(true);
+
+      // Lấy progress trực tiếp từ API progress
       try {
-        const userData = localStorage.getItem("user");
-        if (!userData) return;
-
-        const user = JSON.parse(userData);
-        const response = await userService.getMyEnrolledCourses(user.id);
-        const enrolledCourses = response.data;
-        console.log("Enrolled courses:", enrolledCourses);
-
-        console.log("Course ID:", course?.id);
-        console.log(
-          "Enrolled course IDs:",
-          enrolledCourses.map((e) => e.course.id)
+        const progressResponse = await learnerService.getCourseProgress(
+          user.id,
+          courseId
         );
-
-        const isEnrolled = enrolledCourses.some(
-          (enrollment: EnrollmentRecord) => enrollment.course.id === course?.id
-        );
-
-        console.log("Is enrolled:", isEnrolled);
-        setIsEnrolled(isEnrolled);
-      } catch (error) {
-        console.error("Error checking enrollment status:", error);
+        if (
+          progressResponse.data &&
+          typeof progressResponse.data.progress === "number"
+        ) {
+          setProgress(progressResponse.data.progress);
+        } else {
+          setProgress(currentEnrollment.progress);
+        }
+      } catch (progressError) {
+        console.error("Error fetching progress:", progressError);
+        setProgress(currentEnrollment.progress);
       }
-    };
-
+    }
+    setIsEnrolled(!!currentEnrollment);
+  } catch (error) {
+    console.error("Error checking enrollment status:", error);
+  }
+};
+  
+  useEffect(() => {
     checkEnrollmentStatus();
-  }, [courseId, course?.id]);
-
+  }, [courseId]);
 
   // Helper function to determine lesson type from API response
   const getLessonType = (lesson: any): LessonType => {
@@ -440,6 +469,7 @@ const CourseStudyBoard: React.FC = () => {
             setIsSidebarVisible={setIsSidebarVisible}
             currentLesson={currentLesson}
             isEnrolled={isEnrolled}
+            progress={progress}
           />
         </div>
       )}
@@ -492,6 +522,9 @@ const CourseStudyBoard: React.FC = () => {
               course={course}
               comments={comments}
               users={users}
+              onUpdateProgress={handleUpdateProgress}
+              progress={progress}
+              isEnrolled={isEnrolled}
             />
           </div>
         </div>

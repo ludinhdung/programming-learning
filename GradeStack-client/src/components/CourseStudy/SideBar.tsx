@@ -17,6 +17,7 @@ interface SideBarProps {
   isSidebarVisible: boolean;
   setIsSidebarVisible: (isSidebarVisible: boolean) => void;
   isEnrolled: boolean;
+  progress: number;
 }
 
 const SideBar: React.FC<SideBarProps> = ({
@@ -25,7 +26,9 @@ const SideBar: React.FC<SideBarProps> = ({
   isSidebarVisible,
   setIsSidebarVisible,
   isEnrolled,
+  progress,
 }) => {
+  console.log("Progress:", progress);
   const getMenuItems = (modules: Module[]): MenuProps["items"] => {
     return modules.map((module, moduleIndex) => ({
       key: `module-${moduleIndex}`,
@@ -164,7 +167,10 @@ const SideBar: React.FC<SideBarProps> = ({
     <div className="flex flex-col h-full font-bold">
       <div className="flex justify-between py-4 px-2">
         <div>
-          <a href={`/courses/${course.id}`} className="flex items-center opacity-90 bg-gray-700 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+          <a
+            href={`/courses/${course.id}`}
+            className="flex items-center opacity-90 bg-gray-700 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -254,7 +260,7 @@ const SideBar: React.FC<SideBarProps> = ({
             >
               <div
                 className="bg-[#0033FF] transition-all duration-500"
-                style={{ width: "30%" }}
+                style={{ width: `${progress}%`}}
               >
                 <div className="bg-white/25 w-[90%] h-1 mx-auto mt-px"></div>
               </div>

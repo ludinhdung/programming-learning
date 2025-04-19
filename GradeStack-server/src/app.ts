@@ -21,6 +21,7 @@ import checkoutRoutes from './modules/checkout/routes/checkout.routes';
 import noteRoutes from './modules/note/note.route';
 import { commentRoutes } from './modules/comment';
 import coursesRouter from './modules/courses/routes/course.routes';
+import progressRoutes from './modules/progress/routes/progress.routes';
 const app = express();
 
 app.use(cors());
@@ -51,7 +52,7 @@ app.use('/api/practice-code', practiceCodeRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api', noteRoutes);
 app.use('/api/comments', commentRoutes);
-
+app.use('/api/progress', progressRoutes);
 app.use(errorHandler);
 
 export default app;
