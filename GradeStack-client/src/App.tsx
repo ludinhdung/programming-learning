@@ -50,6 +50,10 @@ import UserDashboard from "./pages/UserDashboard/UserDashboard";
 import PracticeCode from "./pages/PracticeCode/PracticeCode";
 import { TransactionList } from "./components/InstructorManagement/Contents/Transaction";
 import { CourseVerificationList } from "./components/InstructorManagement/Contents/CourseVerification";
+import AdminOverview from "./pages/AdminDashboard/components/Overview";
+import AdminTransactions from "./pages/AdminDashboard/components/Transactions";
+import AdminSupporterManagement from "./pages/AdminDashboard/components/SupporterManagement";
+import AdminWithdrawalRequests from "./pages/AdminDashboard/components/WithdrawalRequests";
 
 const App: React.FC = () => {
   return (
@@ -59,13 +63,20 @@ const App: React.FC = () => {
           <Route path="/" element={<Home />} />
           <Route path="/course-study/:courseId" element={<CourseStudy />} />
           <Route path="/practice-code/:lessonId" element={<PracticeCode />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin" element={<AdminDashboard />}>
+            <Route index element={<AdminOverview />} />
+            <Route path="transactions" element={<AdminTransactions />} />
+            <Route path="supporters" element={<AdminSupporterManagement />} />
+            <Route path="withdrawals" element={<AdminWithdrawalRequests />} />
+          </Route>
           {/* <Route path="/create-course" element={<CreateCourse />} /> */}
           <Route path="/courses" element={<CourseList />} />
           {/* <Route path="/courses/:id" element={<CourseDetail />} /> */}
           <Route path="/topics" element={<Topics />} />
           <Route path="/topics/:id" element={<CourseList />} />
           <Route path="/learning-paths" element={<LearningPaths />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+
           {/* <Route path="/learning-paths/:id" element={<CourseList />} /> */}
           <Route path="/checkout/:courseId" element={<Checkout />} />
           <Route path="/profile" element={<Profile />} />
@@ -91,7 +102,6 @@ const App: React.FC = () => {
             element={<InstructorManagement />}
           >
             <Route index element={<Overview />} />
-
             <Route path="course" element={<Outlet />}>
               <Route index element={<InstructorCourseList />} />
               <Route path="create" element={<InstructorCreateCourse />} />

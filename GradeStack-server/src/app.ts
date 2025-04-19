@@ -22,6 +22,7 @@ import noteRoutes from './modules/note/note.route';
 import { commentRoutes } from './modules/comment';
 import coursesRouter from './modules/courses/routes/course.routes';
 import progressRoutes from './modules/progress/routes/progress.routes';
+import adminRoutes from './modules/admin/admin.route'
 const app = express();
 
 app.use(cors());
@@ -43,6 +44,7 @@ app.use('/api', videoLessonRouter);
 app.use('/api', moduleRouter);
 app.use('/api', learningPathRouter);
 app.use('/api', certificateRouter);
+app.use("/api/admin", adminRoutes)
 
 app.use("/api/courses", coursesRouter);
 

@@ -1,0 +1,81 @@
+import { Request, Response } from 'express';
+import { AdminService } from './admin.service';
+import { AppError } from '../../shared/middleware/error.middleware';
+
+const adminService = new AdminService();
+
+export class AdminController {
+    async getAllTransactions(req: Request, res: Response) {
+        try {
+            const transactions = await adminService.getAllTransactions();
+            res.json({
+                success: true,
+                data: transactions
+            });
+        } catch (error) {
+            if (error instanceof AppError) {
+                res.status(error.statusCode).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error'
+                });
+            }
+        }
+    }
+
+    async getTransactionById(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const transaction = await adminService.getTransactionById(id);
+            res.json({
+                success: true,
+                data: transaction
+            });
+        } catch (error) {
+            if (error instanceof AppError) {
+                res.status(error.statusCode).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error'
+                });
+            }
+        }
+    }
+
+    async updateTransactionStatus(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const { status } = req.body;
+
+            if (!['PENDING', 'APPROVED', 'REJECTED'].includes(status)) {
+                throw new AppError('Invalid status', 400);
+            }
+
+            const transaction = await adminService.updateTransactionStatus(id, status);
+            res.json({
+                success: true,
+                data: transaction
+            });
+        } catch (error) {
+            if (error instanceof AppError) {
+                res.status(error.statusCode).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Internal server error'
+                });
+            }
+        }
+    }
+}

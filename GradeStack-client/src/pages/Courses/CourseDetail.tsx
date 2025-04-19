@@ -455,13 +455,7 @@ const CourseDetail: React.FC = () => {
                                         {module.lessons.map((lesson) => (
                                             <div
                                                 key={lesson.id}
-                                                onClick={() => {
-                                                    if (isEnrolled || lesson.isPreview) {
-                                                        window.location.href = `/course-study/${courseId}?lessonId=${lesson.id}`;
-                                                    }
-                                                }}
-                                                className={`mb-4 rounded-none bg-[#14202e] p-4 border border-transparent ${!lesson.isPreview && !isEnrolled ? "opacity-60" : "hover:border-[#1b55ac]"
-                                                    } ${(isEnrolled || lesson.isPreview) ? "cursor-pointer" : "cursor-not-allowed"} transition-all duration-500 ease-in-out`}
+                                                className={`mb-4 rounded-none bg-[#14202e] p-4 border border-transparent ${!lesson.isPreview && !isEnrolled ? 'opacity-60' : ''} cursor-pointer transition-all duration-500 ease-in-out hover:border-[#1b55ac]`}
                                             >
                                                 <div className="flex items-center">
                                                     <div className="mr-4 flex-shrink-0 rounded-full border-4 border-[#0a1321] p-4 text-center w-16 h-16 flex items-center justify-center">
