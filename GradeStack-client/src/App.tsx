@@ -49,7 +49,8 @@ import UserDashboard from "./pages/UserDashboard/UserDashboard";
 
 import PracticeCode from "./pages/PracticeCode/PracticeCode";
 import { TransactionList } from "./components/InstructorManagement/Contents/Transaction";
-import { CourseVerificationList } from "./components/InstructorManagement/Contents/CourseVerification";
+import { CourseVerificationList } from "./components/InstructorManagement/Contents/CourseVerification/";
+import  CourseVerificationDetail  from "./components/InstructorManagement/Contents/CourseVerification/CourseVerificationDetail";
 
 const App: React.FC = () => {
   return (
@@ -103,6 +104,7 @@ const App: React.FC = () => {
             <Route path="monetization" element={<InstructorMonetization />} />
             <Route path="transactions" element={<TransactionList />} />
             <Route path="verify-courses" element={<CourseVerificationList />} />
+            <Route path="verify-courses/:courseId" element={<CourseVerificationDetail />} />
           </Route>
           {/* Supporter Dashboard*/}
           <Route path="/supporter-management" element={<SupporterDashboard />}>
