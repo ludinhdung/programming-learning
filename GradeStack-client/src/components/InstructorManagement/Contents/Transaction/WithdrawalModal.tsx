@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
 import { formatVND } from '../../../../utils/formatCurrency';
-import { instructorService } from '../../../../services/api';
 
 interface WithdrawalModalProps {
     isOpen: boolean;
     onClose: () => void;
     balance: number;
-    onSuccess: () => void;
+    onSuccess: (amount: number) => void;
+    isLoading: boolean;
 }
 
-const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ isOpen, onClose, balance, onSuccess }) => {
-    const [amount, setAmount] = useState<number>(0);
+const WithdrawalModal = ({
+    isOpen,
+    onClose,
+    balance,
+    onSuccess,
+    isLoading,
+}: WithdrawalModalProps) => {
+    const [amount, setAmount] = useState("");
     const [error, setError] = useState<string>('');
-    const [loading, setLoading] = useState(false);
 
     if (!isOpen) return null;
 
@@ -24,35 +29,23 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ isOpen, onClose, bala
     };
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = parseInt(e.target.value.replace(/[^0-9]/g, ''), 10);
-        setAmount(value || 0);
-        setError(validateAmount(value || 0));
+        const value = parseFloat(e.target.value);
+        setAmount(value.toString());
+        setError(validateAmount(value));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const validationError = validateAmount(amount);
+        const numericAmount = parseFloat(amount);
+        const validationError = validateAmount(numericAmount);
         if (validationError) {
             setError(validationError);
             return;
         }
 
-        try {
-            setLoading(true);
-            const user = localStorage.getItem("user");
-            if (!user) throw new Error("User not found");
-
-            const userData = JSON.parse(user);
-            await instructorService.requestWithdrawal(userData.id, amount);
-
-            setAmount(0);
-            onSuccess();
-            onClose();
-        } catch {
-            setError('Failed to submit withdrawal request');
-        } finally {
-            setLoading(false);
-        }
+        setError('');
+        onSuccess(numericAmount);
+        setAmount('');
     };
 
     return (
@@ -85,11 +78,15 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ isOpen, onClose, bala
                         </label>
                         <div className="relative">
                             <input
-                                type="text"
-                                value={formatVND(amount)}
+                                type="number"
+                                value={amount}
                                 onChange={handleAmountChange}
                                 className="w-full bg-zinc-700 text-white px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 placeholder="Enter amount"
+                                min="0"
+                                max={balance}
+                                step="0.01"
+                                required
                             />
                         </div>
                         {error && (
@@ -120,10 +117,10 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ isOpen, onClose, bala
                         </button>
                         <button
                             type="submit"
-                            disabled={loading || !!error || amount <= 0}
+                            disabled={isLoading || !!error || parseFloat(amount) <= 0 || parseFloat(amount) > balance}
                             className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-600/50 disabled:cursor-not-allowed transition-colors"
                         >
-                            {loading ? 'Processing...' : 'Submit Request'}
+                            {isLoading ? 'Processing...' : 'Submit Request'}
                         </button>
                     </div>
                 </form>

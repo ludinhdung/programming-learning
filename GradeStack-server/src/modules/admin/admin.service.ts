@@ -102,15 +102,27 @@ export class AdminService {
             });
 
             // If transaction is approved and it's a withdrawal, update wallet balance
-            if (status === 'APPROVED' && transaction.type === 'WITHDRAWAL') {
-                await prisma.wallet.update({
-                    where: { id: transaction.wallet.id },
-                    data: {
-                        balance: {
-                            decrement: transaction.amount
+            if (transaction.type === 'WITHDRAWAL') {
+                if (status === 'APPROVED') {
+                    await prisma.wallet.update({
+                        where: { id: transaction.wallet.id },
+                        data: {
+                            balance: {
+                                decrement: transaction.amount
+                            }
                         }
-                    }
-                });
+                    });
+                } else if (status === 'REJECTED') {
+                    // Refund the wallet when transaction is rejected
+                    await prisma.wallet.update({
+                        where: { id: transaction.wallet.id },
+                        data: {
+                            balance: {
+                                increment: transaction.amount
+                            }
+                        }
+                    });
+                }
             }
 
             return transaction;

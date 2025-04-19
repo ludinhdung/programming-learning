@@ -3,6 +3,7 @@ import { instructorService } from "../../../services/api";
 import { formatVND } from "../../../utils/formatCurrency";
 import { TransactionList } from "./Transaction";
 import WithdrawalModal from "./Transaction/WithdrawalModal";
+import { message } from 'antd';
 
 interface Wallet {
   balance: number;
@@ -10,10 +11,19 @@ interface Wallet {
   instructorId: string;
 }
 
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 const Monetization = () => {
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isWithdrawalModalOpen, setIsWithdrawalModalOpen] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   const fetchWallet = async () => {
     try {
@@ -24,16 +34,36 @@ const Monetization = () => {
       }
       const userData = JSON.parse(user);
       const instructorId = userData.id;
-      const response = await instructorService.getInstructorWallet(
-        instructorId
-      );
+      const response = await instructorService.getInstructorWallet(instructorId);
       setWallet(response.data);
-      console.log(response.data);
-
     } catch (error) {
-      console.log("Error fetching wallet", error);
+      console.error("Error fetching wallet", error);
+      message.error("Failed to fetch wallet information");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleWithdrawal = async (amount: number) => {
+    try {
+      setIsWithdrawing(true);
+      const user = localStorage.getItem("user");
+      if (!user) {
+        throw new Error("User not found");
+      }
+      const userData = JSON.parse(user);
+      const instructorId = userData.id;
+
+      await instructorService.requestWithdrawal(instructorId, amount);
+      message.success("Withdrawal request submitted successfully");
+      setIsWithdrawalModalOpen(false);
+      fetchWallet(); // Refresh wallet data
+    } catch (error: unknown) {
+      console.error("Error processing withdrawal", error);
+      const apiError = error as ApiError;
+      message.error(apiError.response?.data?.message || "Failed to process withdrawal");
+    } finally {
+      setIsWithdrawing(false);
     }
   };
 
@@ -90,7 +120,7 @@ const Monetization = () => {
               {isLoading ? (
                 <div className="animate-pulse bg-white/20 h-8 w-32 rounded"></div>
               ) : (
-                formatVND(wallet?.balance)
+                formatVND(wallet?.balance || 0)
               )}
             </h2>
             <p className="text-white/60 text-sm">Total Available</p>
@@ -157,8 +187,7 @@ const Monetization = () => {
             </span>
           </div>
           <div className="text-white">
-            <h2 className="text-3xl font-bold mb-1">0</h2>{" "}
-            {/* Replace with actual student count */}
+            <h2 className="text-3xl font-bold mb-1">0</h2>
             <p className="text-purple-500 text-sm flex items-center gap-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -177,14 +206,14 @@ const Monetization = () => {
       </div>
 
       {/* Recent Transactions Section */}
-
       <TransactionList />
 
       <WithdrawalModal
         isOpen={isWithdrawalModalOpen}
         onClose={() => setIsWithdrawalModalOpen(false)}
         balance={wallet?.balance || 0}
-        onSuccess={fetchWallet}
+        onSuccess={handleWithdrawal}
+        isLoading={isWithdrawing}
       />
     </div>
   );

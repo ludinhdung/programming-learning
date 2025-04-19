@@ -609,4 +609,28 @@ export class InstructorController {
             next(error);
         }
     };
+
+    /**
+     * Request withdrawal from instructor wallet
+     */
+    public requestWithdrawal = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const { id } = req.params;
+            const { amount } = req.body;
+
+            // Validate required fields
+            if (!amount || typeof amount !== 'number') {
+                res.status(400).json({ message: 'Valid withdrawal amount is required' });
+                return;
+            }
+
+            const transaction = await this.instructorService.requestWithdrawal(id, amount);
+            res.status(200).json({
+                success: true,
+                data: transaction
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
 }

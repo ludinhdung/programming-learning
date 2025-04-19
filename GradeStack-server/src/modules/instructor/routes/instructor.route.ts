@@ -15,6 +15,7 @@ router.post('/', instructorController.createInstructor);
 router.get('/', instructorController.getAllInstructors);
 router.get('/:id', instructorController.getInstructor);
 router.get('/:id/wallet', instructorController.getInstructorWallet);
+router.post('/:id/wallet/withdraw', authenticate, instructorController.requestWithdrawal);
 router.put('/:id/profile', instructorController.updateProfile);
 router.put('/:id/avatar', instructorController.updateAvatar);
 router.post('/upload-video', uploadVideo, instructorController.uploadVideo);

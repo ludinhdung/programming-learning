@@ -341,6 +341,11 @@ export const instructorService = {
     return response.data;
   },
 
+  async requestWithdrawal(instructorId: string, amount: number) {
+    const response = await api.post(`/instructors/${instructorId}/wallet/withdraw`, { amount });
+    return response.data;
+  },
+
   async getInstructorTransactions(instructorId: string) {
     const response = await api.get(`/instructors/${instructorId}/transactions`);
     return response.data;
