@@ -2,31 +2,42 @@ import { useEffect, useState } from "react";
 import { instructorService } from "../../../services/api";
 import { formatVND } from "../../../utils/formatCurrency";
 import { TransactionList } from "./Transaction";
-const Monetization = () => {
-  const [wallet, setWallet] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  useEffect(() => {
-    const fetchWallet = async () => {
-      try {
-        setIsLoading(true);
-        const user = localStorage.getItem("user");
-        if (!user) {
-          throw new Error("User not found");
-        }
-        const userData = JSON.parse(user);
-        const instructorId = userData.id;
-        const response = await instructorService.getInstructorWallet(
-          instructorId
-        );
-        setWallet(response.data);
-        console.log(response.data);
+import WithdrawalModal from "./Transaction/WithdrawalModal";
 
-      } catch (error) {
-        console.log("Error fetching wallet", error);
-      } finally {
-        setIsLoading(false);
+interface Wallet {
+  balance: number;
+  id: string;
+  instructorId: string;
+}
+
+const Monetization = () => {
+  const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isWithdrawalModalOpen, setIsWithdrawalModalOpen] = useState(false);
+
+  const fetchWallet = async () => {
+    try {
+      setIsLoading(true);
+      const user = localStorage.getItem("user");
+      if (!user) {
+        throw new Error("User not found");
       }
-    };
+      const userData = JSON.parse(user);
+      const instructorId = userData.id;
+      const response = await instructorService.getInstructorWallet(
+        instructorId
+      );
+      setWallet(response.data);
+      console.log(response.data);
+
+    } catch (error) {
+      console.log("Error fetching wallet", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchWallet();
   }, []);
 
@@ -34,7 +45,11 @@ const Monetization = () => {
     <div className="flex flex-col w-full min-h-screen bg-zinc-800 p-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-white text-2xl font-bold">Financial Dashboard</h1>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all">
+        <button
+          onClick={() => setIsWithdrawalModalOpen(true)}
+          disabled={isLoading || !wallet?.balance || wallet?.balance <= 0}
+          className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-5 w-5"
@@ -165,6 +180,12 @@ const Monetization = () => {
 
       <TransactionList />
 
+      <WithdrawalModal
+        isOpen={isWithdrawalModalOpen}
+        onClose={() => setIsWithdrawalModalOpen(false)}
+        balance={wallet?.balance || 0}
+        onSuccess={fetchWallet}
+      />
     </div>
   );
 };
