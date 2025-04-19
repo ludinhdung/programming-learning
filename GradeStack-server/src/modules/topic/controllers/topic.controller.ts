@@ -25,6 +25,7 @@ export class TopicController {
         try {
             const { id } = req.params;
             const topicData = req.body;
+            
             // Validate required fields
             if (
                 !topicData?.name || 
@@ -99,7 +100,7 @@ export class TopicController {
      */
     public updateTopic = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { topicId } = req.params;
+            const { id, topicId } = req.params;
             const topicData = req.body;
             
             // Validate required fields
@@ -108,7 +109,7 @@ export class TopicController {
                 return;
             }
 
-            const topic = await this.topicService.updateTopic(topicId, topicData);
+            const topic = await this.topicService.updateTopic(id, topicId, topicData);
             res.status(200).json(topic);
         } catch (error) {
             this.handleError(res, error);
@@ -120,8 +121,8 @@ export class TopicController {
      */
     public deleteTopic = async (req: Request, res: Response): Promise<void> => {
         try {
-            const { topicId } = req.params;
-            await this.topicService.deleteTopic(topicId);
+            const { id, topicId } = req.params;
+            await this.topicService.deleteTopic(id, topicId);
             res.status(204).send();
         } catch (error) {
             this.handleError(res, error);

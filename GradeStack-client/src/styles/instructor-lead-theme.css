@@ -1,0 +1,167 @@
+/* Instructor Lead Dashboard Theme - Dark Mode */
+
+/* Màu nền chính */
+.instructor-lead-bg {
+  background-color: #151922 !important;
+  color: white !important;
+}
+
+/* Màu nền thứ cấp (cho card, panel) */
+.instructor-lead-card {
+  background-color: #1a1f2e !important;
+  border: none !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 0.5rem !important;
+}
+
+/* Màu nền cho input, select, button */
+.instructor-lead-input {
+  background-color: #242a38 !important;
+  border-color: #374151 !important;
+  color: white !important;
+}
+
+.instructor-lead-input::placeholder {
+  color: #6b7280 !important;
+}
+
+.instructor-lead-input:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Màu nút chính */
+.instructor-lead-btn-primary {
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  color: white !important;
+}
+
+.instructor-lead-btn-primary:hover {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+/* Màu nút thứ cấp */
+.instructor-lead-btn-secondary {
+  background-color: #242a38 !important;
+  border-color: #374151 !important;
+  color: white !important;
+}
+
+.instructor-lead-btn-secondary:hover {
+  background-color: #1a1f2e !important;
+}
+
+/* Màu viền */
+.instructor-lead-border {
+  border-color: #374151 !important;
+}
+
+/* Màu tiêu đề */
+.instructor-lead-title {
+  color: white !important;
+  position: relative;
+}
+
+.instructor-lead-title::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: 0;
+  width: 5rem;
+  height: 0.25rem;
+  background-color: #3b82f6;
+}
+
+/* Màu văn bản */
+.instructor-lead-text {
+  color: #e5e7eb !important;
+}
+
+.instructor-lead-text-secondary {
+  color: #9ca3af !important;
+}
+
+/* Màu cho bảng */
+.instructor-lead-table {
+  background-color: #1a1f2e !important;
+  color: white !important;
+}
+
+.instructor-lead-table th {
+  background-color: #242a38 !important;
+  color: white !important;
+  border-color: #374151 !important;
+}
+
+.instructor-lead-table td {
+  border-color: #374151 !important;
+}
+
+.instructor-lead-table tr:hover > td {
+  background-color: #242a38 !important;
+}
+
+/* Override Ant Design styles */
+.ant-select-dropdown {
+  background-color: #242a38 !important;
+  border-color: #374151 !important;
+}
+
+.ant-select-item {
+  color: white !important;
+}
+
+.ant-select-item-option-selected {
+  background-color: #3b82f6 !important;
+}
+
+.ant-select-item-option-active:not(.ant-select-item-option-selected) {
+  background-color: #1a1f2e !important;
+}
+
+.ant-form-item-label > label {
+  color: #e5e7eb !important;
+}
+
+.ant-modal-content,
+.ant-modal-header {
+  background-color: #1a1f2e !important;
+  color: white !important;
+}
+
+.ant-modal-title {
+  color: white !important;
+}
+
+.ant-modal-close-x {
+  color: white !important;
+}
+
+.ant-pagination-item {
+  background-color: #242a38 !important;
+  border-color: #374151 !important;
+}
+
+.ant-pagination-item a {
+  color: white !important;
+}
+
+.ant-pagination-item-active {
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+}
+
+.ant-pagination-prev button,
+.ant-pagination-next button {
+  background-color: #242a38 !important;
+  border-color: #374151 !important;
+  color: white !important;
+}
+
+.ant-pagination-options-size-changer {
+  background-color: #242a38 !important;
+  border-color: #374151 !important;
+  color: white !important;
+}

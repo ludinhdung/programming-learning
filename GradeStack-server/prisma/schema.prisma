@@ -73,6 +73,7 @@ model Course {
   duration    Int     @default(0) 
   isPublished Boolean @default(false)
   thumbnail   String?
+  isFinished  Boolean @default(false)
 
   instructor   Instructor @relation(fields: [instructorId], references: [userId])
   instructorId String
@@ -362,6 +363,7 @@ model Workshop {
   description String
   scheduledAt DateTime
   duration    Int // Thời gian workshop (phút)
+  type        String   @default("FRONTEND") // FRONTEND hoặc BACKEND
 
   instructor   Instructor @relation(fields: [instructorId], references: [userId])
   instructorId String

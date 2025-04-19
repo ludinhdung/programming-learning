@@ -54,13 +54,13 @@ const topicService = {
     return response.data;
   },
 
-  async updateTopic(topicId: string, topicData: TopicUpdateData) {
-    const response = await apiClient.put(`/topics/${topicId}`, topicData);
+  async updateTopic(instructorId: string, topicId: string, topicData: TopicUpdateData) {
+    const response = await apiClient.put(`/instructors/${instructorId}/topics/${topicId}`, topicData);
     return response.data;
   },
 
-  async deleteTopic(topicId: string) {
-    const response = await apiClient.delete(`/topics/${topicId}`);
+  async deleteTopic(instructorId: string, topicId: string) {
+    const response = await apiClient.delete(`/instructors/${instructorId}/topics/${topicId}`);
     return response.data;
   },
 

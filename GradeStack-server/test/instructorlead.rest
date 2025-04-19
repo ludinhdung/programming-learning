@@ -1,0 +1,149 @@
+# Kiểm thử API cho INSTRUCTOR_LEAD
+@baseUrl = http://localhost:4000/api
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1MjgzNDUxZC1mNjViLTQ3NTYtYjUzZC0xNTMxMmQ5ZTFkZjIiLCJyb2xlIjoiSU5TVFJ1Q1RPUiIsImlhdCI6MTc0NDY0Njc2MywiZXhwIjoxNzQ0NzMzMTYzfQ.zZz8oZXWEa-NGxJf0fAMF_iQb-pPlaMXteT2nFwNZPk
+@instructorLeadId = d2c013c4-ff13-4527-a297-45f6c5ce9421
+@learningPathId = 23af0614-cefe-45dd-b187-d2be247f8036
+@workshopId = 7e4fe40a-084d-4441-ad07-6cf93f331905
+@courseId1 = bca1eddc-92b0-48f8-b3a3-15c2a6dfc6f6
+@courseId2 = 51d5b74f-ee6e-42ab-b585-267d3f01a9c6
+
+### ==========================================
+### ĐĂNG NHẬP VÀ XÁC THỰC
+### ==========================================
+
+### Đăng nhập với tài khoản INSTRUCTOR_LEAD
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "instructorlead@example.com",
+  "password": "password123"
+}
+
+### ==========================================
+### QUẢN LÝ LEARNING PATH
+### ==========================================
+
+### Lấy tất cả learning paths (công khai)
+GET {{baseUrl}}/learning-paths
+Content-Type: application/json
+
+### Lấy thông tin chi tiết learning path (công khai)
+GET {{baseUrl}}/learning-paths/{{learningPathId}}
+Content-Type: application/json
+
+### Tạo learning path mới (yêu cầu quyền INSTRUCTOR_LEAD)
+POST {{baseUrl}}/instructors/{{instructorLeadId}}/learning-paths
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Lộ trình học Full-stack Web Development",
+  "description": "Học tất cả những gì bạn cần để trở thành một lập trình viên full-stack",
+  "thumbnail": "https://example.com/thumbnail.jpg",
+  "courseIds": ["{{courseId1}}", "{{courseId2}}"]
+}
+
+### Lấy danh sách learning paths của instructor lead
+GET {{baseUrl}}/instructors/{{instructorLeadId}}/learning-paths
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### Cập nhật learning path
+PUT {{baseUrl}}/instructors/{{instructorLeadId}}/learning-paths/{{learningPathId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Lộ trình học Full-stack Web Development (Cập nhật)",
+  "description": "Mô tả cập nhật cho lộ trình học",
+  "thumbnail": "https://example.com/new-thumbnail.jpg",
+  "courseIds": ["{{courseId1}}", "{{courseId2}}"]
+}
+
+### Cập nhật thứ tự khóa học trong learning path
+PUT {{baseUrl}}/instructors/{{instructorLeadId}}/learning-paths/{{learningPathId}}/courses-order
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "courses": [
+    {
+      "courseId": "{{courseId1}}",
+      "order": 0
+    },
+    {
+      "courseId": "{{courseId2}}",
+      "order": 1
+    }
+  ]
+}
+
+### Xóa learning path
+DELETE {{baseUrl}}/instructors/{{instructorLeadId}}/learning-paths/{{learningPathId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### ==========================================
+### QUẢN LÝ WORKSHOP
+### ==========================================
+
+### Lấy danh sách workshop (công khai)
+GET {{baseUrl}}/workshops
+Content-Type: application/json
+
+### Lấy thông tin chi tiết workshop (công khai)
+GET {{baseUrl}}/workshops/{{workshopId}}
+Content-Type: application/json
+
+### Tạo workshop mới (yêu cầu quyền INSTRUCTOR_LEAD)
+POST {{baseUrl}}/instructors/{{instructorLeadId}}/workshops
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Workshop về ReactJS và NextJS",
+  "description": "Học cách xây dựng ứng dụng web hiện đại với ReactJS và NextJS",
+  "scheduledAt": "2025-05-15T14:00:00Z",
+  "duration": 120,
+  "type": "FRONTEND"
+}
+
+### Cập nhật workshop
+PUT {{baseUrl}}/instructors/{{instructorLeadId}}/workshops/{{workshopId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Workshop về ReactJS và NextJS (Cập nhật)",
+  "description": "Mô tả cập nhật cho workshop",
+  "scheduledAt": "2025-05-16T15:00:00Z",
+  "duration": 150,
+  "type": "FRONTEND"
+}
+
+### Xóa workshop
+DELETE {{baseUrl}}/instructors/{{instructorLeadId}}/workshops/{{workshopId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### ==========================================
+### KIỂM TRA PHÂN QUYỀN
+### ==========================================
+
+### Thử truy cập với quyền LEARNER (không được phép)
+POST {{baseUrl}}/instructors/{{instructorLeadId}}/learning-paths
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJsZWFybmVyX2lkIiwicm9sZSI6IkxFQVJORVIiLCJpYXQiOjE2MTYxNjgwMDB9.mock_token_for_learner
+
+{
+  "title": "Lộ trình học không được phép",
+  "description": "Mô tả không được phép",
+  "thumbnail": "https://example.com/thumbnail.jpg",
+  "courseIds": ["{{courseId1}}"]
+}
+
+### Thử truy cập tài nguyên của instructor khác (không được phép)
+GET {{baseUrl}}/instructors/other_instructor_id/learning-paths
+Content-Type: application/json
+Authorization: Bearer {{token}}

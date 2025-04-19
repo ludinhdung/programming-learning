@@ -5,7 +5,9 @@
   "main": "src/server.ts",
   "scripts": {
     "seed": "ts-node prisma/seed.ts",
-    "dev": "nodemon src/server.ts"
+    "dev": "nodemon src/server.ts",
+    "mock:instructorlead": "ts-node test/mockData/instructorlead-mock.ts",
+    "generate:token": "ts-node test/mockData/generate-token.ts"
   },
   "license": "MIT",
   "dependencies": {
@@ -35,6 +37,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.7.0",
     "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.17",
     "@types/dockerode": "^3.3.35",

@@ -21,8 +21,22 @@ api.interceptors.request.use((config) => {
 
 export const authService = {
   async login(email: string, password: string) {
-    const response = await api.post("/auth/login", { email, password });
-    return response.data;
+    try {
+      console.log('Gọi API đăng nhập với:', { email });
+      const response = await api.post("/auth/login", { email, password });
+      console.log('Phản hồi API đăng nhập:', response);
+      
+      // Kiểm tra cấu trúc phản hồi
+      if (response.data.data) {
+        // Nếu phản hồi có cấu trúc { data: { user, token } }
+        return response.data.data;
+      }
+      // Nếu phản hồi có cấu trúc { user, token }
+      return response.data;
+    } catch (error) {
+      console.error('Lỗi khi đăng nhập:', error);
+      throw error;
+    }
   },
 
   async register(userData: {
@@ -242,6 +256,10 @@ export const instructorService = {
 
   async deleteCourse(id: string, courseId: string) {
     const response = await api.delete(`/instructors/${id}/courses/${courseId}`);
+    return response.data;
+  },
+  async toggleCoursePublishStatus(id: string, courseId: string, isPublished: boolean) {
+    const response = await api.patch(`/instructors/${id}/courses/${courseId}/publish-status`, { isPublished });
     return response.data;
   },
 

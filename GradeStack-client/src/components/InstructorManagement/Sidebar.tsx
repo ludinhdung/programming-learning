@@ -12,6 +12,7 @@ import {
   MdBrush,
   MdCategory,
   MdTimeline,
+  MdEvent,
 } from "react-icons/md";
 import { instructorService } from "../../services/api";
 import { message } from "antd";
@@ -156,16 +157,6 @@ const Sidebar = () => {
       icon: MdVideoLibrary,
       text: "Course",
       href: "/instructor-management/course",
-    },
-    {
-      icon: MdCategory,
-      text: "Topics",
-      href: "/instructor/topics",
-    },
-    {
-      icon: MdTimeline,
-      text: "Learning Paths",
-      href: "/instructor/learning-paths",
     },
     {
       icon: MdAnalytics,

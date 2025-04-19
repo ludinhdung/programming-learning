@@ -1,4 +1,4 @@
-import { Layout, Table, Tag, Menu, Button, Switch, Modal, Form, Input, Tooltip, Popconfirm, Space, Card, Statistic } from 'antd';
+import { Layout, Table, Tag, Menu, Button, Switch, Modal, Form, Input, Tooltip, Popconfirm, Space, Card, Statistic, Spin, Alert } from 'antd';
 import {
   UserOutlined,
   TeamOutlined,
@@ -18,8 +18,9 @@ import {
   ClockCircleOutlined,
 } from '@ant-design/icons';
 import DashboardHeader from "../../components/DashboardHeader/DashboardHeader";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import React from 'react';
+import { getDashboardOverview, DashboardOverview } from '../../services/admin-api';
 
 const { Content, Sider } = Layout;
 
@@ -55,7 +56,31 @@ const AdminDashboard = () => {
   const [selectedKey, setSelectedKey] = useState('dashboard');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm<CreateSupporterForm>();
-
+  
+  // State cho dữ liệu dashboard
+  const [dashboard, setDashboard] = useState<DashboardOverview | null>(null);
+  const [loadingDashboard, setLoadingDashboard] = useState<boolean>(true);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
+  
+  // Lấy dữ liệu dashboard khi component được mount
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoadingDashboard(true);
+        setDashboardError(null);
+        const data = await getDashboardOverview();
+        setDashboard(data);
+      } catch (error) {
+        console.error('Lỗi khi tải dữ liệu dashboard:', error);
+        setDashboardError('Không thể tải dữ liệu dashboard. Vui lòng thử lại sau.');
+      } finally {
+        setLoadingDashboard(false);
+      }
+    };
+    
+    fetchDashboardData();
+  }, []);
+  
   // Mock data
   const supporters: Supporter[] = [
     {
@@ -418,75 +443,111 @@ const AdminDashboard = () => {
               <h1 className="text-2xl font-semibold text-gray-800">Admin Dashboard</h1>
             </div>
 
-            {/* Revenue Statistics */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Card className="bg-white border border-gray-200">
-                <Statistic
-                  title={<span className="text-gray-700">Total Revenue</span>}
-                  value={89000}
-                  prefix={<DollarOutlined />}
-                  valueStyle={{ color: '#4CAF50' }}
-                  formatter={value => `$${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                />
-              </Card>
-              <Card className="bg-white border border-gray-200">
-                <Statistic
-                  title={<span className="text-gray-700">Monthly Revenue</span>}
-                  value={12500}
-                  prefix={<DollarOutlined />}
-                  valueStyle={{ color: '#2196F3' }}
-                  formatter={value => `$${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                />
-              </Card>
-              <Card className="bg-white border border-gray-200">
-                <Statistic
-                  title={<span className="text-gray-700">Pending Payments</span>}
-                  value={1890}
-                  prefix={<DollarOutlined />}
-                  valueStyle={{ color: '#FF9800' }}
-                  formatter={value => `$${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                />
-              </Card>
-              <Card className="bg-white border border-gray-200">
-                <Statistic
-                  title={<span className="text-gray-700">Average Transaction</span>}
-                  value={156}
-                  prefix={<DollarOutlined />}
-                  valueStyle={{ color: '#607D8B' }}
-                  formatter={value => `$${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                />
-              </Card>
-            </div>
+            {loadingDashboard ? (
+              <div className="flex justify-center items-center py-20">
+                <Spin size="large" tip="Đang tải dữ liệu..." />
+              </div>
+            ) : dashboardError ? (
+              <Alert
+                message="Lỗi tải dữ liệu"
+                description={dashboardError}
+                type="error"
+                showIcon
+                className="my-4"
+              />
+            ) : dashboard ? (
+              <>
+                {/* Revenue Statistics */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <Card className="bg-white border border-gray-200">
+                    <Statistic
+                      title={<span className="text-gray-700">Tổng doanh thu</span>}
+                      value={dashboard.totalRevenue || 0}
+                      prefix={<DollarOutlined />}
+                      valueStyle={{ color: '#4CAF50' }}
+                      formatter={value => `$${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                    />
+                  </Card>
+                  <Card className="bg-white border border-gray-200">
+                    <Statistic
+                      title={<span className="text-gray-700">Doanh thu tháng</span>}
+                      value={dashboard.monthlyRevenue || 0}
+                      prefix={<DollarOutlined />}
+                      valueStyle={{ color: '#2196F3' }}
+                      formatter={value => `$${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                    />
+                  </Card>
+                  <Card className="bg-white border border-gray-200">
+                    <Statistic
+                      title={<span className="text-gray-700">Thanh toán chờ xử lý</span>}
+                      value={dashboard.pendingPayments || 0}
+                      prefix={<DollarOutlined />}
+                      valueStyle={{ color: '#FF9800' }}
+                      formatter={value => `$${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                    />
+                  </Card>
+                  <Card className="bg-white border border-gray-200">
+                    <Statistic
+                      title={<span className="text-gray-700">Giao dịch trung bình</span>}
+                      value={dashboard.averageTransaction || 0}
+                      prefix={<DollarOutlined />}
+                      valueStyle={{ color: '#607D8B' }}
+                      formatter={value => `$${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                    />
+                  </Card>
+                </div>
 
-            {/* User Statistics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="bg-white border border-gray-200">
-                <Statistic
-                  title={<span className="text-gray-700">Total Instructors</span>}
-                  value={245}
-                  prefix={<BookOutlined />}
-                  valueStyle={{ color: '#2196F3' }}
-                />
-              </Card>
-              <Card className="bg-white border border-gray-200">
-                <Statistic
-                  title={<span className="text-gray-700">Total Learners</span>}
-                  value={1234}
-                  prefix={<UserOutlined />}
-                  valueStyle={{ color: '#4CAF50' }}
-                />
-              </Card>
-              <Card className="bg-white border border-gray-200">
-                <Statistic
-                  title={<span className="text-gray-700">Active Courses</span>}
-                  value={156}
-                  prefix={<BookOutlined />}
-                  valueStyle={{ color: '#FF9800' }}
-                />
-              </Card>
-            </div>
+                {/* User Statistics */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                  <Card className="bg-white border border-gray-200">
+                    <Statistic
+                      title={<span className="text-gray-700">Tổng giảng viên</span>}
+                      value={dashboard.totalInstructors || 0}
+                      prefix={<BookOutlined />}
+                      valueStyle={{ color: '#2196F3' }}
+                    />
+                  </Card>
+                  <Card className="bg-white border border-gray-200">
+                    <Statistic
+                      title={<span className="text-gray-700">Tổng học viên</span>}
+                      value={dashboard.totalLearners || 0}
+                      prefix={<UserOutlined />}
+                      valueStyle={{ color: '#4CAF50' }}
+                    />
+                  </Card>
+                  <Card className="bg-white border border-gray-200">
+                    <Statistic
+                      title={<span className="text-gray-700">Khóa học đang hoạt động</span>}
+                      value={dashboard.totalCourses || 0}
+                      prefix={<BookOutlined />}
+                      valueStyle={{ color: '#FF9800' }}
+                    />
+                  </Card>
+                </div>
 
-           
+                {/* Học viên và đánh giá */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                  <Card className="bg-white border border-gray-200">
+                    <Statistic
+                      title={<span className="text-gray-700">Học viên hoạt động</span>}
+                      value={dashboard.activeStudents || 0}
+                      prefix={<UserOutlined />}
+                      valueStyle={{ color: '#4CAF50' }}
+                    />
+                  </Card>
+                  <Card className="bg-white border border-gray-200">
+                    <Statistic
+                      title={<span className="text-gray-700">Đánh giá trung bình</span>}
+                      value={dashboard.averageRating || 0}
+                      prefix={<StarFilled />}
+                      valueStyle={{ color: '#FF9800' }}
+                      suffix="/5"
+                      precision={1}
+                    />
+                  </Card>
+                </div>
+              </>
+            ) : null}
           </div>
         );
       case 'instructors-list':

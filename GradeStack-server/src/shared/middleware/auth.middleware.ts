@@ -15,6 +15,7 @@ declare global {
     namespace Express {
         interface Request {
             user?: any;
+            resourceOwnerId?: string;
         }
     }
 }
@@ -56,6 +57,10 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     }
 };
 
+/**
+ * Middleware để xác thực quyền truy cập dựa trên vai trò
+ * @param roles - Danh sách các vai trò được phép truy cập
+ */
 export const authorize = (...roles: Role[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
         if (!req.user) {
@@ -67,5 +72,96 @@ export const authorize = (...roles: Role[]) => {
         }
 
         next();
+    };
+};
+
+/**
+ * Middleware để kiểm tra người dùng chỉ được thao tác trên dữ liệu của chính họ
+ * Sử dụng cho INSTRUCTOR_LEAD
+ */
+export const checkResourceOwnership = () => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (!req.user) {
+                return next(new AppError('Not authenticated', 401));
+            }
+
+            // Lấy ID từ tham số URL (thường là ID của instructor)
+            const resourceOwnerId = req.params.id;
+            
+            // Nếu người dùng là ADMIN hoặc SUPPORTER, cho phép truy cập
+            if (req.user.role === Role.ADMIN || req.user.role === Role.SUPPORTER) {
+                return next();
+            }
+            
+            // Kiểm tra xem người dùng có phải là chủ sở hữu của tài nguyên không
+            if (req.user.id !== resourceOwnerId) {
+                return next(new AppError('You are not authorized to access this resource', 403));
+            }
+            
+            // Lưu ID của chủ sở hữu tài nguyên vào request để sử dụng sau này
+            req.resourceOwnerId = resourceOwnerId;
+            next();
+        } catch (error) {
+            next(new AppError('Authorization check failed', 500));
+        }
+    };
+};
+
+/**
+ * Middleware để kiểm tra quyền sở hữu của một tài nguyên cụ thể (learning path, workshop)
+ */
+export const checkSpecificResourceOwnership = (resourceType: 'learningPath' | 'workshop') => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (!req.user) {
+                return next(new AppError('Not authenticated', 401));
+            }
+
+            // Nếu người dùng là ADMIN hoặc SUPPORTER, cho phép truy cập
+            if (req.user.role === Role.ADMIN || req.user.role === Role.SUPPORTER) {
+                return next();
+            }
+
+            const userId = req.user.id;
+            const resourceId = req.params.learningPathId || req.params.workshopId;
+
+            if (!resourceId) {
+                return next(new AppError('Resource ID not provided', 400));
+            }
+
+            let isOwner = false;
+
+            if (resourceType === 'learningPath') {
+                // Kiểm tra quyền sở hữu learning path
+                const learningPath = await prisma.learningPath.findUnique({
+                    where: { id: resourceId },
+                    select: { instructorUserId: true }
+                });
+
+                isOwner = learningPath?.instructorUserId === userId;
+            } else if (resourceType === 'workshop') {
+                // Kiểm tra quyền sở hữu workshop
+                const workshop = await prisma.workshop.findUnique({
+                    where: { id: resourceId },
+                    select: { instructorId: true }
+                });
+
+                const instructor = await prisma.instructor.findUnique({
+                    where: { userId: userId },
+                    select: { userId: true }
+                });
+
+                isOwner = workshop?.instructorId === instructor?.userId;
+            }
+
+            if (!isOwner) {
+                return next(new AppError('You do not have permission to access this resource', 403));
+            }
+
+            next();
+        } catch (error) {
+            next(new AppError('Resource ownership check failed', 500));
+        }
     };
 };

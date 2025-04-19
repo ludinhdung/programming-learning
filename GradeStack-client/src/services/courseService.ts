@@ -77,7 +77,7 @@ const courseService = {
   async deleteCourse(instructorId: string, courseId: string) {
     const response = await apiClient.delete(`/instructors/${instructorId}/courses/${courseId}`);
     return response.data;
-  },
+  }
 };
 
 export default courseService;

@@ -28,7 +28,7 @@ export abstract class TopicBaseService<
         return this.model.findUnique({
             where: { id: topicId },
             include: { 
-                instructor: {
+                Instructor: {
                     include: { user: true }
                 }
             }

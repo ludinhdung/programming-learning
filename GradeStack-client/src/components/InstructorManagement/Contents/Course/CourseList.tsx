@@ -50,6 +50,10 @@ const CourseList = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
+  
+  // Thêm state cho modal verify
+  const [verifyModalOpen, setVerifyModalOpen] = useState(false);
+  const [courseToVerify, setCourseToVerify] = useState<Course | null>(null);
 
   const handleDeleteClick = (courseId: string) => {
     setCourseToDelete(courseId);
@@ -61,6 +65,46 @@ const CourseList = () => {
       await handleDeleteCourse(courseToDelete);
       setDeleteModalOpen(false);
       setCourseToDelete(null);
+    }
+  };
+
+  // Xử lý khi nhấn nút verify
+  const handleVerifyClick = (course: Course) => {
+    setCourseToVerify(course);
+    setVerifyModalOpen(true);
+  };
+
+  // Xử lý khi xác nhận verify
+  const handleVerifyConfirm = async () => {
+    if (courseToVerify) {
+      await handleVerifyCourse(courseToVerify);
+      setVerifyModalOpen(false);
+      setCourseToVerify(null);
+    }
+  };
+
+  // Gọi API để verify course
+  const handleVerifyCourse = async (course: Course) => {
+    try {
+      const userData = localStorage.getItem("user");
+      if (!userData) {
+        setError("User not found. Please login again.");
+        return;
+      }
+      const user = JSON.parse(userData);
+
+      // Gọi API toggle publish status với giá trị ngược lại của isPublished hiện tại
+      await instructorService.toggleCoursePublishStatus(user.id, course.id, !course.isPublished);
+      
+      // Cập nhật state courses
+      setCourses(courses.map(c => 
+        c.id === course.id ? {...c, isPublished: !course.isPublished} : c
+      ));
+      
+      message.success(`Course ${!course.isPublished ? 'published' : 'unpublished'} successfully!`);
+    } catch (error) {
+      console.error("Error verifying course:", error);
+      message.error("Failed to update course status. Please try again.");
     }
   };
 
@@ -130,6 +174,7 @@ const CourseList = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-zinc-800 p-8">
+      {/* Modal xóa khóa học */}
       <Modal
         opened={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
@@ -157,6 +202,41 @@ const CourseList = () => {
           </div>
         </div>
       </Modal>
+      
+      {/* Modal xác nhận verify khóa học */}
+      <Modal
+        opened={verifyModalOpen}
+        onClose={() => setVerifyModalOpen(false)}
+        title="Xác nhận thay đổi trạng thái"
+        centered
+      >
+        <div className="p-4">
+          <p className="mb-4">
+            {courseToVerify?.isPublished 
+              ? "Bạn có chắc chắn muốn hủy xuất bản khóa học này?" 
+              : "Bạn có chắc chắn muốn xuất bản khóa học này?"}
+          </p>
+          <div className="flex justify-end gap-4">
+            <button
+              onClick={() => setVerifyModalOpen(false)}
+              className="px-4 py-2 text-sm text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={handleVerifyConfirm}
+              className={`px-4 py-2 text-sm text-white rounded ${
+                courseToVerify?.isPublished 
+                  ? "bg-yellow-500 hover:bg-yellow-600" 
+                  : "bg-green-500 hover:bg-green-600"
+              }`}
+            >
+              {courseToVerify?.isPublished ? "Hủy xuất bản" : "Xuất bản"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+      
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-white">Course Management</h1>
         <Link to="create">
@@ -241,13 +321,25 @@ const CourseList = () => {
                     {formatVND(course.price)}
                   </span>
 
-                    <Link to={`detail/${course.id}`}>
-                      <button className="px-3 py-1 text-sm text-white bg-indigo-600 rounded hover:bg-indigo-500">
-                        Details
-                      </button>
-                    </Link>
+                  <Link to={`detail/${course.id}`}>
+                    <button className="px-3 py-1 text-sm text-white bg-indigo-600 rounded hover:bg-indigo-500">
+                      Details
+                    </button>
+                  </Link>
 
-                  <div className="flex">
+                  <div className="flex gap-2">
+                    {/* Nút verify course */}
+                    <button
+                      onClick={() => handleVerifyClick(course)}
+                      className={`text-white p-1 rounded text-sm font-medium ${
+                        course.isPublished 
+                          ? "bg-yellow-500 hover:bg-yellow-700" 
+                          : "bg-green-500 hover:bg-green-700"
+                      }`}
+                    >
+                      {course.isPublished ? "Unpublish" : "Publish"}
+                    </button>
+                    
                     <button
                       onClick={() => handleDeleteClick(course.id)}
                       className="text-white bg-red-500 hover:bg-red-700 p-1 rounded text-sm font-medium"

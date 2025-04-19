@@ -1,6 +1,7 @@
 import { LearningPath, LearningPathCourse, Prisma, PrismaClient } from '@prisma/client';
 import { withTransaction } from '../../../shared/utils/transaction.utils';
 import { CreateLearningPathDTO, LearningPathCourseOrderDTO, UpdateLearningPathDTO } from '../dto/LearningPathDTO';
+import { log } from 'console';
 
 const prisma = new PrismaClient();
 
@@ -27,6 +28,8 @@ export class LearningPathService {
                     instructorUserId: instructorId
                 }
             });
+
+            console.log("Learning Path created:", learningPath);
             
             // Create course connections with order
             if (courseIds?.length > 0) {
@@ -249,6 +252,7 @@ export class LearningPathService {
      */
     async deleteLearningPath(instructorId: string, learningPathId: string): Promise<void> {
         // Verify learning path exists and belongs to instructor
+        console.log("Vào tới đây");
         await this.verifyLearningPathOwnership(instructorId, learningPathId);
         
         // Delete learning path and all its connections in a transaction
