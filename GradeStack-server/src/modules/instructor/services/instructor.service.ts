@@ -1185,7 +1185,11 @@ export class InstructorService extends InstructorBaseService<
               user: true,
             },
           },
-          _count: true,
+          _count: {
+            select: {
+              EnrolledCourse: true,
+            },
+          },
         },
       });
     } catch (error) {

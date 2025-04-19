@@ -5,7 +5,7 @@ import VideoContent from "./Contents/VideoContent";
 import FinalQuizContent from "./Contents/FinalQuizContent";
 import { useParams } from "react-router-dom";
 import { learnerService } from "../../services/api";
-import { Spin } from "antd";
+import { message, Spin } from "antd";
 import PracticeCode from "../../pages/PracticeCode/PracticeCode";
 import { userService } from "../../services/api";
 
@@ -54,6 +54,7 @@ export interface Module {
 export interface Lesson {
   id: string;
   title: string;
+  order: number;
   description: string;
   lessonType: LessonType;
   duration?: number;
@@ -204,7 +205,7 @@ const CourseStudyBoard: React.FC = () => {
   );
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(true);
   const [isEnrolled, setIsEnrolled] = useState(false);
-
+  
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
@@ -347,6 +348,7 @@ const CourseStudyBoard: React.FC = () => {
 
     checkEnrollmentStatus();
   }, [courseId, course?.id]);
+
 
   // Helper function to determine lesson type from API response
   const getLessonType = (lesson: any): LessonType => {

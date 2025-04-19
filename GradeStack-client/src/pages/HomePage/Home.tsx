@@ -562,7 +562,7 @@ const Home: React.FC = () => {
                   className="group flex h-[min-content] aspect-[1/.7] lg:h-auto lg:aspect-auto lg:max-w-none series-card"
                 >
                   <a
-                    href={`/course-study/${course.id}`}
+                    href={`/courses/${course.id}`}
                     className="panel relative transition-colors duration-300 px-4 lg:px-5 py-4 flex-1 overflow-hidden text-center aspect-square bg-slate-800 rounded-lg hover:bg-blue-800"
                   >
                     <header className="flex flex-col items-center justify-center text-center h-[9.38rem]">

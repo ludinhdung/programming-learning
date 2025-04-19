@@ -164,7 +164,7 @@ const SideBar: React.FC<SideBarProps> = ({
     <div className="flex flex-col h-full font-bold">
       <div className="flex justify-between py-4 px-2">
         <div>
-          <button className="flex items-center opacity-90 bg-gray-700 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+          <a href={`/courses/${course.id}`} className="flex items-center opacity-90 bg-gray-700 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -183,7 +183,7 @@ const SideBar: React.FC<SideBarProps> = ({
               <path d="M5 12l4 -4" />
             </svg>
             Series Overview
-          </button>
+          </a>
         </div>
         <div className="flex md:justify-end items-center space-x-2">
           <button className="flex items-center justify-center opacity-90 bg-gray-700 p-2 text-white hover:bg-gray-600">
