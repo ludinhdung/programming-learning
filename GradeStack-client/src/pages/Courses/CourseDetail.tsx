@@ -3,7 +3,7 @@ import Header from '../../components/Header/Header';
 import { Button, Modal } from 'antd';
 import styled from "styled-components";
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import userService from '../../services/user.service';
 import { formatVND } from '../../utils/formatCurrency';
 import SigninForm from '../../components/SigninForm/SigninForm';
@@ -115,6 +115,7 @@ interface EnrollmentRecord {
 
 const CourseDetail: React.FC = () => {
     const { courseId } = useParams<{ courseId: string }>();
+    const navigate = useNavigate();
     const [courseData, setCourseData] = useState<CourseData | null>(null);
     const [loading, setLoading] = useState(true);
     const [showLoading, setShowLoading] = useState(false);
@@ -154,6 +155,15 @@ const CourseDetail: React.FC = () => {
             window.location.href = `/courses/${courseId}`;
         } else if (lastAttemptedAction === 'bookmark') {
             handleBookmarkClick();
+        }
+    };
+
+    const handleLessonClick = (lesson: CourseData['modules'][0]['lessons'][0]) => {
+        if (isEnrolled || lesson.isPreview) {
+            navigate(`/course-study/${courseId}?lessonId=${lesson.id}`);
+        } else {
+            setLastAttemptedAction('buy');
+            setShowLoginModal(true);
         }
     };
 
@@ -455,6 +465,7 @@ const CourseDetail: React.FC = () => {
                                         {module.lessons.map((lesson) => (
                                             <div
                                                 key={lesson.id}
+                                                onClick={() => handleLessonClick(lesson)}
                                                 className={`mb-4 rounded-none bg-[#14202e] p-4 border border-transparent ${!lesson.isPreview && !isEnrolled ? 'opacity-60' : ''} cursor-pointer transition-all duration-500 ease-in-out hover:border-[#1b55ac]`}
                                             >
                                                 <div className="flex items-center">
