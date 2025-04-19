@@ -229,207 +229,204 @@ const CreateLearningPath: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
-      <Card
-        title={
-          <div className="flex items-center">
-            <Button
-              icon={<ArrowLeftOutlined />}
-              onClick={() => navigate('/instructor-lead-management/learning-paths')}
-              style={{ marginRight: 16 }}
-              type="text"
-            />
-            <Title level={4} style={{ margin: 0 }}>
-              Tạo Learning Path Mới
-            </Title>
-          </div>
-        }
-        className="w-full shadow-md"
-      >
+    <div className="p-6 instructor-lead-bg min-h-screen">
+      <div className="mb-6 flex justify-between items-center">
+        <div className="flex text-3xl justify-start uppercase font-extrabold">
+          <span className="text-blue-600 mr-2">//</span>
+          <span className="text-white">Tạo Learning Path</span>
+        </div>
+        <Button 
+          icon={<ArrowLeftOutlined />} 
+          onClick={() => navigate('/instructor-lead-management/learning-paths')}
+          className="instructor-lead-btn-secondary"
+        >
+          Quay lại danh sách
+        </Button>
+      </div>
+
+      <Card className="instructor-lead-card overflow-hidden">
         <Form
           form={form}
           layout="vertical"
           onFinish={onFinish}
-          initialValues={{ estimatedTime: 10 }}
+          initialValues={{ estimatedTime: 1 }}
+          className="text-white"
         >
-          <Form.Item
-            name="name"
-            label="Tên Learning Path"
-            rules={[
-              { required: true, message: 'Vui lòng nhập tên Learning Path' },
-              { max: 100, message: 'Tên không được vượt quá 100 ký tự' }
-            ]}
-          >
-            <Input placeholder="Nhập tên Learning Path" />
-          </Form.Item>
+        <Form.Item
+          name="name"
+          label="Tên Learning Path"
+          rules={[
+            { required: true, message: 'Vui lòng nhập tên Learning Path' },
+            { max: 100, message: 'Tên không được vượt quá 100 ký tự' }
+          ]}
+        >
+          <Input placeholder="Nhập tên Learning Path" className="bg-[#242a38] text-white border-gray-700" />
+        </Form.Item>
 
-          <Form.Item
-            name="description"
-            label="Mô tả"
-            rules={[
-              { required: true, message: 'Vui lòng nhập mô tả' },
-              { max: 500, message: 'Mô tả không được vượt quá 500 ký tự' }
-            ]}
-          >
-            <TextArea
-              placeholder="Nhập mô tả về Learning Path này"
-              autoSize={{ minRows: 3, maxRows: 6 }}
-            />
-          </Form.Item>
+        <Form.Item
+          name="description"
+          label="Mô tả"
+          rules={[
+            { required: true, message: 'Vui lòng nhập mô tả' },
+            { max: 500, message: 'Mô tả không được vượt quá 500 ký tự' }
+          ]}
+        >
+          <TextArea
+            placeholder="Nhập mô tả về Learning Path này"
+            autoSize={{ minRows: 3, maxRows: 6 }}
+            className="bg-[#242a38] text-white border-gray-700"
+          />
+        </Form.Item>
 
-          <Form.Item
-            name="estimatedTime"
-            label="Thời gian hoàn thành dự kiến (giờ)"
-            rules={[
-              { required: true, message: 'Vui lòng nhập thời gian dự kiến' },
-              { type: 'number', min: 1, message: 'Thời gian phải lớn hơn 0' }
-            ]}
-            tooltip="Thời gian dự kiến để hoàn thành tất cả các khóa học trong learning path này"
-          >
-            <InputNumber min={1} style={{ width: '100%' }} />
-          </Form.Item>
+        <Form.Item
+          name="estimatedTime"
+          label="Thời gian hoàn thành dự kiến (giờ)"
+          rules={[
+            { required: true, message: 'Vui lòng nhập thời gian dự kiến' },
+            { type: 'number', min: 1, message: 'Thời gian phải lớn hơn 0' }
+          ]}
+          tooltip="Thời gian dự kiến để hoàn thành tất cả các khóa học trong learning path này"
+        >
+          <InputNumber min={1} style={{ width: '100%' }} className="bg-[#242a38] text-white border-gray-700" />
+        </Form.Item>
 
-          <Form.Item
-            label="Hình ảnh đại diện"
-            required
-            tooltip="Hình ảnh đại diện cho Learning Path"
-          >
-            <div className="flex flex-col items-center">
-              <Upload
-                name="thumbnail"
-                listType="picture-card"
-                className="avatar-uploader"
-                showUploadList={false}
-                beforeUpload={beforeUpload}
-                onChange={handleChange}
-                fileList={fileList}
-                maxCount={1}
-                style={{ width: '100%', height: 200 }}
-                customRequest={async ({ file, onSuccess, onError }) => {
-                  try {
-                    console.log('Bắt đầu tải lên hình ảnh từ customRequest', file);
-                    
-                    // Validate file is a RcFile
-                    if (!file || !(file instanceof File)) {
-                      throw new Error('File không hợp lệ');
-                    }
-                    
-                    // Sử dụng hàm handleUpload để xử lý việc tải lên hình ảnh một cách nhất quán
-                    const url = await handleUpload(file as RcFile);
-                    
-                    // Update form value với đường dẫn hình ảnh nhận được
-                    form.setFieldsValue({ thumbnail: url });
-                    
-                    // Mark as done and update file list
-                    const fileWithUrl = { ...file, status: 'done', url } as UploadFile;
-                    setFileList([fileWithUrl]);
-                    
-                    // Thành công
-                    onSuccess?.(url);
-                  } catch (error: any) {
-                    console.error('Lỗi khi tải lên hình ảnh trong customRequest:', error);
-                    
-                    // Log detailed error information
-                    if (error.response) {
-                      console.error('Server response:', error.response.data);
-                      console.error('Status code:', error.response.status);
-                    }
-                    
-                    message.error('Lỗi khi tải lên hình ảnh: ' + (error instanceof Error ? error.message : 'Lỗi không xác định'));
-                    onError?.(error as Error);
-                    
-                    // Reset file list on error
-                    setFileList([]);
+        <Form.Item
+          label="Hình ảnh đại diện"
+          required
+          tooltip="Hình ảnh đại diện cho Learning Path"
+        >
+          <div className="flex flex-col items-center">
+            <Upload
+              name="thumbnail"
+              listType="picture-card"
+              className="avatar-uploader"
+              showUploadList={false}
+              beforeUpload={beforeUpload}
+              onChange={handleChange}
+              fileList={fileList}
+              maxCount={1}
+              style={{ width: '100%', height: 200 }}
+              customRequest={async ({ file, onSuccess, onError }) => {
+                try {
+                  console.log('Bắt đầu tải lên hình ảnh từ customRequest', file);
+                  
+                  // Validate file is a RcFile
+                  if (!file || !(file instanceof File)) {
+                    throw new Error('File không hợp lệ');
                   }
-                }}
-              >
-                {imageUrl ? (
-                  <div className="relative group">
-                    <img src={imageUrl} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer">
-                      <span className="text-white">Thay đổi</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    {uploading ? <LoadingOutlined /> : <PlusOutlined />}
-                    <div style={{ marginTop: 8 }}>Tải lên</div>
-                  </div>
-                )}
-              </Upload>
-              
-              {/* Hidden input to store the image URL */}
-              <Form.Item 
-                name="thumbnail" 
-                hidden={true}
-                initialValue={imageUrl}
-                rules={[{ required: true, message: 'Vui lòng tải lên hình ảnh đại diện' }]}
-              >
-                <Input />
-              </Form.Item>
-              
-              {/* Clear button if image exists */}
-              {imageUrl && (
-                <Button 
-                  type="text" 
-                  danger 
-                  onClick={() => {
-                    setImageUrl('');
-                    setFileList([]);
-                    form.setFieldsValue({ thumbnail: '' });
-                  }}
-                  style={{ marginTop: 8 }}
-                >
-                  Xóa hình
-                </Button>
-              )}
-            </div>
-          </Form.Item>
-
-          <Title level={5} className="mt-4">Khóa học trong Learning Path</Title>
-          <div className="mb-4">
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <Select
-                placeholder="Chọn khóa học để thêm vào Learning Path"
-                style={{ width: '100%' }}
-                onChange={handleCourseSelect}
-                optionFilterProp="children"
-                showSearch
-                filterOption={(input, option) =>
-                  (option?.children as unknown as string).toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  
+                  // Sử dụng hàm handleUpload để xử lý việc tải lên hình ảnh một cách nhất quán
+                  const url = await handleUpload(file as RcFile);
+                  
+                  // Update form value với đường dẫn hình ảnh nhận được
+                  form.setFieldsValue({ thumbnail: url });
+                  
+                  // Mark as done and update file list
+                  const fileWithUrl = { ...file, status: 'done', url } as UploadFile;
+                  setFileList([fileWithUrl]);
+                  
+                  // Thành công
+                  onSuccess?.(url);
+                } catch (error: any) {
+                  console.error('Lỗi khi tải lên hình ảnh trong customRequest:', error);
+                  
+                  // Log detailed error information
+                  if (error.response) {
+                    console.error('Server response:', error.response.data);
+                    console.error('Status code:', error.response.status);
+                  }
+                  
+                  message.error('Lỗi khi tải lên hình ảnh: ' + (error instanceof Error ? error.message : 'Lỗi không xác định'));
+                  onError?.(error as Error);
+                  
+                  // Reset file list on error
+                  setFileList([]);
                 }
-              >
-                {availableCourses
-                  .filter(course => !selectedCourses.some(selected => selected.id === course.id))
-                  .map(course => (
-                    <Option key={course.id} value={course.id}>
-                      {course.title}
-                    </Option>
-                  ))}
-              </Select>
-              
-              <div className="mt-4 mb-2">
-                <Title level={5}>Danh sách khóa học đã chọn</Title>
-                <div className="text-gray-500 text-sm mb-2">
-                  Kéo và thả để sắp xếp thứ tự khóa học trong Learning Path
+              }}
+            >
+              {imageUrl ? (
+                <div className="relative group">
+                  <img src={imageUrl} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer">
+                    <span className="text-white">Thay đổi</span>
+                  </div>
                 </div>
-              </div>
-              
-              <DragDropContext onDragEnd={onDragEnd}>
-                <Droppable droppableId="courses">
-                  {(provided) => (
-                    <div
-                      {...provided.droppableProps}
-                      ref={provided.innerRef}
-                      className="border rounded-md p-2"
-                      style={{ minHeight: '100px' }}
-                    >
-                      {selectedCourses.length === 0 ? (
-                        <div className="text-center py-4 text-gray-400">
-                          Chưa có khóa học nào được chọn
-                        </div>
-                      ) : (
-                        <List
+              ) : (
+                <div>
+                  {uploading ? <LoadingOutlined /> : <PlusOutlined />}
+                  <div style={{ marginTop: 8 }}>Tải lên</div>
+                </div>
+              )}
+            </Upload>
+            
+            {/* Hidden input to store the image URL */}
+            <Form.Item 
+              name="thumbnail" 
+              hidden={true}
+              initialValue={imageUrl}
+              rules={[{ required: true, message: 'Vui lòng tải lên hình ảnh đại diện' }]}
+            >
+              <Input />
+            </Form.Item>
+            
+            {/* Clear button if image exists */}
+            {imageUrl && (
+              <Button
+                type="default"
+                danger
+                onClick={() => {
+                  setImageUrl('');
+                  setFileList([]);
+                  form.setFieldsValue({ thumbnail: '' });
+                }}
+                className="mt-2"
+              >
+                Xóa hình ảnh
+              </Button>
+            )}
+          </div>
+        </Form.Item>
+
+        <Form.Item
+          label="Khóa học trong Learning Path"
+          required
+          tooltip="Các khóa học sẽ được sắp xếp theo thứ tự trong Learning Path"
+        >
+          <div className="mb-4">
+            <Select
+              placeholder="Chọn khóa học để thêm vào Learning Path"
+              style={{ width: '100%' }}
+              onChange={handleCourseSelect}
+              className="bg-[#242a38] text-white border-gray-700"
+              dropdownStyle={{ background: '#242a38', color: 'white' }}
+            >
+              {availableCourses
+                .filter(course => !selectedCourses.some(sc => sc.id === course.id))
+                .map(course => (
+                  <Option key={course.id} value={course.id}>
+                    {course.title}
+                  </Option>
+                ))}
+            </Select>
+          </div>
+
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <div className="text-white mb-2">
+              {selectedCourses.length === 0 ? (
+                <div className="text-center p-4 border border-dashed border-gray-600 rounded-md">
+                  <p className="text-gray-400">Chưa có khóa học nào được thêm vào Learning Path</p>
+                </div>
+              ) : (
+                <div>
+                  <p className="mb-2">Kéo để sắp xếp thứ tự các khóa học:</p>
+                  <DragDropContext onDragEnd={onDragEnd}>
+                    <Droppable droppableId="courses">
+                      {(provided) => (
+                        <div
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
+                        >
+                          <List
                           dataSource={selectedCourses}
                           renderItem={(course, index) => (
                             <Draggable key={course.id} draggableId={course.id} index={index}>
@@ -441,7 +438,7 @@ const CreateLearningPath: React.FC = () => {
                                   className="mb-2"
                                 >
                                   <List.Item
-                                    className="border rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition-colors"
+                                    className="border border-gray-700 rounded-md p-2 bg-[#1a1f2e] hover:bg-[#242a38] transition-colors"
                                     actions={[
                                       <Button
                                         key="remove"
@@ -475,33 +472,37 @@ const CreateLearningPath: React.FC = () => {
                             </Draggable>
                           )}
                         />
-                      )}
                       {provided.placeholder}
                     </div>
                   )}
                 </Droppable>
               </DragDropContext>
-            </Space>
-          </div>
+              </div>
+              )}
+            </div>
+          </Space>
+        </Form.Item>
 
-          <Form.Item className="mt-6">
-            <Space>
-              <Button 
-                type="primary" 
-                htmlType="submit" 
-                loading={loading}
-                disabled={uploading || !imageUrl || selectedCourses.length === 0}
-              >
-                Tạo Learning Path
-              </Button>
-              <Button 
-                onClick={() => navigate('/instructor-lead-management/learning-paths')}
-                disabled={loading || uploading}
-              >
-                Hủy
-              </Button>
-            </Space>
-          </Form.Item>
+        <Form.Item className="mt-6">
+          <Space>
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              loading={loading}
+              disabled={uploading || !imageUrl || selectedCourses.length === 0}
+              className="bg-blue-600 hover:bg-blue-500 border-0"
+            >
+              Tạo Learning Path
+            </Button>
+            <Button 
+              onClick={() => navigate('/instructor-lead-management/learning-paths')}
+              disabled={loading || uploading}
+              className="bg-[#242a38] text-white border-gray-700 hover:bg-[#1a1f2e]"
+            >
+              Hủy
+            </Button>
+          </Space>
+        </Form.Item>
         </Form>
       </Card>
     </div>

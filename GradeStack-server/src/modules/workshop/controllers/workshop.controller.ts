@@ -227,4 +227,28 @@ export class WorkshopController {
       this.handleError(res, error);
     }
   };
+
+  /**
+   * Lấy thông tin preview của workshop
+   */
+  public getWorkshopPreview = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { workshopId } = req.params;
+      
+      // Xác thực ID workshop
+      const validationResult = workshopIdSchema.safeParse({ workshopId });
+      if (!validationResult.success) {
+        res.status(400).json({ 
+          message: 'ID workshop không hợp lệ', 
+          errors: validationResult.error.format() 
+        });
+        return;
+      }
+
+      const previewData = await this.workshopService.getWorkshopPreview(workshopId);
+      res.status(200).json(previewData);
+    } catch (error) {
+      this.handleError(res, error);
+    }
+  };
 }

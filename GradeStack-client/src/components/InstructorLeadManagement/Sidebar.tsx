@@ -38,8 +38,8 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, text, href }) => {
         end={text !== "Course"}
         className={({ isActive }) => `
           flex items-center px-4 lg:px-6 xl:px-8 py-3 text-gray-200 
-          hover:bg-indigo-600 rounded-lg
-          ${isActive ? "bg-zinc-700" : ""}
+          hover:bg-blue-600 rounded-lg
+          ${isActive ? "bg-[#1a1f2e]" : ""}
         `}
       >
         <Icon className="w-5 h-5 mr-4" />
@@ -191,9 +191,9 @@ const Sidebar = () => {
   console.log("Full name:", fullName);
 
   return (
-    <nav className="flex flex-col relative w-full h-screen bg-zinc-900 text-white transition-all duration-300">
+    <nav className="flex flex-col relative w-full h-screen bg-[#151922] text-white transition-all duration-300">
       {/* Profile Section */}
-      <div className="p-4 border-b border-zinc-700">
+      <div className="p-4 border-b border-gray-800">
         <div className="flex items-center space-x-3">
           {loading ? (
             <div className="w-16 h-16 rounded-full bg-slate-700 animate-pulse"></div>

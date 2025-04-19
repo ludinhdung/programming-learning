@@ -1,63 +1,34 @@
 import { Outlet } from 'react-router-dom';
-import { Layout, Menu, Breadcrumb } from 'antd';
+import { Layout, Menu } from 'antd';
 import { Link, useLocation } from 'react-router-dom';
-import { CalendarOutlined, PlusOutlined, UnorderedListOutlined } from '@ant-design/icons';
-import { useAuth } from '../../hooks/useAuth';
+import { CalendarOutlined, AppstoreOutlined, TeamOutlined } from '@ant-design/icons';
+import Header from '../../components/Header/Header';
 
 const { Content, Sider } = Layout;
 
 /**
- * Layout cho module Workshop
+ * Layout cho các trang liên quan đến workshop
  */
 const WorkshopLayout = () => {
   const location = useLocation();
-  const { user } = useAuth();
-  const isInstructor = user?.role === 'INSTRUCTOR';
+  const currentPath = location.pathname;
 
-  // Xác định item menu nào đang được chọn
+  // Xác định key được chọn dựa trên đường dẫn hiện tại
   const getSelectedKey = () => {
-    const path = location.pathname;
-    if (path === '/workshops') return ['list'];
-    if (path === '/instructor/workshops') return ['instructor-list'];
-    if (path === '/instructor/workshops/create') return ['create'];
-    return ['list'];
+    if (currentPath.includes('/calendar')) return '2';
+    if (currentPath.includes('/registered')) return '3';
+    return '1';
   };
 
   return (
     <Layout className="min-h-screen">
-      <Breadcrumb className="p-4">
-        <Breadcrumb.Item>
-          <Link to="/">Trang chủ</Link>
-        </Breadcrumb.Item>
-        <Breadcrumb.Item>Workshop</Breadcrumb.Item>
-      </Breadcrumb>
-
-      <Layout className="bg-white">
-        <Sider width={250} className="bg-white">
-          <Menu
-            mode="inline"
-            selectedKeys={getSelectedKey()}
-            style={{ height: '100%', borderRight: 0 }}
-          >
-            <Menu.Item key="list" icon={<CalendarOutlined />}>
-              <Link to="/workshops">Danh sách Workshop</Link>
-            </Menu.Item>
-            
-            {isInstructor && (
-              <>
-                <Menu.Item key="instructor-list" icon={<UnorderedListOutlined />}>
-                  <Link to="/instructor/workshops">Quản lý Workshop</Link>
-                </Menu.Item>
-                <Menu.Item key="create" icon={<PlusOutlined />}>
-                  <Link to="/instructor/workshops/create">Tạo Workshop mới</Link>
-                </Menu.Item>
-              </>
-            )}
-          </Menu>
-        </Sider>
-        <Content className="p-6">
-          <Outlet />
-        </Content>
+      <Header />
+      <Layout className="bg-[#151922]">
+        <Layout className="bg-[#151922] p-0 sm:p-6">
+          <Content className="min-h-[280px]">
+            <Outlet />
+          </Content>
+        </Layout>
       </Layout>
     </Layout>
   );

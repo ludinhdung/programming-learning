@@ -313,4 +313,65 @@ export class WorkshopService {
 
     return attendances.map(attendance => attendance.workshop);
   }
+
+  /**
+   * Lấy thông tin preview của một workshop
+   * @param workshopId ID của workshop cần lấy preview
+   * @returns Thông tin preview của workshop
+   */
+  async getWorkshopPreview(workshopId: string) {
+    const workshop = await prisma.workshop.findUnique({
+      where: { id: workshopId },
+      include: {
+        instructor: {
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true
+              }
+            }
+          }
+        },
+        _count: {
+          select: {
+            attendees: true
+          }
+        }
+      }
+    });
+
+    if (!workshop) {
+      throw { status: 404, message: `Không tìm thấy workshop với id ${workshopId}` };
+    }
+
+    // Tính toán thời gian còn lại đến khi workshop diễn ra
+    const now = new Date();
+    const scheduledAt = new Date(workshop.scheduledAt);
+    const timeUntilWorkshop = scheduledAt.getTime() - now.getTime();
+    const daysUntilWorkshop = Math.floor(timeUntilWorkshop / (1000 * 60 * 60 * 24));
+    const hoursUntilWorkshop = Math.floor((timeUntilWorkshop % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+    // Xác định trạng thái của workshop
+    let status = 'upcoming';
+    if (now > scheduledAt) {
+      if (now > new Date(scheduledAt.getTime() + workshop.duration * 60000)) {
+        status = 'completed';
+      } else {
+        status = 'ongoing';
+      }
+    }
+
+    return {
+      workshop,
+      preview: {
+        timeUntilWorkshop: {
+          days: daysUntilWorkshop,
+          hours: hoursUntilWorkshop
+        },
+        status,
+        attendeesCount: workshop._count?.attendees || 0
+      }
+    };
+  }
 }

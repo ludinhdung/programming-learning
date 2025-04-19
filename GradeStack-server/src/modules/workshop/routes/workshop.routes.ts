@@ -15,6 +15,9 @@ router.get('/workshops', workshopController.getWorkshops);
 // Lấy thông tin chi tiết workshop
 router.get('/workshops/:workshopId', workshopController.getWorkshop);
 
+// Lấy thông tin preview của workshop
+router.get('/workshops/:workshopId/preview', workshopController.getWorkshopPreview);
+
 /**
  * Routes cho INSTRUCTOR và INSTRUCTOR_LEAD
  * - Yêu cầu xác thực (authenticate)

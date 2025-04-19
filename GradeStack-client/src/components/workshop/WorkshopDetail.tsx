@@ -14,14 +14,20 @@ import {
   Alert, 
   Modal, 
   Space, 
-  Descriptions
+  Descriptions,
+  Tooltip
 } from 'antd';
 import { 
   CalendarOutlined, 
   ClockCircleOutlined, 
   UserOutlined, 
   EditOutlined, 
-  DeleteOutlined 
+  DeleteOutlined,
+  LinkOutlined,
+  EnvironmentOutlined,
+  VideoCameraOutlined,
+  FileOutlined,
+  TagOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Workshop } from '../../types/workshop.types';
@@ -59,8 +65,8 @@ const WorkshopDetail = () => {
       
       // Kiểm tra xem người dùng đã đăng ký chưa
       if (user && user.role === 'LEARNER') {
-        const registeredWorkshops = await workshopService.getRegisteredWorkshops(user.id);
-        setIsRegistered(registeredWorkshops.some(w => w.id === workshopId));
+        const registeredWorkshops = await workshopService.getUserRegisteredWorkshops(user.id);
+        setIsRegistered(registeredWorkshops.some((w: Workshop) => w.id === workshopId));
       }
     } catch (err) {
       console.error('Lỗi khi tải thông tin workshop:', err);
@@ -119,7 +125,7 @@ const WorkshopDetail = () => {
       setRegisterLoading(true);
       setError(null);
       
-      await workshopService.cancelRegistration(user.id, workshopId);
+      await workshopService.unregisterWorkshop(user.id, workshopId);
       setIsRegistered(false);
       setSuccessMessage('Hủy đăng ký tham dự workshop thành công!');
       setOpenDialog(false);
@@ -144,7 +150,7 @@ const WorkshopDetail = () => {
       setRegisterLoading(true);
       setError(null);
       
-      await workshopService.deleteWorkshop(user.id, workshopId);
+      await workshopService.deleteWorkshop(workshopId);
       setSuccessMessage('Xóa workshop thành công!');
       
       // Chuyển hướng về trang danh sách workshop
@@ -316,8 +322,102 @@ const WorkshopDetail = () => {
                     {workshop._count?.attendees || 0}
                   </Space>
                 </Descriptions.Item>
+                {workshop.level && (
+                  <Descriptions.Item 
+                    label="Cấp độ"
+                    labelStyle={{ fontWeight: 'bold' }}
+                  >
+                    <Tag color={workshop.level === 'BEGINNER' ? 'green' : workshop.level === 'INTERMEDIATE' ? 'blue' : 'purple'}>
+                      {workshop.level === 'BEGINNER' ? 'Cơ bản' : workshop.level === 'INTERMEDIATE' ? 'Trung cấp' : 'Nâng cao'}
+                    </Tag>
+                  </Descriptions.Item>
+                )}
+                {workshop.isOnline ? (
+                  <Descriptions.Item 
+                    label="Hình thức"
+                    labelStyle={{ fontWeight: 'bold' }}
+                  >
+                    <Space>
+                      <VideoCameraOutlined />
+                      <span>Trực tuyến</span>
+                    </Space>
+                  </Descriptions.Item>
+                ) : workshop.location ? (
+                  <Descriptions.Item 
+                    label="Địa điểm"
+                    labelStyle={{ fontWeight: 'bold' }}
+                  >
+                    <Space>
+                      <EnvironmentOutlined />
+                      {workshop.location}
+                    </Space>
+                  </Descriptions.Item>
+                ) : null}
+                {workshop.isOnline && workshop.meetingUrl && isRegistered && (
+                  <Descriptions.Item 
+                    label="Link phòng học"
+                    labelStyle={{ fontWeight: 'bold' }}
+                  >
+                    <Space>
+                      <LinkOutlined />
+                      <a href={workshop.meetingUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                        Tham gia Google Meet
+                      </a>
+                    </Space>
+                  </Descriptions.Item>
+                )}
               </Descriptions>
             </div>
+            
+            {/* Hiển thị tài liệu nếu có */}
+            {workshop.materials && workshop.materials.length > 0 && (
+              <div style={{ marginTop: 24 }}>
+                <Typography.Title level={4}>
+                  Tài liệu
+                </Typography.Title>
+                <List
+                  size="small"
+                  bordered
+                  dataSource={workshop.materials}
+                  renderItem={(material) => {
+                    const isUrl = material.startsWith('http');
+                    return (
+                      <List.Item>
+                        <Space>
+                          <FileOutlined />
+                          {isUrl ? (
+                            <a href={material} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                              {material}
+                            </a>
+                          ) : (
+                            <span>{material}</span>
+                          )}
+                        </Space>
+                      </List.Item>
+                    );
+                  }}
+                />
+              </div>
+            )}
+            
+            {/* Hiển thị tags nếu có */}
+            {workshop.tags && workshop.tags.length > 0 && (
+              <div style={{ marginTop: 24 }}>
+                <Typography.Title level={4}>
+                  Tags
+                </Typography.Title>
+                <div className="flex flex-wrap gap-2">
+                  {workshop.tags.map((tag, index) => (
+                    <Tag key={index} color="blue">
+                      <Space>
+                        <TagOutlined />
+                        {tag}
+                      </Space>
+                    </Tag>
+                  ))}
+                </div>
+              </div>
+            )}
           </Col>
           
           <Col xs={24} md={8}>
@@ -352,9 +452,9 @@ const WorkshopDetail = () => {
                     </List.Item>
                   )}
                 />
-                {workshop._count?.attendees > 5 && (
+                {(workshop._count?.attendees || 0) > 5 && (
                   <Typography.Text type="secondary" style={{ display: 'block', textAlign: 'center', marginTop: 8 }}>
-                    Và {workshop._count.attendees - 5} người khác...
+                    Và {(workshop._count?.attendees || 0) - 5} người khác...
                   </Typography.Text>
                 )}
               </Card>
@@ -363,10 +463,29 @@ const WorkshopDetail = () => {
         </Row>
       </Card>
 
-      <div>
+      <div className="flex gap-2">
         <Button onClick={() => navigate(-1)}>
           Quay lại
         </Button>
+        <Button 
+          type="primary" 
+          onClick={() => navigate(`/workshops/${workshopId}/preview`)}
+        >
+          Xem preview
+        </Button>
+        {isRegistered && workshop.isOnline && workshop.meetingUrl && (
+          <Tooltip title="Tham gia phòng học trực tuyến">
+            <Button 
+              type="primary" 
+              icon={<VideoCameraOutlined />}
+              href={workshop.meetingUrl}
+              target="_blank"
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Vào lớp học
+            </Button>
+          </Tooltip>
+        )}
       </div>
 
       {/* Modal xác nhận hủy đăng ký hoặc xóa workshop */}

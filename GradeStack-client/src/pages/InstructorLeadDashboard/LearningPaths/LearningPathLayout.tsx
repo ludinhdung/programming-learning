@@ -3,7 +3,9 @@ import { Outlet } from 'react-router-dom';
 
 const LearningPathLayout: React.FC = () => {
   return (
-    <Outlet />
+    <div className="instructor-lead-bg min-h-screen">
+      <Outlet />
+    </div>
   );
 };
 

@@ -423,8 +423,9 @@ const LearningPathList: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 instructor-lead-bg min-h-screen">
       <Card
+        className="instructor-lead-card overflow-hidden"
         title={
           <div className="flex justify-between items-center">
             <Title level={4} className="m-0">Learning Path Management</Title>
@@ -433,6 +434,7 @@ const LearningPathList: React.FC = () => {
                 type="primary" 
                 icon={<PlusOutlined />} 
                 onClick={() => navigate('/instructor-lead-management/learning-paths/create')}
+                className="instructor-lead-btn-primary"
               >
                 Create New Learning Path
               </Button>
@@ -440,19 +442,21 @@ const LearningPathList: React.FC = () => {
                 icon={<ReloadOutlined />} 
                 onClick={() => fetchLearningPaths()}
                 loading={loading}
+                className="instructor-lead-btn-secondary"
               >
                 Refresh
               </Button>
             </Space>
           </div>
         }
-        className="w-full shadow-md"
+        bodyStyle={{ padding: '24px' }}
         extra={
           <Space>
             <Button 
               type={viewMode === 'grid' ? 'primary' : 'default'}
               icon={<AppstoreOutlined />}
               onClick={() => handleViewModeChange('grid')}
+              className={viewMode === 'grid' ? 'instructor-lead-btn-primary' : 'instructor-lead-btn-secondary'}
             >
               Grid
             </Button>
@@ -460,6 +464,7 @@ const LearningPathList: React.FC = () => {
               type={viewMode === 'table' ? 'primary' : 'default'}
               icon={<UnorderedListOutlined />}
               onClick={() => handleViewModeChange('table')}
+              className={viewMode === 'table' ? 'instructor-lead-btn-primary' : 'instructor-lead-btn-secondary'}
             >
               Table
             </Button>
@@ -473,6 +478,7 @@ const LearningPathList: React.FC = () => {
             onChange={handleSearchChange}
             style={{ width: 250 }}
             allowClear
+            className="instructor-lead-input"
           />
           
           <Select
@@ -480,6 +486,8 @@ const LearningPathList: React.FC = () => {
             style={{ width: 200 }}
             onChange={handleCourseCountFilterChange}
             value={courseCountFilter}
+            className="instructor-lead-input"
+            dropdownStyle={{ background: '#242a38', color: 'white' }}
           >
             <Option value="all">All learning paths</Option>
             <Option value="none">No courses</Option>

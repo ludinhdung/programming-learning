@@ -1,16 +1,12 @@
 import { useState, useEffect } from 'react';
 import { 
-  Row, 
-  Col, 
-  Card, 
   Button, 
   Tag, 
   Input, 
   Select, 
   Pagination, 
   Spin, 
-  Typography, 
-  Space 
+  Typography 
 } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 // Thay thế format từ date-fns bằng hàm tự định nghĩa
@@ -28,7 +24,7 @@ import { Workshop, PaginatedWorkshopResponse } from '../../types/workshop.types'
 import { workshopService } from '../../services/workshop.service';
 import { useNavigate } from 'react-router-dom';
 
-const { Title, Text, Paragraph } = Typography;
+const { Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
 
@@ -113,8 +109,8 @@ const WorkshopList = () => {
   };
 
   return (
-    <div className="py-8">
-      <Title level={2}>Danh sách Workshop</Title>
+    <div className="py-4">
+      {/* Tiêu đề đã được chuyển lên WorkshopLayout */}
 
       {/* Bộ lọc và tìm kiếm */}
       <div className="mb-6 flex flex-wrap gap-4 items-center">
@@ -157,48 +153,71 @@ const WorkshopList = () => {
         <>
           {/* Danh sách workshop */}
           {workshops.length === 0 ? (
-            <Text>Không tìm thấy workshop nào.</Text>
+            <Text className="text-white">Không tìm thấy workshop nào.</Text>
           ) : (
-            <Row gutter={[24, 24]}>
-              {workshops.map((workshop) => (
-                <Col xs={24} sm={12} md={8} key={workshop.id}>
-                  <Card
-                    hoverable
-                    className="h-full flex flex-col"
-                    actions={[
-                      <Button type="primary" onClick={() => handleViewDetails(workshop.id)}>Xem chi tiết</Button>
-                    ]}
-                  >
-                    <div className="mb-2 flex justify-between items-center">
-                      <Title level={5} ellipsis={{ tooltip: workshop.title }}>
-                        {workshop.title}
-                      </Title>
-                      <Tag color={workshop.type === 'FRONTEND' ? 'blue' : 'purple'}>
-                        {workshop.type === 'FRONTEND' ? 'Frontend' : 'Backend'}
-                      </Tag>
-                    </div>
-                    
-                    <Paragraph 
-                      ellipsis={{ rows: 3 }}
-                      className="text-gray-500 mb-4"
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {workshops.map((workshop) => {
+                // Tạo màu ngẫu nhiên cho workshop
+                const topicColors = [
+                  '#61DAFB', '#F7DF1E', '#DD0031', '#339933', 
+                  '#FF4500', '#FF69B4', '#00CED1', '#563D7C', 
+                  '#3178C6', '#FFA500', '#4169E1'
+                ];
+                const topicColor = topicColors[Math.floor(Math.random() * topicColors.length)];
+                
+                return (
+                  <div key={workshop.id} className="mb-8">
+                    <div 
+                      className="relative w-full bg-gradient-to-b from-[#1a2030] to-[#1a2535] rounded-lg overflow-hidden p-6 cursor-pointer hover:shadow-lg transition-all duration-300"
+                      onClick={() => handleViewDetails(workshop.id)}
                     >
-                      {workshop.description}
-                    </Paragraph>
-                    
-                    <Space direction="vertical" size="small" className="mt-auto">
-                      <Text><strong>Thời gian:</strong> {formatDateTime(workshop.scheduledAt)}</Text>
-                      <Text><strong>Thời lượng:</strong> {workshop.duration} phút</Text>
-                      <Text>
-                        <strong>Giảng viên:</strong> {workshop.instructor?.user.firstName} {workshop.instructor?.user.lastName}
-                      </Text>
-                      <Text>
-                        <strong>Số người đăng ký:</strong> {workshop._count?.attendees || 0}
-                      </Text>
-                    </Space>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
+                      <div className="flex items-start gap-4">
+                        <div 
+                          className="w-16 h-16 rounded-lg flex items-center justify-center bg-cover bg-center"
+                          style={{ 
+                            backgroundColor: topicColor,
+                          }}
+                        >
+                          <span className="text-2xl font-bold text-white">
+                            {workshop.title.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-xl font-semibold text-white">
+                              {workshop.title}
+                            </h3>
+                            <Tag color={workshop.type === 'FRONTEND' ? 'blue' : 'purple'}>
+                              {workshop.type === 'FRONTEND' ? 'Frontend' : 'Backend'}
+                            </Tag>
+                          </div>
+                          <div className="mt-4 flex items-center text-gray-400 text-sm">
+                            <span><strong>Thời gian:</strong> {formatDateTime(workshop.scheduledAt)}</span>
+                            <span className="mx-2">•</span>
+                            <span><strong>Thời lượng:</strong> {workshop.duration} phút</span>
+                          </div>
+                          <div className="mt-2 flex items-center text-gray-400 text-sm">
+                            <span><strong>Giảng viên:</strong> {workshop.instructor?.user.firstName} {workshop.instructor?.user.lastName}</span>
+                            <span className="mx-2">•</span>
+                            <span><strong>Số người đăng ký:</strong> {workshop._count?.attendees || 0}</span>
+                          </div>
+                          <div className="mt-4 flex gap-2">
+                            <Button onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewDetails(workshop.id);
+                            }}>Xem chi tiết</Button>
+                            <Button type="primary" onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/workshops/${workshop.id}/preview`);
+                            }}>Xem preview</Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
 
           {/* Phân trang */}
@@ -211,6 +230,7 @@ const WorkshopList = () => {
                 onChange={handlePageChange}
                 showSizeChanger
                 showTotal={(total) => `Tổng cộng ${total} workshop`}
+                className="text-white"
               />
             </div>
           )}

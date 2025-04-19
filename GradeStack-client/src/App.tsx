@@ -2,6 +2,7 @@
 import React from "react";
 import { MantineProvider } from "@mantine/core";
 import "@mantine/core/styles.css";
+import "./styles/instructor-lead-theme.css";
 import {
   BrowserRouter as Router,
   Routes,
@@ -14,6 +15,8 @@ import NotFound from "./pages/NotFound";
 import CourseStudy from "./pages/CourseStudyPage/CourseStudy";
 // Instructor
 import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
+import AdminLogin from "./pages/admin-login";
+import AdminRouteGuard from "./components/AdminRouteGuard";
 import CourseList from "./pages/CourseList/CourseList";
 import CourseDetail from "./pages/Courses/CourseDetail";
 import Topics from "./pages/Topics/Topics";
@@ -51,6 +54,7 @@ import PracticeCode from "./pages/PracticeCode/PracticeCode";
 // Workshop
 import WorkshopListPage from "./pages/workshop/WorkshopListPage";
 import WorkshopDetailPage from "./pages/workshop/WorkshopDetailPage";
+import WorkshopPreviewPage from "./pages/workshop/WorkshopPreviewPage";
 import InstructorWorkshopListPage from "./pages/InstructorLeadDashboard/Workshops/InstructorWorkshopListPage";
 import CreateWorkshopPage from "./pages/InstructorLeadDashboard/Workshops/CreateWorkshopPage";
 import EditWorkshopPage from "./pages/InstructorLeadDashboard/Workshops/EditWorkshopPage";
@@ -59,6 +63,14 @@ import WorkshopLayout from "./pages/workshop/WorkshopLayout";
 
 // Instructor Lead Dashboard
 import InstructorLeadDashboard from "./pages/InstructorLeadDashboard/InstructorLeadDashboard";
+
+// Certificate Management
+import { 
+  CertificateList,
+  CertificateDetail,
+  CreateCertificate,
+  EditCertificate 
+} from "./pages/InstructorLead/CertificateManagement";
 
 const App: React.FC = () => {
   return (
@@ -69,7 +81,8 @@ const App: React.FC = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/course-study/:courseId" element={<CourseStudy />} />
           <Route path="/practice-code/:lessonId" element={<PracticeCode />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin-login" element={<AdminLogin />} />
+<Route path="/admin-dashboard" element={<AdminRouteGuard><AdminDashboard /></AdminRouteGuard>} />
           {/* <Route path="/create-course" element={<CreateCourse />} /> */}
           <Route path="/courses" element={<CourseList />} />
           {/* <Route path="/courses/:id" element={<CourseDetail />} /> */}
@@ -80,7 +93,9 @@ const App: React.FC = () => {
           <Route path="/checkout/:courseId" element={<Checkout />} />
           {/* Instructor Dashboard*/}
           <Route path="/supporter-dashboard" element={<SupporterDashboard />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin-login" element={<AdminLogin />} />
+          <Route path="/admin-dashboard" element={<AdminRouteGuard><AdminDashboard /></AdminRouteGuard>} />
           {/* <Route path="/create-course" element={<CreateCourse />} /> */}
           <Route path="/courses" element={<CourseList />} />
           <Route path="/courses/:courseId" element={<CourseDetail />} />
@@ -123,6 +138,14 @@ const App: React.FC = () => {
               <Route path="create" element={<CreateWorkshopPage />} />
               <Route path=":id/edit" element={<EditWorkshopPage />} />
             </Route>
+
+            {/* Quản lý chứng chỉ */}
+            <Route path="certificates">
+              <Route index element={<CertificateList />} />
+              <Route path=":certificateId" element={<CertificateDetail />} />
+              <Route path="create" element={<CreateCertificate />} />
+              <Route path="edit/:certificateId" element={<EditCertificate />} />
+            </Route>
           </Route>  
 
           {/* Supporter Dashboard*/}
@@ -135,6 +158,13 @@ const App: React.FC = () => {
             </Route>
           </Route>
 
+          {/* Workshop routes */}
+          <Route path="/workshops" element={<WorkshopLayout />}>
+            <Route index element={<WorkshopListPage />} />
+            <Route path=":workshopId" element={<WorkshopDetailPage />} />
+            <Route path=":workshopId/preview" element={<WorkshopPreviewPage />} />
+          </Route>
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

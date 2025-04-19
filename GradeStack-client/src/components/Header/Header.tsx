@@ -36,9 +36,8 @@ const Header: React.FC = () => {
   const navItems = [
     { name: "Topics", href: "/topics" },
     { name: "Learning Paths", href: "/learning-paths" },
-    { name: "Features", href: "#" },
-    { name: "Blog", href: "#" },
-    { name: "Teams", href: "#" },
+    { name: "Workshops", href: "/workshops" },
+
   ];
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);

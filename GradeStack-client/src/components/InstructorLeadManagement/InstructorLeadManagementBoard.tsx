@@ -23,7 +23,7 @@ const InstructorLeadManagementBoard: React.FC<InstructorLeadManagementBoardProps
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-zinc-900">
+    <div className="flex flex-col min-h-screen bg-[#151922]">
       
       <div className="fixed top-0 left-0 right-0 z-40">
         <InstructorLeadHeader 

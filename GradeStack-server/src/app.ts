@@ -21,6 +21,8 @@ import checkoutRoutes from './modules/checkout/routes/checkout.routes';
 import noteRoutes from './modules/note/note.route';
 import { commentRoutes } from './modules/comment';
 import workshopRouter from './modules/workshop/routes/workshop.routes';
+// Import route cho module admin
+import { adminRoute } from './modules/admin';
 
 const app = express();
 
@@ -53,6 +55,8 @@ app.use('/api', noteRoutes);
 app.use('/api/comments', commentRoutes);
 // Áp dụng routes cho workshop
 app.use('/api', workshopRouter);
+// Áp dụng routes cho admin
+app.use('/api/admin', adminRoute);
 
 app.use(errorHandler);
 

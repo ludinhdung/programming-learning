@@ -39,8 +39,6 @@ interface InstructorLeadHeaderProps {
  */
 const InstructorLeadHeader: React.FC<InstructorLeadHeaderProps> = ({
   onToggleSidebar,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  isSidebarCollapsed,
 }) => {
   const [instructorLead, setInstructorLead] = useState<InstructorLeadData | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -125,7 +123,7 @@ const InstructorLeadHeader: React.FC<InstructorLeadHeaderProps> = ({
     : "Instructor Lead";
 
   return (
-    <header className="bg-zinc-800 shadow-md w-full py-3 px-4 md:px-6">
+    <header className="bg-[#1a1f2e] shadow-md w-full py-3 px-4 md:px-6 border-b border-gray-800">
       <div className="flex items-center justify-between">
         {/* Nút toggle sidebar cho mobile */}
         <div className="flex items-center">
@@ -232,21 +230,21 @@ const InstructorLeadHeader: React.FC<InstructorLeadHeaderProps> = ({
             <MenuItems
               transition
               anchor="bottom end"
-              className="w-52 origin-top-right rounded-xl border border-white/5 bg-zinc-800 p-1 text-sm text-white transition duration-100 ease-out focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0 z-50"
+              className="w-52 origin-top-right rounded-xl border border-gray-800 bg-[#1a1f2e] p-1 text-sm text-white transition duration-100 ease-out focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0 z-50"
             >
               {profileMenu.map((item) => (
                 <MenuItem key={item.name}>
                   {item.onClick ? (
                     <button
                       onClick={item.onClick}
-                      className="group flex w-full items-center gap-2 rounded-lg py-1.5 px-3 hover:bg-zinc-700"
+                      className="group flex w-full items-center gap-2 rounded-lg py-1.5 px-3 hover:bg-blue-600"
                     >
                       {item.name}
                     </button>
                   ) : (
                     <a
                       href={item.href}
-                      className="group flex w-full items-center gap-2 rounded-lg py-1.5 px-3 hover:bg-zinc-700"
+                      className="group flex w-full items-center gap-2 rounded-lg py-1.5 px-3 hover:bg-blue-600"
                     >
                       {item.name}
                     </a>
@@ -282,10 +280,10 @@ const InstructorLeadHeader: React.FC<InstructorLeadHeaderProps> = ({
         open={isMobileMenuOpen}
         width={250}
         bodyStyle={{ padding: 0 }}
-        headerStyle={{ borderBottom: '1px solid #333' }}
+        headerStyle={{ borderBottom: '1px solid #374151', background: '#1a1f2e', color: 'white' }}
       >
-        <div className="flex flex-col h-full bg-zinc-900">
-          <div className="p-4 border-b border-zinc-700">
+        <div className="flex flex-col h-full bg-[#151922]">
+          <div className="p-4 border-b border-gray-800">
             <div className="flex items-center space-x-3">
               {avatarUrl ? (
                 <img
@@ -294,7 +292,7 @@ const InstructorLeadHeader: React.FC<InstructorLeadHeaderProps> = ({
                   className="w-12 h-12 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white">
+                <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white">
                   {instructorLead?.user?.firstName?.[0]?.toUpperCase() || "IL"}
                 </div>
               )}
@@ -306,19 +304,19 @@ const InstructorLeadHeader: React.FC<InstructorLeadHeaderProps> = ({
           </div>
           <div className="p-4">
             <nav className="space-y-2">
-              <a href="/instructor-lead-management" className="block px-4 py-2 text-gray-300 hover:bg-zinc-800 rounded-md">
+              <a href="/instructor-lead-management" className="block px-4 py-2 text-gray-300 hover:bg-[#1a1f2e] rounded-md">
                 Tổng quan
               </a>
-              <a href="/instructor-lead-management/course" className="block px-4 py-2 text-gray-300 hover:bg-zinc-800 rounded-md">
+              <a href="/instructor-lead-management/course" className="block px-4 py-2 text-gray-300 hover:bg-[#1a1f2e] rounded-md">
                 Khóa học
               </a>
-              <a href="/instructor-lead-management/topics" className="block px-4 py-2 text-gray-300 hover:bg-zinc-800 rounded-md">
+              <a href="/instructor-lead-management/topics" className="block px-4 py-2 text-gray-300 hover:bg-[#1a1f2e] rounded-md">
                 Chủ đề
               </a>
-              <a href="/instructor-lead-management/learning-paths" className="block px-4 py-2 text-gray-300 hover:bg-zinc-800 rounded-md">
+              <a href="/instructor-lead-management/learning-paths" className="block px-4 py-2 text-gray-300 hover:bg-[#1a1f2e] rounded-md">
                 Lộ trình học
               </a>
-              <a href="/instructor-lead-management/workshops" className="block px-4 py-2 text-gray-300 hover:bg-zinc-800 rounded-md">
+              <a href="/instructor-lead-management/workshops" className="block px-4 py-2 text-gray-300 hover:bg-[#1a1f2e] rounded-md">
                 Hội thảo
               </a>
             </nav>

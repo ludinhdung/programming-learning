@@ -344,8 +344,9 @@ const TopicList: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 instructor-lead-bg min-h-screen">
       <Card
+        className="instructor-lead-card overflow-hidden"
         title={
           <div className="flex justify-between items-center">
             <Title level={4} className="m-0">Quản lý chủ đề</Title>
@@ -354,6 +355,7 @@ const TopicList: React.FC = () => {
                 type="primary" 
                 icon={<PlusOutlined />} 
                 onClick={() => navigate('/instructor-lead-management/topics/create')}
+                className="instructor-lead-btn-primary"
               >
                 Tạo chủ đề mới
               </Button>
@@ -361,19 +363,21 @@ const TopicList: React.FC = () => {
                 icon={<ReloadOutlined />} 
                 onClick={() => fetchTopics()}
                 loading={loading}
+                className="instructor-lead-btn-secondary"
               >
                 Làm mới
               </Button>
             </Space>
           </div>
         }
-        className="w-full shadow-md"
+        bodyStyle={{ padding: '24px' }}
         extra={
           <Space>
             <Button 
               type={viewMode === 'grid' ? 'primary' : 'default'}
               icon={<AppstoreOutlined />}
               onClick={() => handleViewModeChange('grid')}
+              className={viewMode === 'grid' ? 'instructor-lead-btn-primary' : 'instructor-lead-btn-secondary'}
             >
               Lưới
             </Button>
@@ -381,6 +385,7 @@ const TopicList: React.FC = () => {
               type={viewMode === 'table' ? 'primary' : 'default'}
               icon={<UnorderedListOutlined />}
               onClick={() => handleViewModeChange('table')}
+              className={viewMode === 'table' ? 'instructor-lead-btn-primary' : 'instructor-lead-btn-secondary'}
             >
               Bảng
             </Button>
@@ -394,6 +399,7 @@ const TopicList: React.FC = () => {
             onChange={handleSearchChange}
             style={{ width: 250 }}
             allowClear
+            className="instructor-lead-input"
           />
           
           <Select
@@ -401,6 +407,8 @@ const TopicList: React.FC = () => {
             style={{ width: 200 }}
             onChange={handleCourseCountFilterChange}
             value={courseCountFilter}
+            className="instructor-lead-input"
+            dropdownStyle={{ background: '#242a38', color: 'white' }}
           >
             <Option value="all">Tất cả chủ đề</Option>
             <Option value="none">Chưa có khóa học</Option>

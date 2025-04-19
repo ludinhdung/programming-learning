@@ -19,8 +19,31 @@ export interface Workshop {
   _count?: {
     attendees: number;
   };
+  attendees?: Array<{
+    id: string;
+    userId: string;
+    workshopId: string;
+    createdAt: string;
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+    }
+  }>;
   createdAt: string;
   updatedAt: string;
+  
+  // Các trường mở rộng
+  thumbnail?: string;
+  capacity?: number;
+  level?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  location?: string;
+  isOnline?: boolean;
+  meetingUrl?: string;
+  materials?: string[];
+  tags?: string[];
+  prerequisites?: string;
 }
 
 /**
@@ -32,6 +55,17 @@ export interface CreateWorkshopDto {
   scheduledAt: string;
   duration: number;
   type: 'FRONTEND' | 'BACKEND';
+  
+  // Các trường mở rộng
+  thumbnail?: string;
+  capacity?: number;
+  level?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  location?: string;
+  isOnline?: boolean;
+  meetingUrl?: string;
+  materials?: string[];
+  tags?: string[];
+  prerequisites?: string;
 }
 
 /**
@@ -43,6 +77,17 @@ export interface UpdateWorkshopDto {
   scheduledAt?: string;
   duration?: number;
   type?: 'FRONTEND' | 'BACKEND';
+  
+  // Các trường mở rộng
+  thumbnail?: string;
+  capacity?: number;
+  level?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  location?: string;
+  isOnline?: boolean;
+  meetingUrl?: string;
+  materials?: string[];
+  tags?: string[];
+  prerequisites?: string;
 }
 
 /**
@@ -62,5 +107,20 @@ export interface PaginatedWorkshopResponse {
     page: number;
     limit: number;
     totalPages: number;
+  };
+}
+
+/**
+ * Kiểu dữ liệu cho preview của Workshop
+ */
+export interface WorkshopPreviewResponse {
+  workshop: Workshop;
+  preview: {
+    timeUntilWorkshop: {
+      days: number;
+      hours: number;
+    };
+    status: 'upcoming' | 'ongoing' | 'completed';
+    attendeesCount: number;
   };
 }

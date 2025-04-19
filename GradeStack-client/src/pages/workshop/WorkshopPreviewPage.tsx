@@ -1,11 +1,11 @@
-import WorkshopDetail from '../../components/workshop/WorkshopDetail';
+import WorkshopPreview from '../../components/workshop/WorkshopPreview';
 import { Layout } from 'antd';
 import Header from '../../components/Header/Header';
 
 /**
- * Trang hiển thị chi tiết workshop
+ * Trang hiển thị preview của workshop
  */
-const WorkshopDetailPage = () => {
+const WorkshopPreviewPage = () => {
   const { Content } = Layout;
   
   return (
@@ -15,15 +15,15 @@ const WorkshopDetailPage = () => {
         <div className="mb-7">
           <div className="flex text-3xl justify-start uppercase font-extrabold">
             <span className="text-blue-600 mr-2">//</span>
-            <span className="text-white">Chi tiết Workshop</span>
+            <span className="text-white">Workshop Preview</span>
           </div>
         </div>
         <Content className="bg-transparent">
-          <WorkshopDetail />
+          <WorkshopPreview />
         </Content>
       </div>
     </div>
   );
 };
 
-export default WorkshopDetailPage;
+export default WorkshopPreviewPage;
