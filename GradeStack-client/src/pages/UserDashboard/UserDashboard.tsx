@@ -30,6 +30,7 @@ import type {
   NotedCourseData,
 } from "../../services/note.service";
 import Header from "../../components/Header/Header";
+import { Link } from "react-router-dom";
 
 const { Text } = Typography;
 const { Panel } = Collapse; // Destructure Panel
@@ -40,7 +41,8 @@ const CourseCard: FC<{
   avatar?: string;
   progress?: number;
   thumbnail?: string;
-}> = ({ title, instructorName, progress, thumbnail, avatar }) => {
+  id: string
+}> = ({ title, instructorName, progress, thumbnail, avatar, id }) => {
   return (
     <div className="flex mb-6 bg-[#13151f] overflow-hidden">
       <div className="w-70 h-40 relative">
@@ -52,7 +54,9 @@ const CourseCard: FC<{
       </div>
       <div className="flex flex-col justify-between p-4 flex-grow">
         <div>
-          <h3 className="text-xl font-bold text-white mb-1">{title}</h3>
+          <Link to={`/course-study/${id}`}>
+            <h3 className="text-xl font-bold text-white mb-1">{title}</h3>
+          </Link>
           {instructorName && (
             <div className="flex items-center text-[#94a3b8] mb-2">
               <Avatar src={avatar} size="small" className="mr-3" />
@@ -382,6 +386,7 @@ const UserDashboard: FC = () => {
                 avatar={enrollment.course.instructor?.avatar}
                 progress={enrollment.progress}
                 thumbnail={enrollment.course.thumbnail}
+                id={enrollment.course.id}
               />
             ))}
         </div>

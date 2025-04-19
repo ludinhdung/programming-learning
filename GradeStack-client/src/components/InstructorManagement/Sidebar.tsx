@@ -5,11 +5,7 @@ import {
   MdDashboard,
   MdVideoLibrary,
   MdAnalytics,
-  MdPeople,
-  MdSubtitles,
-  MdCopyright,
   MdAttachMoney,
-  MdBrush,
   MdCategory,
   MdTimeline,
 } from "react-icons/md";
@@ -24,6 +20,7 @@ interface InstructorData {
     lastName: string;
     email: string;
     avatarUrl?: string;
+    role?: string;
   };
   organization?: string;
   avatar?: string;
@@ -58,6 +55,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, text, href }) => {
 const Sidebar = () => {
   const [instructor, setInstructor] = useState<InstructorData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isInstructorLead, setIsInstructorLead] = useState(false);
 
   useEffect(() => {
     const fetchInstructorData = async () => {
@@ -69,39 +67,29 @@ const Sidebar = () => {
           return;
         }
         const user = JSON.parse(userData);
+
+        // Check if user is INSTRUCTOR_LEAD
+        setIsInstructorLead(user.role === 'INSTRUCTOR_LEAD');
+
         if (user) {
           const response = await instructorService.getInstructorById(user.id);
           console.log("Instructor API response:", response);
 
-          // Kiểm tra và định dạng lại dữ liệu nếu cần
           let instructorData: InstructorData;
 
-          // Nếu response có cấu trúc dữ liệu khác với InstructorData
           if (response && typeof response === "object") {
-            // Xử lý tùy thuộc vào cấu trúc của API response
             if (response.data) {
-              // Nếu API trả về dữ liệu trong trường data
               instructorData = response.data;
             } else {
-              // Thử lấy các trường cần thiết từ response
               instructorData = {
                 id: response.id || user.id || "",
                 userId: response.userId || user.id || "",
                 user: {
-                  firstName:
-                    response.firstName ||
-                    response.user?.firstName ||
-                    user.firstName ||
-                    "",
-                  lastName:
-                    response.lastName ||
-                    response.user?.lastName ||
-                    user.lastName ||
-                    "",
-                  email:
-                    response.email || response.user?.email || user.email || "",
-                  avatarUrl:
-                    response.avatarUrl || response.user?.avatarUrl || "",
+                  firstName: response.firstName || response.user?.firstName || user.firstName || "",
+                  lastName: response.lastName || response.user?.lastName || user.lastName || "",
+                  email: response.email || response.user?.email || user.email || "",
+                  avatarUrl: response.avatarUrl || response.user?.avatarUrl || "",
+                  role: user.role // Add role from localStorage
                 },
                 avatar: response.avatar || response.avatarUrl || "",
                 bio: response.bio || "",
@@ -109,7 +97,6 @@ const Sidebar = () => {
             }
             setInstructor(instructorData);
           } else {
-            // Nếu không có dữ liệu hợp lệ từ API
             setInstructor({
               id: user.id || "",
               userId: user.id || "",
@@ -117,6 +104,7 @@ const Sidebar = () => {
                 firstName: user.firstName || "",
                 lastName: user.lastName || "",
                 email: user.email || "",
+                role: user.role // Add role from localStorage
               },
               avatar: user.avatarUrl || "",
             });
@@ -124,7 +112,6 @@ const Sidebar = () => {
         }
       } catch (error) {
         console.error("Failed to fetch instructor data:", error);
-        // Fallback khi có lỗi
         try {
           const userData = localStorage.getItem("user");
           if (userData) {
@@ -136,6 +123,7 @@ const Sidebar = () => {
                 firstName: user.firstName || "",
                 lastName: user.lastName || "",
                 email: user.email || "",
+                role: user.role // Add role from localStorage
               },
             });
           }
@@ -150,13 +138,23 @@ const Sidebar = () => {
     fetchInstructorData();
   }, []);
 
-  const navItems = [
+  // Base navigation items (available to all instructors)
+  const baseNavItems = [
     { icon: MdDashboard, text: "Overview", href: "/instructor-management" },
     {
       icon: MdVideoLibrary,
       text: "Course",
       href: "/instructor-management/course",
     },
+    {
+      icon: MdAttachMoney,
+      text: "Monetization",
+      href: "/instructor-management/monetization",
+    },
+  ];
+
+  // Additional items only for INSTRUCTOR_LEAD
+  const leadOnlyItems = [
     {
       icon: MdCategory,
       text: "Topics",
@@ -172,32 +170,18 @@ const Sidebar = () => {
       text: "Course Verification",
       href: "/instructor-management/verify-courses",
     },
-
-    {
-      icon: MdAttachMoney,
-      text: "Monetization",
-      href: "/instructor-management/monetization",
-    },
-
   ];
 
-  // Tạo đường dẫn avatar
-  const avatarUrl =
-    instructor?.avatar;
+  // Combine navigation items based on role
+  const navItems = isInstructorLead ? [...baseNavItems, ...leadOnlyItems] : baseNavItems;
 
-  // Cải thiện xử lý tên đầy đủ
+  const avatarUrl = instructor?.avatar;
   const fullName = instructor?.user
     ? `${instructor.user.firstName || ""} ${instructor.user.lastName || ""}`
     : "Instructor";
 
-  // Thêm console.log để debug
-  console.log("Current instructor state:", instructor);
-  console.log("Avatar URL:", avatarUrl);
-  console.log("Full name:", fullName);
-
   return (
     <nav className="flex flex-col relative w-full h-screen bg-zinc-900 text-white transition-all duration-300">
-      {/* Profile Section */}
       <div className="p-4 border-b border-zinc-700">
         <div className="flex items-center space-x-3">
           {loading ? (
@@ -210,7 +194,9 @@ const Sidebar = () => {
             />
           )}
           <div className="flex flex-col">
-            <div className="text-sm text-gray-400">Instructor</div>
+            <div className="text-sm text-gray-400">
+              {isInstructorLead ? 'Lead Instructor' : 'Instructor'}
+            </div>
             {loading ? (
               <div className="w-24 h-5 bg-slate-700 rounded animate-pulse mt-1"></div>
             ) : (
@@ -220,7 +206,6 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Navigation Items */}
       <ul className="py-4 space-y-4 text-sm">
         {navItems.map((item, index) => (
           <NavItem
