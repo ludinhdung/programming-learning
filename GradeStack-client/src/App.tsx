@@ -113,6 +113,7 @@ const App: React.FC = () => {
             <Route path="monetization" element={<InstructorMonetization />} />
             <Route path="transactions" element={<TransactionList />} />
             <Route path="verify-courses" element={<CourseVerificationList />} />
+            <Route path="verify-courses/:courseId" element={<CourseVerificationDetail />} />
           </Route>
           {/* Supporter Dashboard*/}
           <Route path="/supporter-management" element={<SupporterDashboard />}>
