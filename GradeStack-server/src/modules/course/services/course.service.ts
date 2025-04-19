@@ -468,6 +468,11 @@ export class CourseService extends CourseBaseService<
                             }
                         }
                     }
+                },
+                _count: {
+                    select: {
+                        EnrolledCourse: true
+                    }
                 }
             }
         });

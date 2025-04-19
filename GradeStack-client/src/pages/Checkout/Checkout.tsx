@@ -112,7 +112,7 @@ export const Checkout: React.FC = () => {
         <Button
           type="default"
           className="bg-[#29324a] mb-4 uppercase text-[#fff] text-xs font-medium rounded-none hover:border-[#1b55ac] hover:bg-[#1c2e48]"
-          onClick={() => navigate("/")}
+          onClick={() => navigate(`/courses/${course.id}`)}
         >
           <svg width="8" height="22" viewBox="0 0 13 22" fill="none" className="fill-current mr-2.5 shrink-0">
             <rect x="0.428223" y="8.95117" width="4.16918" height="4.16918"></rect>

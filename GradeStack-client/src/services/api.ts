@@ -360,6 +360,26 @@ export const learnerService = {
     const respone = await api.get("/courses/all");
     return respone.data;
   },
+  async updateCourseProgress(
+    learnerId: string,
+    courseId: string,
+    progress: number
+  ) {
+    const response = await api.put(
+      `/learner/${learnerId}/courses/${courseId}/progress`,
+      {
+        progress,
+      }
+    );
+    return response.data;
+  },
+
+  async getCourseProgress(learnerId: string, courseId: string) {
+    const response = await api.get(
+      `/learner/${learnerId}/courses/${courseId}/progress`
+    );
+    return response.data;
+  },
 };
 export const userService = {
   async getMyEnrolledCourses(userId: string) {

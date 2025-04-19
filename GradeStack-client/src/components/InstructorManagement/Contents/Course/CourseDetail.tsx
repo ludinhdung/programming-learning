@@ -141,7 +141,7 @@ const CourseDetail: React.FC = () => {
             })),
           })),
         };
-
+        console.log("transformedData", transformedData);
         setCourse(transformedData);
       } catch (error) {
         console.error("Error fetching course:", error);
@@ -441,7 +441,7 @@ const CourseDetail: React.FC = () => {
                   <div className="flex flex-col">
                     <p className="text-sm text-gray-500">Students enrolled</p>
                     <p className="text-lg font-medium">
-                      {course._count?.EnrolledCourse || 0}
+                      {course?._count?.EnrolledCourse || 0}
                     </p>
                   </div>
                 </div>
@@ -543,7 +543,7 @@ const CourseDetail: React.FC = () => {
                               </div>
                               <div className="flex flex-col">
                                 <h3 className="font-medium">{module.title}</h3>
-                                <p className="mt-1 text-sm text-gray-600">
+                                <p className="mt-1 text-sm text-gray-600 max-w-[850px]">
                                   {module.description}
                                 </p>
                               </div>

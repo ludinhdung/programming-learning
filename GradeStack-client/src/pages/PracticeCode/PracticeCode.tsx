@@ -754,7 +754,7 @@ const PracticeCode: React.FC<PracticeCodeProps> = ({ lessonId }) => {
       } = response;
 
       if (success) {
-        let finalOutput = `Code execution successful!\n${codeOutput}`;
+        let finalOutput = `${codeOutput}`;
         if (truncated) {
           finalOutput += "\n\n[Output was truncated due to size limits]";
         }

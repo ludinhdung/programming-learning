@@ -166,8 +166,14 @@ const CourseList = () => {
         </Link>
       </div>
 
-      <div className="space-y-4">
-        {courses.map((course) => (
+      {courses.length === 0 ? (
+        <div className="flex flex-col items-center justify-center bg-neutral-700 rounded-lg p-8">
+          <p className="text-white text-lg mb-4">You haven't created any courses yet.</p>
+          <p className="text-gray-400">Get started by clicking the "Create New Course" button above!</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {courses.map((course) => (
           <div
             key={course.id}
             className="bg-neutral-700 rounded-lg overflow-hidden shadow-lg"
@@ -259,8 +265,9 @@ const CourseList = () => {
               </div>
             </div>
           </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

@@ -249,7 +249,9 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
                 <dd className="text-base font-semibold text-gray-300">
                   {lesson.content.video
                     ? formatDuration(lesson.content.video.duration)
-                    : lesson.content.finalTest ? `${lesson.duration}m` : "N/A"}
+                    : lesson.content.finalTest
+                    ? `${lesson.duration}m`
+                    : "N/A"}
                 </dd>
               </div>
               <div className="pl-6">
