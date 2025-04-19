@@ -76,10 +76,10 @@ export const supporterService = {
     const respone = await api.get("/supporter/learners");
     return respone.data;
   },
-  
+
   async warningLearner(learnerId: string, warningContent: string) {
     console.log(learnerId);
-    
+
     const respone = await api.patch(`/supporter/warning/learner/${learnerId}`, { warningContent });
     return respone.data
   },
@@ -340,7 +340,11 @@ export const instructorService = {
     const response = await api.get(`/instructors/${instructorId}/wallet`);
     return response.data;
   },
-  
+
+  async getInstructorTransactions(instructorId: string) {
+    const response = await api.get(`/instructors/${instructorId}/transactions`);
+    return response.data;
+  },
 };
 
 export const learnerService = {

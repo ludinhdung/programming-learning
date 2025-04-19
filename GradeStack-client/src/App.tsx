@@ -48,6 +48,8 @@ import SupporterManageLearnerComments from "./components/SupporterManagement/Con
 import UserDashboard from "./pages/UserDashboard/UserDashboard";
 
 import PracticeCode from "./pages/PracticeCode/PracticeCode";
+import { TransactionList } from "./components/InstructorManagement/Contents/Transaction";
+import { CourseVerificationList } from "./components/InstructorManagement/Contents/CourseVerification";
 
 const App: React.FC = () => {
   return (
@@ -72,7 +74,7 @@ const App: React.FC = () => {
           <Route path="/admin" element={<AdminDashboard />} />
           {/* <Route path="/create-course" element={<CreateCourse />} /> */}
           <Route path="/courses" element={<CourseList />} />
-          <Route path="/courses/:courseId" element={<CourseDetail  />} />
+          <Route path="/courses/:courseId" element={<CourseDetail />} />
           <Route path="/topics" element={<Topics />} />
           <Route path="/learning-paths" element={<LearningPaths />} />
           <Route
@@ -99,6 +101,8 @@ const App: React.FC = () => {
               />
             </Route>
             <Route path="monetization" element={<InstructorMonetization />} />
+            <Route path="transactions" element={<TransactionList />} />
+            <Route path="verify-courses" element={<CourseVerificationList />} />
           </Route>
           {/* Supporter Dashboard*/}
           <Route path="/supporter-management" element={<SupporterDashboard />}>

@@ -156,9 +156,9 @@ export class CourseService {
     const averageRating =
       course.CourseFeedback.length > 0
         ? course.CourseFeedback.reduce(
-            (sum, feedback) => sum + feedback.rating,
-            0
-          ) / course.CourseFeedback.length
+          (sum, feedback) => sum + feedback.rating,
+          0
+        ) / course.CourseFeedback.length
         : 0;
 
     const { modules, CourseFeedback, ...courseWithoutModules } = course;
@@ -242,5 +242,51 @@ export class CourseService {
       },
     });
     return courses;
+  }
+
+  async getUnpublishedCourses() {
+    return await prisma.course.findMany({
+      where: {
+        isPublished: false
+      },
+      include: {
+        instructor: {
+          include: {
+            user: true
+          }
+        },
+        modules: {
+          include: {
+            lessons: true
+          }
+        },
+        CourseTopic: {
+          include: {
+            topic: true
+          }
+        }
+      },
+      orderBy: {
+        updatedAt: 'desc'
+      }
+    });
+  }
+
+  async toggleCoursePublishStatus(courseId: string) {
+    const course = await prisma.course.findUnique({
+      where: { id: courseId }
+    });
+
+    if (!course) {
+      throw new Error("Course not found");
+    }
+
+    return await prisma.course.update({
+      where: { id: courseId },
+      data: {
+        isPublished: !course.isPublished,
+        updatedAt: new Date()
+      }
+    });
   }
 }

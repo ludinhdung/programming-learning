@@ -169,39 +169,21 @@ const Sidebar = () => {
     },
     {
       icon: MdAnalytics,
-      text: "Analytics",
-      href: "/instructor-management/analytics",
+      text: "Course Verification",
+      href: "/instructor-management/verify-courses",
     },
-    {
-      icon: MdPeople,
-      text: "Community",
-      href: "/instructor-management/community",
-    },
-    {
-      icon: MdSubtitles,
-      text: "Transcription",
-      href: "/instructor-management/transcription",
-    },
-    {
-      icon: MdCopyright,
-      text: "Copyright",
-      href: "/instructor-management/copyright",
-    },
+
     {
       icon: MdAttachMoney,
       text: "Monetization",
       href: "/instructor-management/monetization",
     },
-    {
-      icon: MdBrush,
-      text: "Customization",
-      href: "/instructor-management/customization",
-    },
+
   ];
 
   // Tạo đường dẫn avatar
   const avatarUrl =
-    instructor?.avatar ;
+    instructor?.avatar;
 
   // Cải thiện xử lý tên đầy đủ
   const fullName = instructor?.user

@@ -25,6 +25,7 @@ import {
 } from "../validation/instructor.validation";
 import { z } from "zod";
 import bcrypt from "bcrypt";
+import { AppError } from '../../../shared/middleware/error.middleware';
 const prisma = new PrismaClient();
 
 export class InstructorService extends InstructorBaseService<
@@ -1383,5 +1384,28 @@ export class InstructorService extends InstructorBaseService<
     } catch (error) {
       throw PrismaErrorHandler.handle(error, "Instructor");
     }
+  }
+
+  async getTransactionsByInstructorId(instructorId: string) {
+    const instructor = await prisma.instructor.findUnique({
+      where: { userId: instructorId },
+      include: {
+        Wallet: {
+          include: {
+            transactions: {
+              orderBy: {
+                createdAt: 'desc'
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!instructor || !instructor.Wallet) {
+      throw new AppError('Instructor wallet not found', 404);
+    }
+
+    return instructor.Wallet.transactions;
   }
 }

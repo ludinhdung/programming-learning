@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { instructorService } from "../../../services/api";
 import { formatVND } from "../../../utils/formatCurrency";
+import { TransactionList } from "./Transaction";
 const Monetization = () => {
   const [wallet, setWallet] = useState<any>(null);
-const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const fetchWallet = async () => {
       try {
@@ -17,9 +18,9 @@ const [isLoading, setIsLoading] = useState(true);
         const response = await instructorService.getInstructorWallet(
           instructorId
         );
-         setWallet(response.data);
-         console.log(response.data);
-         
+        setWallet(response.data);
+        console.log(response.data);
+
       } catch (error) {
         console.log("Error fetching wallet", error);
       } finally {
@@ -161,16 +162,9 @@ const [isLoading, setIsLoading] = useState(true);
       </div>
 
       {/* Recent Transactions Section */}
-      <div className="mt-8">
-        <h2 className="text-white text-xl font-bold mb-4">
-          Recent Transactions
-        </h2>
-        <div className="bg-zinc-700 rounded-2xl p-6">
-          <div className="text-center text-gray-400 py-8">
-            No transactions yet
-          </div>
-        </div>
-      </div>
+
+      <TransactionList />
+
     </div>
   );
 };
