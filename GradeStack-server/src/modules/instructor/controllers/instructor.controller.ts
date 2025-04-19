@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { InstructorService } from './../services/instructor.service';
 import { LessonType } from '@prisma/client';
 import { CourseCreateDTO } from '../dto/CourseCreateDTO';
@@ -29,11 +29,11 @@ export class InstructorController {
         try {
             const { userData, instructorData } = req.body;
             // Validate required fields
-            if (    
-                    !userData?.email        || 
-                    !userData?.password     || 
-                    !userData?.firstName    ||
-                    !userData?.lastName
+            if (
+                !userData?.email ||
+                !userData?.password ||
+                !userData?.firstName ||
+                !userData?.lastName
             ) {
                 res.status(400).json({ message: 'Missing required user fields' });
                 return;
@@ -88,7 +88,7 @@ export class InstructorController {
             const instructor = await this.instructorService.updateAvatar(id, avatarUrl);
             res.status(200).json(instructor);
         } catch (error) {
-        this.handleError(res, error);
+            this.handleError(res, error);
         }
     };
 
@@ -133,8 +133,8 @@ export class InstructorController {
                                     }
                                     break;
                                 case LessonType.CODING:
-                                    if (!lesson.codingData?.language    || 
-                                        !lesson.codingData?.problem     || 
+                                    if (!lesson.codingData?.language ||
+                                        !lesson.codingData?.problem ||
                                         !lesson.codingData?.solution
                                     ) {
                                         res.status(400).json({ message: 'Missing required coding exercise fields' });
@@ -146,19 +146,19 @@ export class InstructorController {
                                         res.status(400).json({ message: 'Final test must have at least one question' });
                                         return;
                                     }
-                                    
+
                                     // Validate questions and answers
                                     for (const question of lesson.finalTestData.questions) {
                                         if (!question.content) {
                                             res.status(400).json({ message: 'Missing question content' });
                                             return;
                                         }
-                                        
+
                                         if (!question.answers || question.answers.length === 0) {
                                             res.status(400).json({ message: 'Each question must have at least one answer' });
                                             return;
                                         }
-                                        
+
                                         // Check if at least one answer is correct
                                         const hasCorrectAnswer = question.answers.some(answer => answer.isCorrect);
                                         if (!hasCorrectAnswer) {
@@ -179,7 +179,7 @@ export class InstructorController {
             this.handleError(res, error);
         }
     };
-    
+
     /**
      * Create a new workshop
      */
@@ -189,7 +189,7 @@ export class InstructorController {
             const workshopData = req.body;
 
             // Validate required fields
-            if (!workshopData?.title || !workshopData?.description || !workshopData?.scheduledAt || !workshopData?.duration) { 
+            if (!workshopData?.title || !workshopData?.description || !workshopData?.scheduledAt || !workshopData?.duration) {
                 res.status(400).json({ message: 'Missing required workshop fields' });
                 return;
             }
@@ -197,7 +197,7 @@ export class InstructorController {
             const workshop = await this.instructorService.createWorkshop(id, workshopData);
             res.status(201).json(workshop);
         } catch (error) {
-        this.handleError(res, error);
+            this.handleError(res, error);
         }
     };
 
@@ -208,19 +208,19 @@ export class InstructorController {
         try {
             const page = Number(req.query.page) || 1;
             const limit = Number(req.query.limit) || 10;
-            
+
             // Calculate skip based on page and limit
             const skip = (page - 1) * limit;
-            
+
             // Extract filters from query params (excluding page and limit)
             const { page: _, limit: __, ...filters } = req.query;
-            
+
             const instructors = await this.instructorService.findAll({
                 skip,
                 take: limit,
                 where: filters
             });
-        
+
             res.status(200).json(instructors);
         } catch (error) {
             this.handleError(res, error);
@@ -236,16 +236,16 @@ export class InstructorController {
             const topicData = req.body;
             // Validate required fields
             if (
-                !topicData?.name || 
+                !topicData?.name ||
                 !topicData?.thumbnail ||
                 !topicData?.description
             ) {
-                res.status(400).json({ 
-                    message: 'Missing required topic fields' 
+                res.status(400).json({
+                    message: 'Missing required topic fields'
                 });
                 return;
             }
-            
+
             const topic = await this.instructorService.createTopic(id, topicData);
             res.status(201).json(topic);
         } catch (error) {
@@ -265,10 +265,10 @@ export class InstructorController {
             }
 
             const file = req.file as unknown as UploadedFile;
-            
+
             // Upload the video to Cloudflare R2
             const uploadResult = await r2StorageService.uploadVideo(file, 'course-videos');
-            
+
             // Return only the video URL
             res.status(200).json({
                 videoUrl: uploadResult.videoUrl,
@@ -279,7 +279,7 @@ export class InstructorController {
             this.handleError(res, error);
         }
     };
-    
+
     /**
      * Get all courses for an instructor
      */
@@ -313,7 +313,7 @@ export class InstructorController {
         try {
             const { id, courseId } = req.params;
             const courseData = req.body;
-            
+
             // Validate required fields
             if (!courseData?.title || !courseData?.description) {
                 res.status(400).json({ message: 'Missing required course fields' });
@@ -373,7 +373,7 @@ export class InstructorController {
         try {
             const { courseId } = req.params;
             const moduleData = req.body;
-            
+
             // Validate required fields
             if (!moduleData?.title || !moduleData?.description) {
                 res.status(400).json({ message: 'Missing required module fields' });
@@ -394,7 +394,7 @@ export class InstructorController {
         try {
             const { moduleId } = req.params;
             const moduleData = req.body;
-            
+
             // Validate required fields
             if (!moduleData?.title || !moduleData?.description) {
                 res.status(400).json({ message: 'Missing required module fields' });
@@ -454,7 +454,7 @@ export class InstructorController {
         try {
             const { lessonId } = req.params;
             const lessonData = req.body;
-            
+
             // Validate required fields
             if (!lessonData?.title || !lessonData?.description) {
                 res.status(400).json({ message: 'Missing required lesson fields' });
@@ -480,7 +480,7 @@ export class InstructorController {
             this.handleError(res, error);
         }
     };
-    
+
     public getCoursesFullrelation = async (req: Request, res: Response): Promise<void> => {
         try {
             const { id } = req.params; // Instructor ID
@@ -499,7 +499,7 @@ export class InstructorController {
         try {
             const { lessonId } = req.params;
             const videoData = req.body;
-            
+
             // Validate required fields
             if (!videoData?.url && !videoData?.videoUrl) {
                 res.status(400).json({ message: 'Missing required video URL' });
@@ -570,7 +570,7 @@ export class InstructorController {
         try {
             const { topicId } = req.params;
             const topicData = req.body;
-            
+
             // Validate required fields
             if (!topicData?.name) {
                 res.status(400).json({ message: 'Topic name is required' });
@@ -597,6 +597,16 @@ export class InstructorController {
             });
         } catch (error) {
             this.handleError(res, error);
+        }
+    };
+
+    getTransactions = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const instructorId = req.params.instructorId;
+            const transactions = await this.instructorService.getTransactionsByInstructorId(instructorId);
+            res.status(200).json(transactions);
+        } catch (error) {
+            next(error);
         }
     };
 }

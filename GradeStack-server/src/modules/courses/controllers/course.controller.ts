@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { CourseService } from "../services/course.service";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export class CourseController {
   private courseService: CourseService;
@@ -68,6 +71,33 @@ export class CourseController {
     try {
       const courses = await this.courseService.getAllCourses();
       res.status(200).json(courses);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getUnpublishedCourses = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const courses = await this.courseService.getUnpublishedCourses();
+      res.status(200).json(courses);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  toggleCoursePublishStatus = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { courseId } = req.params;
+      const updatedCourse = await this.courseService.toggleCoursePublishStatus(courseId);
+      res.status(200).json(updatedCourse);
     } catch (error) {
       next(error);
     }

@@ -12,4 +12,8 @@ router.get("/course/:courseId", courseController.getCoursebyCourseId);
 
 router.get("/all", courseController.getAllCourses);
 
+// New routes for course verification
+router.get("/verify/unpublished", courseController.getUnpublishedCourses.bind(courseController));
+router.patch("/verify/:courseId/publish", courseController.toggleCoursePublishStatus.bind(courseController));
+
 export default router;
