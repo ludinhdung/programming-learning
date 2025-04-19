@@ -1408,4 +1408,57 @@ export class InstructorService extends InstructorBaseService<
 
     return instructor.Wallet.transactions;
   }
+
+  async requestWithdrawal(instructorId: string, amount: number) {
+    try {
+      // Get the instructor's wallet
+      const wallet = await prisma.wallet.findUnique({
+        where: { instructorId }
+      });
+
+      if (!wallet) {
+        throw new AppError('Wallet not found', 404);
+      }
+
+      // Check if the withdrawal amount is valid
+      if (amount <= 0) {
+        throw new AppError('Withdrawal amount must be greater than 0', 400);
+      }
+
+      // Check minimum withdrawal amount (100,000 VND)
+      if (amount < 100000) {
+        throw new AppError('Minimum withdrawal amount is 100,000 VND', 400);
+      }
+
+      // Check if the wallet has sufficient balance
+      if (Number(wallet.balance) < amount) {
+        throw new AppError('Insufficient balance for withdrawal', 400);
+      }
+
+      // Create a withdrawal transaction
+      const transaction = await prisma.transaction.create({
+        data: {
+          walletId: wallet.id,
+          amount: amount,
+          type: 'WITHDRAWAL',
+          status: 'PENDING'
+        }
+      });
+
+      // Update wallet balance
+      await prisma.wallet.update({
+        where: { id: wallet.id },
+        data: {
+          balance: {
+            decrement: amount
+          }
+        }
+      });
+
+      return transaction;
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new AppError('Failed to process withdrawal request', 500);
+    }
+  }
 }
