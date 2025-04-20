@@ -64,7 +64,7 @@ const SideBar: React.FC<SideBarProps> = ({
             }
           >
             <div className="flex justify-between items-center w-full">
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="text-sm truncate" title={lesson.title}>
                   {lesson.title}
                 </div>
