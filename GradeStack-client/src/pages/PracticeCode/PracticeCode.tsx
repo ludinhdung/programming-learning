@@ -499,7 +499,8 @@ const EditorContainer = styled.div`
   position: relative;
   border: 1px solid rgba(27, 85, 172, 0.15);
   height: 600px;
-  overflow: hidden;
+  overflow-y: auto; 
+  overflow-x: hidden;
 `;
 
 interface Message {
@@ -1228,7 +1229,7 @@ const PracticeCode: React.FC<PracticeCodeProps> = ({ lessonId }) => {
                             useShadows: false,
                             verticalHasArrows: false,
                             horizontalHasArrows: false,
-                            vertical: "visible",
+                            vertical: "visible", // Luôn hiện thanh cuộn dọc
                             horizontal: "visible",
                             verticalScrollbarSize: 10,
                             horizontalScrollbarSize: 10,
