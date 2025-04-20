@@ -3,6 +3,7 @@ import {
   PlayCircleOutlined,
   FileOutlined,
   CodeOutlined,
+  LockOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Menu } from "antd";
@@ -30,6 +31,38 @@ const SideBar: React.FC<SideBarProps> = ({
   progress,
   completedLessons,
 }) => {
+  
+  // Add helper function to check if a lesson is accessible
+  const isLessonAccessible = (
+    moduleIndex: number,
+    lessonIndex: number
+  ): boolean => {
+    if (!isEnrolled) {
+      return false;
+    }
+
+    // First lesson of first module is always accessible
+    if (moduleIndex === 0 && lessonIndex === 0) {
+      return true;
+    }
+
+    // Get previous lesson
+    let prevLessonId: string | null = null;
+    if (lessonIndex === 0) {
+      // If it's first lesson of a module, check last lesson of previous module
+      if (moduleIndex > 0) {
+        const prevModule = course.modules[moduleIndex - 1];
+        prevLessonId = prevModule.lessons[prevModule.lessons.length - 1].id;
+      }
+    } else {
+      // Check previous lesson in same module
+      prevLessonId = course.modules[moduleIndex].lessons[lessonIndex - 1].id;
+    }
+
+    // If there's no previous lesson, or it's completed, allow access
+    return !prevLessonId || completedLessons.includes(prevLessonId);
+  };
+
   const getMenuItems = (modules: Module[]): MenuProps["items"] => {
     return modules.map((module, moduleIndex) => ({
       key: `module-${moduleIndex}`,
@@ -38,142 +71,152 @@ const SideBar: React.FC<SideBarProps> = ({
           <span>{`${module.order}. ${module.title}`}</span>
         </div>
       ),
-      children: module.lessons.map((lesson, lessonIndex) => ({
-        key: `lesson-${moduleIndex}-${lessonIndex}`,
-        disabled: !isEnrolled && !lesson.isPreview,
-        icon: (
-          <div className="flex items-center">
-            {lesson.lessonType === LessonType.VIDEO ? (
-              <PlayCircleOutlined />
-            ) : lesson.lessonType === LessonType.CODING ? (
-              <CodeOutlined />
-            ) : (
-              <FileOutlined />
-            )}
-          </div>
-        ),
-        label: (
-          <div
-            className={`flex flex-col py-2 ${
-              !isEnrolled && !lesson.isPreview ? "cursor-not-allowed" : ""
-            }`}
-            onClick={() =>
-              isEnrolled || lesson.isPreview
-                ? setCurrentLesson(lesson, lessonIndex)
-                : null
-            }
-          >
-            <div className="flex justify-between items-center w-full">
-              <div className="flex-1 min-w-0">
-                <div className="text-sm truncate" title={lesson.title}>
-                  {lesson.title}
-                </div>
-                <div
-                  className={`text-xs font-semibold flex items-center gap-4 ${
-                    !isEnrolled && !lesson.isPreview
-                      ? "text-gray-600"
-                      : "text-gray-400"
-                  }`}
-                >
-                  {lesson.lessonType === LessonType.VIDEO ? (
-                    <>
-                      Lesson: {lessonIndex + 1}
-                      <div className="flex items-center gap-1">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="13"
-                          height="13"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="inline-block ml-1"
-                        >
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-                          <path d="M12 12h3.5" />
-                          <path d="M12 7v5" />
-                        </svg>
-                        {` ${formatDuration(lesson.duration || 0)}`}
-                      </div>
-                    </>
-                  ) : lesson.lessonType === LessonType.CODING ? (
-                    <>
-                      <div className="flex items-center gap-1">
-                        <span>Duration:</span>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="13"
-                          height="13"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="inline-block ml-1"
-                        >
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-                          <path d="M12 12h3.5" />
-                          <path d="M12 7v5" />
-                        </svg>
-                        {`${lesson.duration}m`}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      Total questions:{" "}
-                      {`${module.lessons[lessonIndex].content.finalTest?.questions.length}`}
-                      <div className="flex items-center gap-1">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="13"
-                          height="13"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="inline-block ml-1"
-                        >
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-                          <path d="M12 12h3.5" />
-                          <path d="M12 7v5" />
-                        </svg>
-                        {`${module.lessons[lessonIndex].content.finalTest?.estimatedDuration}m`}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-              {completedLessons.includes(lesson.id) && (
-                <div className="flex items-center ml-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    className="text-green-500"
-                  >
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M5 12l5 5l10 -10" />
-                  </svg>
-                </div>
+      children: module.lessons.map((lesson, lessonIndex) => {
+        const isAccessible = isLessonAccessible(moduleIndex, lessonIndex);
+        return {
+          key: `lesson-${moduleIndex}-${lessonIndex}`,
+          disabled:
+            (!isEnrolled && !lesson.isPreview) || (isEnrolled && !isAccessible),
+          icon: (
+            <div className="flex items-center">
+              {isEnrolled && !isAccessible ? (
+                <LockOutlined className="text-gray-500" />
+              ) : lesson.lessonType === LessonType.VIDEO ? (
+                <PlayCircleOutlined />
+              ) : lesson.lessonType === LessonType.CODING ? (
+                <CodeOutlined />
+              ) : (
+                <FileOutlined />
               )}
             </div>
-          </div>
-        ),
-      })),
+          ),
+          label: (
+            <div
+              className={`flex flex-col py-2 ${
+                (!isEnrolled && !lesson.isPreview) ||
+                (isEnrolled && !isAccessible)
+                  ? "cursor-not-allowed opacity-50"
+                  : ""
+              }`}
+              onClick={() =>
+                (isEnrolled && isAccessible) || lesson.isPreview
+                  ? setCurrentLesson(lesson, lessonIndex)
+                  : null
+              }
+            >
+              <div className="flex justify-between items-center w-full">
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm truncate" title={lesson.title}>
+                    {lesson.title}
+                  </div>
+                  <div
+                    className={`text-xs font-semibold flex items-center gap-4 ${
+                      (!isEnrolled && !lesson.isPreview) ||
+                      (isEnrolled && !isAccessible)
+                        ? "text-gray-600"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    {lesson.lessonType === LessonType.VIDEO ? (
+                      <>
+                        Lesson: {lessonIndex + 1}
+                        <div className="flex items-center gap-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="13"
+                            height="13"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="inline-block ml-1"
+                          >
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                            <path d="M12 12h3.5" />
+                            <path d="M12 7v5" />
+                          </svg>
+                          {` ${formatDuration(lesson.duration || 0)}`}
+                        </div>
+                      </>
+                    ) : lesson.lessonType === LessonType.CODING ? (
+                      <>
+                        <div className="flex items-center gap-1">
+                          <span>Duration:</span>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="13"
+                            height="13"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="inline-block ml-1"
+                          >
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                            <path d="M12 12h3.5" />
+                            <path d="M12 7v5" />
+                          </svg>
+                          {`${lesson.duration}m`}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        Total questions:{" "}
+                        {`${module.lessons[lessonIndex].content.finalTest?.questions.length}`}
+                        <div className="flex items-center gap-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="13"
+                            height="13"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="inline-block ml-1"
+                          >
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                            <path d="M12 12h3.5" />
+                            <path d="M12 7v5" />
+                          </svg>
+                          {`${module.lessons[lessonIndex].content.finalTest?.estimatedDuration}m`}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {completedLessons.includes(lesson.id) && (
+                  <div className="flex items-center ml-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      className="text-green-500"
+                    >
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+            </div>
+          ),
+        };
+      }),
     }));
   };
 
