@@ -152,6 +152,11 @@ const Header: React.FC = () => {
     </>
   );
 
+  // Loại bỏ tab "My library" nếu chưa đăng nhập
+  const filteredNavItems = user
+    ? navItems
+    : navItems.filter((item) => item.name !== "My library");
+
   return (
     <>
       <header className="bg-zinc-950 shadow-xl fixed top-0 left-0 right-0 w-full z-50">
@@ -159,7 +164,7 @@ const Header: React.FC = () => {
           {/* Left Navigation - Hidden on mobile */}
           <div className="flex-1 hidden md:flex justify-start">
             <PopoverGroup className="flex lg:gap-x-4 space-x-4">
-              {navItems.map((item) => (
+              {filteredNavItems.map((item) => (
                 <a
                   key={item.name}
                   href={item.href}
@@ -228,7 +233,7 @@ const Header: React.FC = () => {
             <div className="mt-6 flow-root">
               <div className="-my-6 divide-y divide-gray-500/25">
                 <div className="space-y-2 py-6">
-                  {navItems.map((item) => (
+                  {filteredNavItems.map((item) => (
                     <a
                       key={item.name}
                       href={item.href}

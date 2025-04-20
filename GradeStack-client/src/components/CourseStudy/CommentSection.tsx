@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Comment, commentService } from '../../services/comment.service';
 import { formatDistanceToNow } from 'date-fns';
 import { Modal, message } from 'antd';
-import { DeleteOutlined, EditOutlined, MoreOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 
 interface CommentSectionProps {
     lessonId: string;
@@ -259,7 +259,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ lessonId }) => {
                                                             className="py-2 px-4 bg-[#29324a] text-[#fff] text-sm font-medium rounded-none border border-blue-400/10 hover:border hover:border-blue-400/30 box-border"
                                                             onClick={(e) => toggleDropdown(e, comment.id)}
                                                         >
-                                                           ...
+                                                        ...
                                                         </button>
                                                         
                                                         {openDropdownId === comment.id && (
@@ -317,13 +317,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({ lessonId }) => {
                                                         </p>
                                                         
                                                         {user?.id === reply.userId && (
-                                                            <div className="flex items-center mt-2 space-x-2">
+                                                            <div className="flex items-center mt-2 opacity-0 group-hover:opacity-100 transition-opacity space-x-2">
                                                                 <div className="relative">
                                                                     <button
                                                                         className="py-2 px-4 bg-[#334159] text-[#fff] text-xs font-medium rounded-none border border-blue-400/10 hover:border hover:border-blue-400/30 box-border"
                                                                         onClick={(e) => toggleDropdown(e, reply.id)}
                                                                     >
-                                                                    ...
+                                                                     ...
                                                                     </button>
                                                                 
                                                                     {openDropdownId === reply.id && (

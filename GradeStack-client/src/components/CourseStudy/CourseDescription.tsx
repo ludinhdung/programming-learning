@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Course, Comment, User, Lesson } from "./CourseStudyBoard";
+import { Course, Comment, User, Lesson, LessonType } from "./CourseStudyBoard";
 import { message, Tabs } from "antd";
 import type { TabsProps } from "antd";
 import { Input, Select, Button, Tooltip } from "antd";
@@ -435,38 +435,26 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
       ),
       children: renderTab1Content(),
     },
-    {
-      key: "2",
-      label: (
-        <span className="text-gray-200 text-lg font-semibold">Discuss</span>
-      ),
-      children: <CommentSection lessonId={lesson?.id} />,
-    },
-    {
-      key: "3",
-      label: (
-        <span className="text-gray-200 text-lg font-semibold">Notes</span>
-      ),
-      children: (
-        <NoteComponent lessonId={lesson?.id} />
-      )
-    }
-    // {
-    //   key: "3",
-    //   label: <span className="text-gray-200 text-lg font-semibold">Notes</span>,
-    //   children: (
-    //     <NotesSection
-    //       currentTime={currentTime} // Replace with actual current time value
-    //       notes={notes} // Replace with actual notes array
-    //       setNotes={setNotes} // Replace with actual setNotes function
-    //       lectureTitle={lectureTitle} // Replace with actual lecture title
-    //       onJumpToTimestamp={onJumpToTimestamp} // Replace with actual function
-    //       onPlayVideo={onPlayVideo} // Replace with actual function
-    //       onPauseVideo={onPauseVideo} // Replace with actual function
-    //       formatTime={formatTime} // Replace with actual function
-    //     />
-    //   ),
-    // },
+    ...(isEnrolled ? [
+      {
+        key: "2",
+        label: (
+          <span className="text-gray-200 text-lg font-semibold">Discuss</span>
+        ),
+        children: <CommentSection lessonId={lesson?.id} />,
+      },
+      ...(lesson?.lessonType === LessonType.VIDEO ? [
+        {
+          key: "3",
+          label: (
+            <span className="text-gray-200 text-lg font-semibold">Notes</span>
+          ),
+          children: (
+            <NoteComponent lessonId={lesson?.id} />
+          )
+        }
+      ] : [])
+    ] : [])
   ];
 
   return (
