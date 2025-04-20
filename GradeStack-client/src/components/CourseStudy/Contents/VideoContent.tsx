@@ -5,17 +5,13 @@ import '@vidstack/react/player/styles/default/layouts/video.css';
 import { useVideoStore } from '../../../store/videoStore';
 import { useEffect, useRef, useState } from 'react';
 import { noteService } from '../../../services/note.service';
+import useNoteStore from '../../../store/noteStore';
+import useAuthStore from '../../../store/authStore';
 
 interface VideoContentProps {
   video: string;
   lectureTitle?: string;
   lessonId: string;
-}
-
-interface Note {
-  id: string;
-  content: string;
-  timestamp: number;
 }
 
 const VideoContent: React.FC<VideoContentProps> = ({
@@ -24,6 +20,8 @@ const VideoContent: React.FC<VideoContentProps> = ({
   lessonId,
 }) => {
   const setCurrentTime = useVideoStore((state) => state.setCurrentTime);
+  const { notes, setNotes } = useNoteStore();
+  const { isAuthenticated } = useAuthStore();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [duration, setDuration] = useState<number>(100);
   const [currentTime, setCurrentTimeState] = useState<number>(0);
@@ -31,10 +29,11 @@ const VideoContent: React.FC<VideoContentProps> = ({
   const [isLayoutVisible, setIsLayoutVisible] = useState<boolean>(true);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [notes, setNotes] = useState<Note[]>([]);
 
   useEffect(() => {
     const fetchNotes = async () => {
+      if (!isAuthenticated) return;
+
       try {
         const notesData = await noteService.getNotesByLesson(lessonId);
         setNotes(notesData);
@@ -44,7 +43,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
     };
 
     fetchNotes();
-  }, [lessonId]);
+  }, [lessonId, setNotes, isAuthenticated]);
 
   useEffect(() => {
     const videoElement = document.querySelector('video');
