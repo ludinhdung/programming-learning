@@ -52,7 +52,7 @@ app.use('/api/images', imageUploadRouter);
 app.use("/api/supporter", supporterRouter);
 app.use('/api/practice-code', practiceCodeRoutes);
 app.use('/api/checkout', checkoutRoutes);
-app.use('/api', noteRoutes);
+app.use('/api/notes', noteRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/progress', progressRoutes);
 app.use(errorHandler);

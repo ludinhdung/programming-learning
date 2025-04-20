@@ -4,27 +4,24 @@ import '@vidstack/react/player/styles/default/theme.css';
 import '@vidstack/react/player/styles/default/layouts/video.css';
 import { useVideoStore } from '../../../store/videoStore';
 import { useEffect, useRef, useState } from 'react';
+import { noteService } from '../../../services/note.service';
 
 interface VideoContentProps {
   video: string;
   lectureTitle?: string;
+  lessonId: string;
 }
 
-interface Marker {
-  time: number;
-  label: string;
-  note: string;
+interface Note {
+  id: string;
+  content: string;
+  timestamp: number;
 }
-
-const markers: Marker[] = [
-  { time: 1, label: 'Marker 1', note: 'Đây là nội dung note 1' },
-  { time: 3, label: 'Marker 2', note: 'Đây là nội dung note 2' },
-  { time: 6, label: 'Marker 3', note: 'Đây là nội dung note 3' },
-];
 
 const VideoContent: React.FC<VideoContentProps> = ({
   video,
   lectureTitle,
+  lessonId,
 }) => {
   const setCurrentTime = useVideoStore((state) => state.setCurrentTime);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -34,6 +31,20 @@ const VideoContent: React.FC<VideoContentProps> = ({
   const [isLayoutVisible, setIsLayoutVisible] = useState<boolean>(true);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [notes, setNotes] = useState<Note[]>([]);
+
+  useEffect(() => {
+    const fetchNotes = async () => {
+      try {
+        const notesData = await noteService.getNotesByLesson(lessonId);
+        setNotes(notesData);
+      } catch (error) {
+        console.error('Error fetching notes:', error);
+      }
+    };
+
+    fetchNotes();
+  }, [lessonId]);
 
   useEffect(() => {
     const videoElement = document.querySelector('video');
@@ -111,6 +122,12 @@ const VideoContent: React.FC<VideoContentProps> = ({
     }
   };
 
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div className="w-full aspect-video relative">
       <MediaPlayer
@@ -139,24 +156,24 @@ const VideoContent: React.FC<VideoContentProps> = ({
         />
 
         {/* Markers */}
-        {markers.map((marker) => {
-          const leftPercent = (marker.time / duration) * 100;
+        {notes.map((note) => {
+          const leftPercent = (note.timestamp / duration) * 100;
 
           return (
             <div
-              key={marker.time}
+              key={note.id}
               className="absolute w-2 h-2 bg-yellow-500 rounded-none -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20"
               style={{
                 left: `${leftPercent}%`,
               }}
-              onClick={() => handleMarkerClick(marker.time)}
-              onMouseEnter={() => isLayoutVisible && setHoveredMarker(marker.time)}
+              onClick={() => handleMarkerClick(note.timestamp)}
+              onMouseEnter={() => isLayoutVisible && setHoveredMarker(note.timestamp)}
               onMouseLeave={() => setHoveredMarker(null)}
             >
-              {hoveredMarker === marker.time && isLayoutVisible && (
+              {hoveredMarker === note.timestamp && isLayoutVisible && (
                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white p-2 rounded text-sm whitespace-nowrap z-30">
-                  <div className="font-bold">{marker.time}s</div>
-                  <div>{marker.note}</div>
+                  <div className="font-bold">{formatTime(note.timestamp)}</div>
+                  <div>{note.content}</div>
                 </div>
               )}
             </div>
