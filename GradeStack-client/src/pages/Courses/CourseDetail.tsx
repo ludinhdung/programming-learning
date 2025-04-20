@@ -8,6 +8,7 @@ import userService from "../../services/user.service";
 import { formatVND } from "../../utils/formatCurrency";
 import SigninForm from "../../components/SigninForm/SigninForm";
 import { learnerService } from "../../services/api";
+import Footer from "../../components/Footer/Footer";
 
 // Styled components
 export const LoadingBar = styled.div`
@@ -232,7 +233,7 @@ const CourseDetail: React.FC = () => {
       setShowLoading(true);
       try {
         const response = await axios.get(
-          `http://localhost:4000/api/courses/${courseId}/full`
+          `${import.meta.env.VITE_API_URL}/api/courses/${courseId}/full`
         );
         console.log(response.data);
         setCourseData(response.data);

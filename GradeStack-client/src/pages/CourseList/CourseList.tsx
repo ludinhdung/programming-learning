@@ -9,6 +9,7 @@ import courseService, { GetCoursesParams } from "../../services/course.service";
 import { instructorService, supporterService } from "../../services/api";
 import { debounce } from "lodash";
 import { formatVND } from "../../utils/formatCurrency";
+import Footer from "../../components/Footer/Footer";
 
 const CustomCheckbox = styled(Checkbox)`
   .ant-checkbox-inner {
@@ -251,7 +252,8 @@ const CourseList = () => {
     ),
     ...selectedInstructors.map(
       (instructorId) =>
-        instructors.find((instructor) => instructor.userId === instructorId)?.user.firstName
+        instructors.find((instructor) => instructor.userId === instructorId)
+          ?.user.firstName
     ),
   ]
     .filter(Boolean)
