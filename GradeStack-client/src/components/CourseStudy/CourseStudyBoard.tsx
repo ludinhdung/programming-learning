@@ -395,10 +395,34 @@ const CourseStudyBoard: React.FC = () => {
         user.id,
         courseId
       );
-      if (response.data?.data) {
-        setCompletedLessons(
-          response.data.data.map((lesson: any) => lesson.lessonId)
+
+      // Get completed lesson IDs
+      const completedLessonIds =
+        response.data?.data?.map((lesson: any) => lesson.lessonId) || [];
+      setCompletedLessons(completedLessonIds);
+
+      // Calculate total lessons
+      const totalLessons =
+        course?.modules.reduce(
+          (total, module) => total + module.lessons.length,
+          0
+        ) || 0;
+
+      // Calculate new progress based on completed lessons and total lessons
+      if (totalLessons > 0) {
+        const newProgress = Math.round(
+          (completedLessonIds.length / totalLessons) * 100
         );
+        setProgress(newProgress);
+
+        // Update progress on server
+        await learnerService.updateCourseProgress(
+          user.id,
+          courseId,
+          newProgress
+        );
+      } else {
+        setProgress(0);
       }
     } catch (error) {
       console.error("Error fetching completed lessons:", error);
@@ -413,19 +437,32 @@ const CourseStudyBoard: React.FC = () => {
       const user = JSON.parse(userData);
       await learnerService.markLessonAsComplete(user.id, courseId, lessonId);
 
-      // Refresh completed lessons
-      await fetchCompletedLessons();
+      // Tạo mảng mới với lesson vừa hoàn thành
+      const newCompletedLessons = [...completedLessons, lessonId];
+      setCompletedLessons(newCompletedLessons);
 
-      // Calculate new progress based on completed lessons
+      // Tính toán progress mới với số lesson vừa cập nhật
       const totalLessons =
         course?.modules.reduce(
           (total, module) => total + module.lessons.length,
           0
         ) || 0;
-      const newProgress = Math.round(
-        (completedLessons.length / totalLessons) * 100
-      );
-      setProgress(newProgress);
+
+      if (totalLessons > 0) {
+        const newProgress = Math.round(
+          (newCompletedLessons.length / totalLessons) * 100
+        );
+        setProgress(newProgress);
+
+        // Cập nhật progress lên server
+        await learnerService.updateCourseProgress(
+          user.id,
+          courseId,
+          newProgress
+        );
+      }
+
+      message.success("Lesson marked as complete!");
     } catch (error) {
       console.error("Error marking lesson as complete:", error);
       message.error("Failed to mark lesson as complete");
