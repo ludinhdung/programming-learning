@@ -267,6 +267,7 @@ const CourseList = () => {
       instructor: {
         name: instructorName,
         avatar:
+          course.instructor?.avatar ||
           "https://laracasts.nyc3.digitaloceanspaces.com/members/avatars/253739.jpg?v=352", // Default avatar
       },
       thumbnail:
@@ -522,7 +523,7 @@ const CourseList = () => {
                     className="group cursor-pointer"
                     onClick={() => handleCourseClick(course.id)}
                   >
-                    <div className="bg-[#14202e] rounded-none overflow-hidden transition-all duration-300 group-hover:transform group-hover:-translate-y-1">
+                    <div className="bg-[#14202e] rounded-lg shadow-md overflow-hidden transition-all duration-300 group-hover:transform group-hover:-translate-y-1">
                       {/* Thumbnail */}
                       <div className="relative aspect-video bg-gradient-to-br from-blue-600 to-blue-400">
                         <img
