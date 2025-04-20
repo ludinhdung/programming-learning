@@ -3,7 +3,6 @@ import { instructorService } from "../../../services/api";
 import { formatVND } from "../../../utils/formatCurrency";
 import { TransactionList } from "./Transaction";
 import WithdrawalModal from "./Transaction/WithdrawalModal";
-import { message } from 'antd';
 
 interface Wallet {
   balance: number;
@@ -38,7 +37,7 @@ const Monetization = () => {
       setWallet(response.data);
     } catch (error) {
       console.error("Error fetching wallet", error);
-      message.error("Failed to fetch wallet information");
+      alert("Failed to fetch wallet information");
     } finally {
       setIsLoading(false);
     }
@@ -55,13 +54,13 @@ const Monetization = () => {
       const instructorId = userData.id;
 
       await instructorService.requestWithdrawal(instructorId, amount);
-      message.success("Withdrawal request submitted successfully");
+      alert("Withdrawal request submitted successfully");
       setIsWithdrawalModalOpen(false);
       fetchWallet(); // Refresh wallet data
     } catch (error: unknown) {
       console.error("Error processing withdrawal", error);
       const apiError = error as ApiError;
-      message.error(apiError.response?.data?.message || "Failed to process withdrawal");
+      alert(apiError.response?.data?.message || "Failed to process withdrawal");
     } finally {
       setIsWithdrawing(false);
     }

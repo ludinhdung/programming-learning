@@ -18,6 +18,7 @@ import {
 } from "@ant-design/icons";
 import { Note } from "./Contents/VideoContent";
 import { formatDuration } from "../../utils/formatDuration";
+import NoteComponent from "./NoteComponet";
 const NotesContainer = styled.div`
   margin-top: 20px;
 `;
@@ -226,7 +227,7 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
   onUpdateProgress,
   progress,
   isEnrolled,
-  
+
 }) => {
   const handleMarkAsComplete = async () => {
     if (!isEnrolled || !lesson) {
@@ -294,8 +295,8 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
                   {lesson.content.video
                     ? formatDuration(lesson.content.video.duration)
                     : lesson.content.finalTest
-                    ? `${lesson.duration}m`
-                    : "N/A"}
+                      ? `${lesson.duration}m`
+                      : "N/A"}
                 </dd>
               </div>
               <div className="pl-6">
@@ -470,8 +471,7 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
               </div>
               <p className="mt-8 text-gray-300 font-semibold">
                 {course.instructor?.bio ||
-                  `Hi, ${
-                    course.instructor?.user?.firstName || "Instructor"
+                  `Hi, ${course.instructor?.user?.firstName || "Instructor"
                   }. I'm the creator of GradeStacks and spend most of my days building the site and thinking of new ways to teach confusing concepts. I live in Orlando, Florida with my wife and two kids.`}
               </p>
             </div>
@@ -824,7 +824,15 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
         <span className="text-gray-200 text-lg font-semibold">Discuss</span>
       ),
       children: renderTab2Content(),
-    },
+    }, {
+      key: "3",
+      label: (
+        <span className="text-gray-200 text-lg font-semibold">Notes</span>
+      ),
+      children: (
+        <NoteComponent />
+      )
+    }
     // {
     //   key: "3",
     //   label: <span className="text-gray-200 text-lg font-semibold">Notes</span>,
