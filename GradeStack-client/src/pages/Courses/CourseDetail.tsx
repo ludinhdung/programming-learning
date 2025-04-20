@@ -697,6 +697,11 @@ const CourseDetail: React.FC = () => {
                         key={lesson.id}
                         className={`mb-4 rounded-none bg-[#14202e] p-4 border border-transparent ${!lesson.isPreview && !isEnrolled ? "opacity-60" : ""
                           } cursor-pointer transition-all duration-500 ease-in-out hover:border-[#1b55ac]`}
+                        onClick={() => {
+                          if (lesson.isPreview || isEnrolled) {
+                            window.location.href = `/course-study/${courseId}?lesson=${lesson.id}`;
+                          }
+                        }}
                       >
                         <div className="flex items-center">
                           <div
