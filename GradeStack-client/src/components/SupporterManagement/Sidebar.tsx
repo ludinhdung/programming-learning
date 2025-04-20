@@ -54,7 +54,7 @@ const Sidebar = () => {
       <div className="px-4 pt-4">
         <div className="flex items-center space-x-3">
           <img
-            src="https://scontent.fhan5-3.fna.fbcdn.net/v/t39.30808-6/485886292_2316536695414452_3735739565780887893_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=ooA0bi5ptPUQ7kNvgGIf4ju&_nc_oc=Adkbbfr5mYFV-xvpy_HbKY8WXrBDatkgJOXgXdL3LLzNaaBRxelzBoNR08h9ZRQCSD-6rhhl2UV2axLqGUYUpr2A&_nc_zt=23&_nc_ht=scontent.fhan5-3.fna&_nc_gid=1vTgyhHIMqyFDtb2yZTVgQ&oh=00_AYGMCZoG8k6iFBHBdgdw5BhQ9YeyI2MWYiOEPrfEFRyOcw&oe=67E4892B"
+            src="https://scontent.fdad3-3.fna.fbcdn.net/v/t39.30808-6/485886292_2316536695414452_3735739565780887893_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=h0-6ydB7JSsQ7kNvwGVwN9w&_nc_oc=Adk2nHKAtc7hGaYin7BfP_GdBu8TPnaP8szplTfJG0Fky8GLw3FUnI2DYZEk6nTu4wjOZETTSmxnRPTwkidxIY5c&_nc_zt=23&_nc_ht=scontent.fdad3-3.fna&_nc_gid=3SftsaOklAACZFnXzvbYIQ&oh=00_AfEnQ7iZD-YxY1CtaTbiA_u9r43-9yzKfhhJ78tBGFgqtg&oe=680A542B"
             alt="Channel Avatar"
             className="w-16 h-16 rounded-full"
           />
