@@ -4,9 +4,7 @@ import '@vidstack/react/player/styles/default/theme.css';
 import '@vidstack/react/player/styles/default/layouts/video.css';
 import { useVideoStore } from '../../../store/videoStore';
 import { useEffect, useRef, useState } from 'react';
-import { useMediaRemote } from '@vidstack/react';
 
-// Returns a `MediaRemoteControl` class instance.
 interface VideoContentProps {
   video: string;
   lectureTitle?: string;
@@ -36,16 +34,12 @@ const VideoContent: React.FC<VideoContentProps> = ({
   const [isLayoutVisible, setIsLayoutVisible] = useState<boolean>(true);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const remote = useMediaRemote();
 
   useEffect(() => {
     const videoElement = document.querySelector('video');
     if (!videoElement) return;
 
     videoRef.current = videoElement;
-
-   remote.pause()
-  
 
     const updateTime = () => {
       const time = videoElement.currentTime;

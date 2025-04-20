@@ -18,6 +18,7 @@ interface SideBarProps {
   setIsSidebarVisible: (isSidebarVisible: boolean) => void;
   isEnrolled: boolean;
   progress: number;
+  completedLessons: string[];
 }
 
 const SideBar: React.FC<SideBarProps> = ({
@@ -27,8 +28,8 @@ const SideBar: React.FC<SideBarProps> = ({
   setIsSidebarVisible,
   isEnrolled,
   progress,
+  completedLessons,
 }) => {
-  console.log("Progress:", progress);
   const getMenuItems = (modules: Module[]): MenuProps["items"] => {
     return modules.map((module, moduleIndex) => ({
       key: `module-${moduleIndex}`,
@@ -40,14 +41,17 @@ const SideBar: React.FC<SideBarProps> = ({
       children: module.lessons.map((lesson, lessonIndex) => ({
         key: `lesson-${moduleIndex}-${lessonIndex}`,
         disabled: !isEnrolled && !lesson.isPreview,
-        icon:
-          lesson.lessonType === LessonType.VIDEO ? (
-            <PlayCircleOutlined />
-          ) : lesson.lessonType === LessonType.CODING ? (
-            <CodeOutlined />
-          ) : (
-            <FileOutlined />
-          ),
+        icon: (
+          <div className="flex items-center">
+            {lesson.lessonType === LessonType.VIDEO ? (
+              <PlayCircleOutlined />
+            ) : lesson.lessonType === LessonType.CODING ? (
+              <CodeOutlined />
+            ) : (
+              <FileOutlined />
+            )}
+          </div>
+        ),
         label: (
           <div
             className={`flex flex-col py-2 ${
@@ -59,102 +63,112 @@ const SideBar: React.FC<SideBarProps> = ({
                 : null
             }
           >
-            <div
-              className="text-sm truncate"
-              title={
-                lesson.lessonType === LessonType.VIDEO
-                  ? module.lessons[lessonIndex].title
-                  : lesson.lessonType === LessonType.CODING
-                  ? module.lessons[lessonIndex].title
-                  : module.lessons[lessonIndex].title
-              }
-            >
-              {lesson.lessonType === LessonType.VIDEO
-                ? module.lessons[lessonIndex].title
-                : lesson.lessonType === LessonType.CODING
-                ? module.lessons[lessonIndex].title
-                : module.lessons[lessonIndex].title}
-            </div>
-            <div
-              className={`text-xs font-semibold flex items-center gap-4 ${
-                !isEnrolled && !lesson.isPreview
-                  ? "text-gray-600"
-                  : "text-gray-400"
-              }`}
-            >
-              {lesson.lessonType === LessonType.VIDEO ? (
-                <>
-                  Lesson: {lessonIndex + 1}
-                  <div className="flex items-center gap-1">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="13"
-                      height="13"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="inline-block ml-1"
-                    >
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                      <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-                      <path d="M12 12h3.5" />
-                      <path d="M12 7v5" />
-                    </svg>
-                    {` ${formatDuration(lesson.duration || 0)}`}
-                  </div>
-                </>
-              ) : lesson.lessonType === LessonType.CODING ? (
-                <>
-                  <div className="flex items-center gap-1">
-                    <span>Duration:</span>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="13"
-                      height="13"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="inline-block ml-1"
-                    >
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                      <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-                      <path d="M12 12h3.5" />
-                      <path d="M12 7v5" />
-                    </svg>
-                    {`${lesson.duration}m`}
-                  </div>
-                </>
-              ) : (
-                <>
-                  Total questions:{" "}
-                  {`${module.lessons[lessonIndex].content.finalTest?.questions.length}`}
-                  <div className="flex items-center gap-1">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="13"
-                      height="13"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="inline-block ml-1"
-                    >
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                      <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-                      <path d="M12 12h3.5" />
-                      <path d="M12 7v5" />
-                    </svg>
-                    {`${module.lessons[lessonIndex].content.finalTest?.estimatedDuration}m`}
-                  </div>
-                </>
+            <div className="flex justify-between items-center w-full">
+              <div className="flex-1">
+                <div className="text-sm truncate" title={lesson.title}>
+                  {lesson.title}
+                </div>
+                <div
+                  className={`text-xs font-semibold flex items-center gap-4 ${
+                    !isEnrolled && !lesson.isPreview
+                      ? "text-gray-600"
+                      : "text-gray-400"
+                  }`}
+                >
+                  {lesson.lessonType === LessonType.VIDEO ? (
+                    <>
+                      Lesson: {lessonIndex + 1}
+                      <div className="flex items-center gap-1">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="13"
+                          height="13"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="inline-block ml-1"
+                        >
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                          <path d="M12 12h3.5" />
+                          <path d="M12 7v5" />
+                        </svg>
+                        {` ${formatDuration(lesson.duration || 0)}`}
+                      </div>
+                    </>
+                  ) : lesson.lessonType === LessonType.CODING ? (
+                    <>
+                      <div className="flex items-center gap-1">
+                        <span>Duration:</span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="13"
+                          height="13"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="inline-block ml-1"
+                        >
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                          <path d="M12 12h3.5" />
+                          <path d="M12 7v5" />
+                        </svg>
+                        {`${lesson.duration}m`}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      Total questions:{" "}
+                      {`${module.lessons[lessonIndex].content.finalTest?.questions.length}`}
+                      <div className="flex items-center gap-1">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="13"
+                          height="13"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="inline-block ml-1"
+                        >
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                          <path d="M12 12h3.5" />
+                          <path d="M12 7v5" />
+                        </svg>
+                        {`${module.lessons[lessonIndex].content.finalTest?.estimatedDuration}m`}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+              {completedLessons.includes(lesson.id) && (
+                <div className="flex items-center ml-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    className="text-green-500"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M5 12l5 5l10 -10" />
+                  </svg>
+                </div>
               )}
             </div>
           </div>
@@ -260,7 +274,7 @@ const SideBar: React.FC<SideBarProps> = ({
             >
               <div
                 className="bg-[#0033FF] transition-all duration-500"
-                style={{ width: `${progress}%`}}
+                style={{ width: `${progress}%` }}
               >
                 <div className="bg-white/25 w-[90%] h-1 mx-auto mt-px"></div>
               </div>

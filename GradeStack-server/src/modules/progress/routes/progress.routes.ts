@@ -13,7 +13,18 @@ router.put(
 // Get current progress
 router.get(
   "/learner/:learnerId/courses/:courseId/progress",
-  progressController.getProgress
+  progressController.getProgress.bind(progressController)
+);
+
+// Add new routes for completed lessons
+router.post(
+  "/learner/:learnerId/courses/:courseId/lessons/:lessonId/complete",
+  progressController.markLessonAsComplete.bind(progressController)
+);
+
+router.get(
+  "/learner/:learnerId/courses/:courseId/completed-lessons",
+  progressController.getCompletedLessons.bind(progressController)
 );
 
 export default router;

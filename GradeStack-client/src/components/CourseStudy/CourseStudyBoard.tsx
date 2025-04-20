@@ -3,9 +3,9 @@ import SideBar from "./SideBar";
 import CourseDescription from "./CourseDescription";
 import VideoContent from "./Contents/VideoContent";
 import FinalQuizContent from "./Contents/FinalQuizContent";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { learnerService } from "../../services/api";
-import { message, Spin } from "antd";
+import { Button, message, Spin } from "antd";
 import PracticeCode from "../../pages/PracticeCode/PracticeCode";
 import { userService } from "../../services/api";
 
@@ -82,6 +82,7 @@ export interface CodingExercise {
   hint?: string;
   solution: string;
   codeSnippet?: string;
+  lessonId?: string;
 }
 export enum SupportedLanguage {
   PYTHON = "PYTHON",
@@ -196,6 +197,7 @@ interface EnrollmentRecord {
 
 const CourseStudyBoard: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
+  const navigate = useNavigate();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -206,6 +208,8 @@ const CourseStudyBoard: React.FC = () => {
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(true);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [progress, setProgress] = useState<number>(0);
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]); // Lưu danh sách lessonId đã hoàn thành
+
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
@@ -293,11 +297,13 @@ const CourseStudyBoard: React.FC = () => {
                     };
                   })
                   // Sort lessons by order
-                  .sort((a, b) => (a.order || 0) - (b.order || 0)),
+                  .sort(
+                    (a: Lesson, b: Lesson) => (a.order || 0) - (b.order || 0)
+                  ),
               };
             })
             // Sort modules by order
-            .sort((a, b) => (a.order || 0) - (b.order || 0)),
+            .sort((a: Module, b: Module) => (a.order || 0) - (b.order || 0)),
           CourseTopic: Array.isArray(response.CourseTopic)
             ? response.CourseTopic.map((topic: any) => ({
               id: topic.topicId || topic.id || "",
@@ -379,6 +385,96 @@ const CourseStudyBoard: React.FC = () => {
     checkEnrollmentStatus();
   }, [courseId]);
 
+  const fetchCompletedLessons = async () => {
+    try {
+      const userData = localStorage.getItem("user");
+      if (!userData || !courseId) return;
+
+      const user = JSON.parse(userData);
+      const response = await learnerService.getCompletedLessons(
+        user.id,
+        courseId
+      );
+
+      // Get completed lesson IDs
+      const completedLessonIds =
+        response.data?.data?.map((lesson: any) => lesson.lessonId) || [];
+      setCompletedLessons(completedLessonIds);
+
+      // Calculate total lessons
+      const totalLessons =
+        course?.modules.reduce(
+          (total, module) => total + module.lessons.length,
+          0
+        ) || 0;
+
+      // Calculate new progress based on completed lessons and total lessons
+      if (totalLessons > 0) {
+        const newProgress = Math.round(
+          (completedLessonIds.length / totalLessons) * 100
+        );
+        setProgress(newProgress);
+
+        // Update progress on server
+        await learnerService.updateCourseProgress(
+          user.id,
+          courseId,
+          newProgress
+        );
+      } else {
+        setProgress(0);
+      }
+    } catch (error) {
+      console.error("Error fetching completed lessons:", error);
+    }
+  };
+
+  const handleMarkLessonComplete = async (lessonId: string) => {
+    try {
+      const userData = localStorage.getItem("user");
+      if (!userData || !courseId) return;
+
+      const user = JSON.parse(userData);
+      await learnerService.markLessonAsComplete(user.id, courseId, lessonId);
+
+      // Tạo mảng mới với lesson vừa hoàn thành
+      const newCompletedLessons = [...completedLessons, lessonId];
+      setCompletedLessons(newCompletedLessons);
+
+      // Tính toán progress mới với số lesson vừa cập nhật
+      const totalLessons =
+        course?.modules.reduce(
+          (total, module) => total + module.lessons.length,
+          0
+        ) || 0;
+
+      if (totalLessons > 0) {
+        const newProgress = Math.round(
+          (newCompletedLessons.length / totalLessons) * 100
+        );
+        setProgress(newProgress);
+
+        // Cập nhật progress lên server
+        await learnerService.updateCourseProgress(
+          user.id,
+          courseId,
+          newProgress
+        );
+      }
+
+      message.success("Lesson marked as complete!");
+    } catch (error) {
+      console.error("Error marking lesson as complete:", error);
+      message.error("Failed to mark lesson as complete");
+    }
+  };
+
+  useEffect(() => {
+    if (isEnrolled && courseId) {
+      fetchCompletedLessons();
+    }
+  }, [isEnrolled, courseId]);
+
   // Helper function to determine lesson type from API response
   const getLessonType = (lesson: any): LessonType => {
     // Handle string-based lessonType from API
@@ -451,6 +547,7 @@ const CourseStudyBoard: React.FC = () => {
     return (
       <div className="h-screen w-full flex items-center justify-center bg-[#0d0d0e] text-white text-xl">
         Course not found
+        <Button onClick={() => navigate("/courses")}>Go to courses</Button>
       </div>
     );
   }
@@ -470,6 +567,7 @@ const CourseStudyBoard: React.FC = () => {
             currentLesson={currentLesson}
             isEnrolled={isEnrolled}
             progress={progress}
+            completedLessons={completedLessons}
           />
         </div>
       )}
@@ -507,8 +605,8 @@ const CourseStudyBoard: React.FC = () => {
 
       <div
         className={`${isSidebarVisible
-          ? "ml-[20%] w-4/5 duration-500 transition-all"
-          : "w-full duration-200 transition-transform"
+            ? "ml-[20%] w-4/5 duration-500 transition-all"
+            : "w-full duration-200 transition-transform"
           } min-h-[calc(100vh-64px)] bg-[#0d0d0e]  `}
       >
         <div className="p-4">
@@ -524,6 +622,8 @@ const CourseStudyBoard: React.FC = () => {
               onUpdateProgress={handleUpdateProgress}
               progress={progress}
               isEnrolled={isEnrolled}
+              onMarkComplete={handleMarkLessonComplete}
+              completedLessons={completedLessons}
             />
           </div>
         </div>
