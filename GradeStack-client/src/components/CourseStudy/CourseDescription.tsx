@@ -204,6 +204,7 @@ interface NotesSectionProps {
 }
 
 const { Option } = Select;
+
 interface CourseDescriptionProps {
   lesson: Lesson | null;
   course: Course;
@@ -212,6 +213,10 @@ interface CourseDescriptionProps {
   onUpdateProgress: (progress: number) => Promise<void>;
   progress: number;
   isEnrolled: boolean;
+  // đánh dấu hoàn thành
+  onMarkComplete: (lessonId: string) => Promise<void>;
+  // hiển thị trạng thái hoàn thành
+  completedLessons: string[];
 }
 
 const onChange = (key: string) => {
@@ -223,10 +228,9 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
   course,
   comments,
   users,
-  onUpdateProgress,
-  progress,
   isEnrolled,
-  
+  onMarkComplete,
+  completedLessons,
 }) => {
   const handleMarkAsComplete = async () => {
     if (!isEnrolled || !lesson) {
@@ -234,35 +238,7 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
       return;
     }
 
-    const currentProgress = typeof progress === "number" ? progress : 0;
-    const totalLessons = course.modules.reduce(
-      (total, module) => total + module.lessons.length,
-      0
-    );
-
-    // Tính số bài học đã hoàn thành dựa trên progress hiện tại
-    const completedLessons = Math.floor((currentProgress * totalLessons) / 100);
-
-    // Tính progress mới (mỗi bài học = 100/totalLessons)
-    const progressPerLesson = 100 / totalLessons;
-    const newProgress = Math.min(
-      (completedLessons + 1) * progressPerLesson,
-      100
-    );
-
-    console.log({
-      totalLessons,
-      completedLessons,
-      progressPerLesson,
-      currentProgress,
-      newProgress,
-    });
-
-    if (!isNaN(newProgress) && newProgress > currentProgress) {
-      await onUpdateProgress(Math.round(newProgress));
-    } else {
-      message.info("This lesson has already been completed!");
-    }
+    await onMarkComplete(lesson.id);
   };
 
   const renderTab1Content = () => {
@@ -336,25 +312,56 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
             <div className="flex space-x-4">
               <button
                 onClick={handleMarkAsComplete}
-                disabled={!isEnrolled}
-                className="flex items-center opacity-90 bg-gray-700 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                disabled={
+                  !isEnrolled || completedLessons.includes(lesson?.id || "")
+                }
+                className={`flex items-center opacity-90 px-3 py-2 text-sm font-semibold text-white shadow-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
+                  !isEnrolled
+                    ? "bg-gray-700 cursor-not-allowed"
+                    : completedLessons.includes(lesson?.id || "")
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "bg-gray-700 hover:bg-indigo-500"
+                }`}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  className="mr-1"
-                >
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M5 12l5 5l10 -10" />
-                </svg>
-                Mark as Complete
+                {completedLessons.includes(lesson?.id || "") ? (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="mr-1"
+                    >
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                    Completed
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="mr-1"
+                    >
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                    Mark as Complete
+                  </>
+                )}
               </button>
               <button className="flex items-center opacity-90 bg-gray-700 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                 <svg

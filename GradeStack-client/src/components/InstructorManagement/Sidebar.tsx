@@ -195,7 +195,7 @@ const Sidebar = () => {
           )}
           <div className="flex flex-col">
             <div className="text-sm text-gray-400">
-              {isInstructorLead ? 'Lead Instructor' : 'Instructor'}
+              {isInstructorLead ? 'Instructor Lead' : 'Instructor'}
             </div>
             {loading ? (
               <div className="w-24 h-5 bg-slate-700 rounded animate-pulse mt-1"></div>

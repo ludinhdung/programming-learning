@@ -1,5 +1,5 @@
-import { RcFile } from 'antd/es/upload';
-import axios from 'axios';
+import { RcFile } from "antd/es/upload";
+import axios from "axios";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 
@@ -80,20 +80,22 @@ export const supporterService = {
   async warningLearner(learnerId: string, warningContent: string) {
     console.log(learnerId);
 
-    const respone = await api.patch(`/supporter/warning/learner/${learnerId}`, { warningContent });
-    return respone.data
+    const respone = await api.patch(`/supporter/warning/learner/${learnerId}`, {
+      warningContent,
+    });
+    return respone.data;
   },
 
   async deleteLearner(learnerId: string) {
     const respone = await api.delete(`/supporter/delete/learner/${learnerId}`);
     return respone.data;
-  }
-}
+  },
+};
 
 export const instructorService = {
   async getInstructorById(instructorId: string) {
-    const respone = await api.get(`/instructors/${instructorId}`)
-    return respone.data
+    const respone = await api.get(`/instructors/${instructorId}`);
+    return respone.data;
   },
 
   async uploadVideo(file: RcFile) {
@@ -143,20 +145,29 @@ export const instructorService = {
     return response.data;
   },
 
-  async createTopic(instructorId: string, topicData: {
-    name: string;
-    description: string;
-    thumbnail: string;
-  }) {
-    const response = await api.post(`/instructors/${instructorId}/topics`, topicData);
+  async createTopic(
+    instructorId: string,
+    topicData: {
+      name: string;
+      description: string;
+      thumbnail: string;
+    }
+  ) {
+    const response = await api.post(
+      `/instructors/${instructorId}/topics`,
+      topicData
+    );
     return response.data;
   },
 
-  async updateTopic(topicId: string, topicData: {
-    name?: string;
-    description?: string;
-    thumbnail?: string;
-  }) {
+  async updateTopic(
+    topicId: string,
+    topicData: {
+      name?: string;
+      description?: string;
+      thumbnail?: string;
+    }
+  ) {
     const response = await api.put(`/topics/${topicId}`, topicData);
     return response.data;
   },
@@ -384,7 +395,26 @@ export const learnerService = {
     );
     return response.data;
   },
+
+  async getCompletedLessons(learnerId: string, courseId: string) {
+    const response = await api.get(
+      `/progress/learner/${learnerId}/courses/${courseId}/completed-lessons`
+    );
+    return response;
+  },
+
+  async markLessonAsComplete(
+    learnerId: string,
+    courseId: string,
+    lessonId: string
+  ) {
+    const response = await api.post(
+      `/progress/learner/${learnerId}/courses/${courseId}/lessons/${lessonId}/complete`
+    );
+    return response;
+  },
 };
+
 export const userService = {
   async getMyEnrolledCourses(userId: string) {
     const respone = await api.get(`/users/${userId}/enrollments`);
