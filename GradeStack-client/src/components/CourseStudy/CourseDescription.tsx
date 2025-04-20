@@ -837,7 +837,7 @@ const CourseDescription: React.FC<CourseDescriptionProps> = ({
         <span className="text-gray-200 text-lg font-semibold">Notes</span>
       ),
       children: (
-        <NoteComponent />
+        <NoteComponent lessonId={lesson?.id} />
       )
     }
     // {

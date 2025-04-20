@@ -56,7 +56,7 @@ class NoteService {
    */
   async createNote(lessonId: string, data: CreateNoteData): Promise<Note> {
     try {
-      const response = await api.post(`/lessons/${lessonId}/notes`, data);
+      const response = await api.post(`notes/lessons/${lessonId}/notes`, data);
       return response.data.data;
     } catch (error) {
       console.error(`Error creating note for lesson ${lessonId}:`, error);
@@ -71,7 +71,7 @@ class NoteService {
    */
   async getNotesByLesson(lessonId: string): Promise<Note[]> {
     try {
-      const response = await api.get(`/lessons/${lessonId}/notes`);
+      const response = await api.get(`notes/lessons/${lessonId}/notes`);
       return response.data.data;
     } catch (error) {
       console.error(`Error fetching notes for lesson ${lessonId}:`, error);
@@ -86,7 +86,7 @@ class NoteService {
    */
   async getNotesByCourse(courseId: string): Promise<Note[]> {
     try {
-      const response = await api.get(`/courses/${courseId}/notes`);
+      const response = await api.get(`notes/courses/${courseId}/notes`);
       return response.data.data;
     } catch (error) {
       console.error(`Error fetching notes for course ${courseId}:`, error);
@@ -100,7 +100,7 @@ class NoteService {
    */
   async getMyNotedCoursesInfo(): Promise<NotedCourseInfo[]> {
     try {
-      const response = await api.get('/my-noted-courses');
+      const response = await api.get('notes/my-noted-courses');
       // Ensure the response structure matches NotedCourseInfo[] based on the sample
       if (response.data && Array.isArray(response.data.data)) {
         // Validate if the structure matches NotedCourseInfo if necessary
@@ -122,7 +122,7 @@ class NoteService {
    */
   async getNoteById(noteId: string): Promise<Note> {
     try {
-      const response = await api.get(`/notes/${noteId}`);
+      const response = await api.get(`notes/notes/${noteId}`);
       return response.data.data;
     } catch (error) {
       console.error(`Error fetching note ${noteId}:`, error);
@@ -138,7 +138,7 @@ class NoteService {
    */
   async updateNote(noteId: string, data: UpdateNoteData): Promise<Note> {
     try {
-      const response = await api.patch(`/notes/${noteId}`, data);
+      const response = await api.patch(`notes/notes/${noteId}`, data);
       return response.data.data;
     } catch (error) {
       console.error(`Error updating note ${noteId}:`, error);
@@ -153,7 +153,7 @@ class NoteService {
    */
   async deleteNote(noteId: string): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await api.delete(`/notes/${noteId}`);
+      const response = await api.delete(`notes/notes/${noteId}`);
       return response.data;
     } catch (error) {
       console.error(`Error deleting note ${noteId}:`, error);

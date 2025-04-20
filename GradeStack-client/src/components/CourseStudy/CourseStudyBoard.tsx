@@ -518,6 +518,7 @@ const CourseStudyBoard: React.FC = () => {
           <VideoContent
             video={currentLesson.content.video?.url || ""}
             lectureTitle={`${currentLessonIndex! + 1}. ${currentLesson.title}`}
+            lessonId={currentLesson.id}
           />
         );
       case LessonType.CODING: {
@@ -605,8 +606,8 @@ const CourseStudyBoard: React.FC = () => {
 
       <div
         className={`${isSidebarVisible
-            ? "ml-[20%] w-4/5 duration-500 transition-all"
-            : "w-full duration-200 transition-transform"
+          ? "ml-[20%] w-4/5 duration-500 transition-all"
+          : "w-full duration-200 transition-transform"
           } min-h-[calc(100vh-64px)] bg-[#0d0d0e]  `}
       >
         <div className="p-4">
