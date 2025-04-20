@@ -19,7 +19,7 @@ const CustomCheckbox = styled(Checkbox)`
   }
 `;
 
-const StyledInput = styled(Input)`
+export const StyledInput = styled(Input)`
   .ant-input::placeholder {
     color: #717780 !important;
     font-weight: 500;

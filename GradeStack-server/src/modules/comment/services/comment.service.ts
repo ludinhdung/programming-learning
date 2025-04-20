@@ -31,6 +31,20 @@ export class CommentService {
               replies: true,
             },
           },
+          replies: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                },
+              },
+            },
+            orderBy: {
+              createdAt: 'asc',
+            },
+          },
         },
         orderBy: {
           createdAt: 'desc',
