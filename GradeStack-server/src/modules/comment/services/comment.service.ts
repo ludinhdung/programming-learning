@@ -135,6 +135,9 @@ export class CommentService {
       // First check if the comment exists and belongs to the user
       const existingComment = await prisma.comment.findUnique({
         where: { id: commentId },
+        include: {
+          replies: true
+        }
       });
 
       if (!existingComment) {
@@ -145,7 +148,15 @@ export class CommentService {
         throw new Error('Unauthorized');
       }
 
-      // Delete the comment
+      if (existingComment.replies.length > 0) {
+        await prisma.comment.deleteMany({
+          where: {
+            parentCommentId: commentId
+          }
+        });
+      }
+
+      // Delete the parent comment
       await prisma.comment.delete({
         where: { id: commentId },
       });

@@ -156,9 +156,9 @@ export class CourseService {
     const averageRating =
       course.CourseFeedback.length > 0
         ? course.CourseFeedback.reduce(
-            (sum, feedback) => sum + feedback.rating,
-            0
-          ) / course.CourseFeedback.length
+          (sum, feedback) => sum + feedback.rating,
+          0
+        ) / course.CourseFeedback.length
         : 0;
 
     const { modules, CourseFeedback, ...courseWithoutModules } = course;
@@ -284,7 +284,7 @@ export class CourseService {
     return await prisma.course.update({
       where: { id: courseId },
       data: {
-        isPublished: !course.isPublished,
+        isPublished: true,
         updatedAt: new Date(),
       },
     });
