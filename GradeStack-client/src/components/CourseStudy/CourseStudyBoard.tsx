@@ -532,6 +532,7 @@ const CourseStudyBoard: React.FC = () => {
           <FinalQuizContent
             lesson={currentLesson}
             onMarkComplete={handleMarkLessonComplete}
+            courseId={courseId || ""}
           />
         );
       default:
