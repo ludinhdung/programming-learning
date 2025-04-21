@@ -6,33 +6,43 @@ import { useVideoStore } from '../../../store/videoStore';
 import { useEffect, useRef, useState } from 'react';
 import { noteService } from '../../../services/note.service';
 import useNoteStore from '../../../store/noteStore';
-import useAuthStore from '../../../store/authStore';
 
 interface VideoContentProps {
   video: string;
   lectureTitle?: string;
   lessonId: string;
+  onMarkComplete?: (lessonId: string) => void;
+  isCompleted?: boolean;
 }
 
 const VideoContent: React.FC<VideoContentProps> = ({
   video,
   lectureTitle,
   lessonId,
+  onMarkComplete,
+  isCompleted = false,
 }) => {
   const setCurrentTime = useVideoStore((state) => state.setCurrentTime);
   const { notes, setNotes } = useNoteStore();
-  const { isAuthenticated } = useAuthStore();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [duration, setDuration] = useState<number>(100);
   const [currentTime, setCurrentTimeState] = useState<number>(0);
   const [hoveredMarker, setHoveredMarker] = useState<number | null>(null);
   const [isLayoutVisible, setIsLayoutVisible] = useState<boolean>(true);
   const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [hasMarkedComplete, setHasMarkedComplete] = useState<boolean>(false);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    if (isCompleted) {
+      setHasMarkedComplete(true);
+    }
+  }, [isCompleted]);
+
+  useEffect(() => {
     const fetchNotes = async () => {
-      if (!isAuthenticated) return;
+      const userData = localStorage.getItem('user');
+      if (!userData) return;
 
       try {
         const notesData = await noteService.getNotesByLesson(lessonId);
@@ -43,7 +53,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
     };
 
     fetchNotes();
-  }, [lessonId, setNotes, isAuthenticated]);
+  }, [lessonId, setNotes]);
 
   useEffect(() => {
     const videoElement = document.querySelector('video');
@@ -55,10 +65,18 @@ const VideoContent: React.FC<VideoContentProps> = ({
       const time = videoElement.currentTime;
       setCurrentTime(time);
       setCurrentTimeState(time);
+
+      if (!hasMarkedComplete && time > 0 && duration > 0) {
+        const progress = (time / duration) * 100;
+        if (progress >= 80) {
+          handleAutoComplete();
+        }
+      }
     };
 
     const updateDuration = () => {
-      setDuration(videoElement.duration || 100);
+      const newDuration = videoElement.duration || 100;
+      setDuration(newDuration);
     };
 
     const handleMouseMove = () => {
@@ -113,7 +131,21 @@ const VideoContent: React.FC<VideoContentProps> = ({
         clearTimeout(hideTimeoutRef.current);
       }
     };
-  }, [setCurrentTime]);
+  }, [setCurrentTime, duration, hasMarkedComplete]);
+
+  const handleAutoComplete = async () => {
+    const userData = localStorage.getItem('user');
+    if (!userData || hasMarkedComplete || isCompleted) return;
+
+    try {
+      setHasMarkedComplete(true);
+      if (onMarkComplete) {
+        onMarkComplete(lessonId);
+      }
+    } catch {
+      setHasMarkedComplete(false);
+    }
+  };
 
   const handleMarkerClick = (time: number) => {
     if (videoRef.current) {
