@@ -424,6 +424,23 @@ export const learnerService = {
     );
     return response;
   },
+  
+  async checkFinalTestSubmission(learnerId: string, lessonId: string) {
+  const response = await api.get(
+    `/final-test/learner/${learnerId}/lesson/${lessonId}/check-submission`
+  );
+  return response.data;
+  },
+  
+  async submitFinalTest(learnerId: string, finalTestId: string, score: number) {
+    const response = await api.post(
+      `/final-test/${finalTestId}/learner/${learnerId}/submit`,
+      {
+        score,
+      }
+    );
+    return response.data;
+  },
 };
 
 export const userService = {
