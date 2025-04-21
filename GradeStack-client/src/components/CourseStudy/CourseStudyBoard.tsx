@@ -461,8 +461,6 @@ const CourseStudyBoard: React.FC = () => {
           newProgress
         );
       }
-
-      message.success("Lesson marked as complete!");
     } catch (error) {
       console.error("Error marking lesson as complete:", error);
       message.error("Failed to mark lesson as complete");
@@ -530,7 +528,12 @@ const CourseStudyBoard: React.FC = () => {
         return <PracticeCode lessonId={codingLessonId} />;
       }
       case LessonType.FINAL_TEST:
-        return <FinalQuizContent lesson={currentLesson} />;
+        return (
+          <FinalQuizContent
+            lesson={currentLesson}
+            onMarkComplete={handleMarkLessonComplete}
+          />
+        );
       default:
         return null;
     }

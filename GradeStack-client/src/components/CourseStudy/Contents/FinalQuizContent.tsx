@@ -11,6 +11,12 @@ interface FinalQuizContentProps {
   onMarkComplete: (lessonId: string) => Promise<void>;
 }
 
+interface SubmissionStatus {
+  submitted: boolean;
+  score: number;
+  submittedAt: string;
+}
+
 const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
   lesson,
   onMarkComplete,
@@ -20,15 +26,40 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
     [key: number]: number;
   }>({});
   const [isStart, setIsStart] = useState(false);
-
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const passingScore = lesson.content.finalTest?.passingScore || 70;
+  const [submissionStatus, setSubmissionStatus] =
+    useState<SubmissionStatus | null>(null);
 
+  const passingScore = lesson.content.finalTest?.passingScore || 70;
   const initialTime = (lesson.content.finalTest?.estimatedDuration || 30) * 60;
   const [timeLeft, setTimeLeft] = useState(initialTime);
-
   const questions = lesson.content.finalTest?.questions || [];
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+
+  // Check submission status when component mounts
+  useEffect(() => {
+    const checkSubmissionStatus = async () => {
+      try {
+        const userData = localStorage.getItem("user");
+        if (!userData) return;
+
+        const user = JSON.parse(userData);
+        const response = await learnerService.checkFinalTestSubmission(
+          user.id,
+          lesson.id
+        );
+        console.log(response.data);
+
+        if (response.data) {
+          setSubmissionStatus(response.data);
+        }
+      } catch (error) {
+        console.error("Error checking submission status:", error);
+      }
+    };
+
+    checkSubmissionStatus();
+  }, [lesson.id]);
 
   //fade
   useEffect(() => {
@@ -51,6 +82,12 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
 
   //start quiz
   const handleStartQuiz = () => {
+    if (submissionStatus?.submitted) {
+      message.warning(
+        "You have already completed this test. You cannot retake it."
+      );
+      return;
+    }
     setIsStart(true);
     setTimeout(() => {
       AOS.refresh();
@@ -81,7 +118,6 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
         const user = JSON.parse(userData);
         await learnerService.submitFinalTest(user.id, lesson.id, score);
         message.success("Your Final Test has been submit");
-
         await onMarkComplete(lesson.id);
       } catch (error) {
         console.error("Failed to submit final test:", error);
@@ -138,6 +174,46 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
       colors: ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"],
     });
   };
+
+  if (submissionStatus?.submitted) {
+    return (
+      <div className="max-w-5xl mx-auto p-6">
+        <div
+          data-aos="fade-left"
+          data-aos-duration="800"
+          className="bg-[#17212c] rounded-xl p-8 shadow-lg border border-[#171c29] text-center"
+        >
+          <h1 className="text-3xl font-bold text-gray-200 mb-4">
+            {lesson.title}
+          </h1>
+          <div className="space-y-6">
+            <div className="p-6 rounded-lg border border-none max-w-lg mx-auto">
+              <div className="space-y-4">
+                <div>
+                  <p className="text-gray-400 text-lg mb-2">Your Score</p>
+                  <p className="text-4xl font-bold text-green-400">
+                    {submissionStatus.score}%
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-400 mb-2">Submitted On</p>
+                  <p className="text-lg text-gray-200">
+                    {new Date(submissionStatus.submittedAt).toLocaleString()}
+                  </p>
+                </div>
+                <div className="mt-6 p-4 bg-green-500/10 border border-green-500 rounded-lg">
+                  <p className="text-green-400">
+                    You have successfully completed this test. Your progress has
+                    been saved.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto p-6">
