@@ -63,7 +63,7 @@ interface EditModuleDrawerProps {
   open: boolean;
   onClose: () => void;
   module: Module;
-  onSave: (updatedModule: Module) => void;
+  onSave: (updatedModule: Module) => Promise<void>;
   onDelete?: (moduleId: string) => void;
 }
 
@@ -313,7 +313,7 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
       };
 
       setEditingModule(updatedModuleWithDuration);
-      onSave(updatedModuleWithDuration);
+      await onSave(updatedModuleWithDuration);
 
       message.success("Lesson created successfully");
 
@@ -457,7 +457,10 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
               Preview Video
             </label>
             <div className="flex justify-center">
-              <iframe src={lesson.content?.video?.url} allowFullScreen></iframe>
+              <iframe
+                src={lesson.content?.video?.url}
+                allowFullScreen
+              ></iframe>
             </div>
           </div>
         )}
