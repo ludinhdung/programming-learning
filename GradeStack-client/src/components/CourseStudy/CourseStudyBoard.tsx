@@ -3,7 +3,7 @@ import SideBar from "./SideBar";
 import CourseDescription from "./CourseDescription";
 import VideoContent from "./Contents/VideoContent";
 import FinalQuizContent from "./Contents/FinalQuizContent";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { learnerService } from "../../services/api";
 import { Button, message, Spin } from "antd";
 import PracticeCode from "../../pages/PracticeCode/PracticeCode";
@@ -198,30 +198,17 @@ interface EnrollmentRecord {
 const CourseStudyBoard: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
-  const [currentLessonIndex, setCurrentLessonIndex] = useState<number | null>(null);
+  const [currentLessonIndex, setCurrentLessonIndex] = useState<number | null>(
+    null
+  );
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(true);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [progress, setProgress] = useState<number>(0);
-  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
-
-  // Function to find lesson by ID
-  const findLessonById = (courseData: Course, lessonId: string): { lesson: Lesson | null, index: number | null } => {
-    let foundIndex = null;
-    const foundLesson = courseData.modules.reduce<Lesson | null>((found, module) => {
-      const index = module.lessons.findIndex(lesson => lesson.id === lessonId);
-      if (index !== -1) {
-        foundIndex = index;
-        return module.lessons[index];
-      }
-      return found;
-    }, null);
-    return { lesson: foundLesson, index: foundIndex };
-  };
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]); // Lưu danh sách lessonId đã hoàn thành
 
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -232,6 +219,8 @@ const CourseStudyBoard: React.FC = () => {
         }
 
         const response = await learnerService.getCoursebyCourseId(courseId);
+
+        // Transform API data to match Course interface
         const courseData: Course = {
           id: response.id,
           title: response.title,
@@ -324,28 +313,6 @@ const CourseStudyBoard: React.FC = () => {
             : [],
         };
         setCourse(courseData);
-
-        // Check for lesson in URL params
-        const lessonId = searchParams.get('lesson');
-        if (lessonId) {
-          const { lesson, index } = findLessonById(courseData, lessonId);
-          if (lesson) {
-            setCurrentLesson(lesson);
-            setCurrentLessonIndex(index);
-          } else {
-            // If lesson not found, fallback to first lesson
-            if (courseData.modules.length > 0 && courseData.modules[0].lessons.length > 0) {
-              setCurrentLesson(courseData.modules[0].lessons[0]);
-              setCurrentLessonIndex(0);
-            }
-          }
-        } else {
-          // If no lesson in URL, use first lesson
-          if (courseData.modules.length > 0 && courseData.modules[0].lessons.length > 0) {
-            setCurrentLesson(courseData.modules[0].lessons[0]);
-            setCurrentLessonIndex(0);
-          }
-        }
       } catch (err) {
         console.error("Error fetching course:", err);
         setError("Failed to load course. Please try again later.");
@@ -355,7 +322,7 @@ const CourseStudyBoard: React.FC = () => {
     };
 
     fetchCourseData();
-  }, [courseId, searchParams]);
+  }, [courseId]);
 
   const handleUpdateProgress = async (newProgress: number) => {
     try {
@@ -419,28 +386,43 @@ const CourseStudyBoard: React.FC = () => {
   }, [courseId]);
 
   const fetchCompletedLessons = async () => {
-    console.log('Starting fetchCompletedLessons');
     try {
       const userData = localStorage.getItem("user");
-      if (!userData || !courseId) {
-        console.log('Missing required data for fetchCompletedLessons:', { userData, courseId });
-        return;
-      }
+      if (!userData || !courseId) return;
 
       const user = JSON.parse(userData);
-      console.log('Fetching completed lessons for:', { userId: user.id, courseId });
-
       const response = await learnerService.getCompletedLessons(
         user.id,
         courseId
       );
 
-      console.log('Completed lessons response:', response);
+      // Get completed lesson IDs
+      const completedLessonIds =
+        response.data?.data?.map((lesson: any) => lesson.lessonId) || [];
+      setCompletedLessons(completedLessonIds);
 
-      if (response.data?.data) {
-        const completedLessonIds = response.data.data.map((lesson: any) => lesson.lessonId);
-        console.log('Completed lesson IDs:', completedLessonIds);
-        setCompletedLessons(completedLessonIds);
+      // Calculate total lessons
+      const totalLessons =
+        course?.modules.reduce(
+          (total, module) => total + module.lessons.length,
+          0
+        ) || 0;
+
+      // Calculate new progress based on completed lessons and total lessons
+      if (totalLessons > 0) {
+        const newProgress = Math.round(
+          (completedLessonIds.length / totalLessons) * 100
+        );
+        setProgress(newProgress);
+
+        // Update progress on server
+        await learnerService.updateCourseProgress(
+          user.id,
+          courseId,
+          newProgress
+        );
+      } else {
+        setProgress(0);
       }
     } catch (error) {
       console.error("Error fetching completed lessons:", error);
@@ -448,26 +430,15 @@ const CourseStudyBoard: React.FC = () => {
   };
 
   const handleMarkLessonComplete = async (lessonId: string) => {
-    console.log('handleMarkLessonComplete called with lessonId:', lessonId);
     try {
       const userData = localStorage.getItem("user");
-      if (!userData || !courseId) {
-        console.log('Missing required data:', { userData, courseId });
-        return;
-      }
+      if (!userData || !courseId) return;
 
       const user = JSON.parse(userData);
-      console.log('Marking lesson as complete:', {
-        userId: user.id,
-        courseId,
-        lessonId
-      });
-
       await learnerService.markLessonAsComplete(user.id, courseId, lessonId);
 
       // Tạo mảng mới với lesson vừa hoàn thành
       const newCompletedLessons = [...completedLessons, lessonId];
-      console.log('Updated completed lessons:', newCompletedLessons);
       setCompletedLessons(newCompletedLessons);
 
       // Tính toán progress mới với số lesson vừa cập nhật
@@ -481,11 +452,6 @@ const CourseStudyBoard: React.FC = () => {
         const newProgress = Math.round(
           (newCompletedLessons.length / totalLessons) * 100
         );
-        console.log('New progress calculated:', {
-          completedLessons: newCompletedLessons.length,
-          totalLessons,
-          newProgress
-        });
         setProgress(newProgress);
 
         // Cập nhật progress lên server
@@ -494,7 +460,6 @@ const CourseStudyBoard: React.FC = () => {
           courseId,
           newProgress
         );
-        console.log('Progress updated on server');
       }
 
       message.success("Lesson marked as complete!");
@@ -506,7 +471,6 @@ const CourseStudyBoard: React.FC = () => {
 
   useEffect(() => {
     if (isEnrolled && courseId) {
-      console.log('Fetching completed lessons:', { isEnrolled, courseId });
       fetchCompletedLessons();
     }
   }, [isEnrolled, courseId]);
@@ -524,14 +488,6 @@ const CourseStudyBoard: React.FC = () => {
     if (lesson.finalTest) return LessonType.FINAL_TEST;
 
     return LessonType.VIDEO;
-  };
-
-  // Update URL when lesson changes
-  const handleLessonChange = (lesson: Lesson, index: number) => {
-    setCurrentLesson(lesson);
-    setCurrentLessonIndex(index);
-    // Update URL with new lessonId
-    navigate(`?lessonId=${lesson.id}`, { replace: true });
   };
 
   const renderLessonContent = () => {
@@ -552,7 +508,7 @@ const CourseStudyBoard: React.FC = () => {
     if (!currentLesson) {
       return (
         <div className="h-screen w-full flex items-center justify-center text-gray-300 text-2xl">
-          No lessons available in this course
+          Choose your lesson to play!
         </div>
       );
     }
@@ -563,8 +519,6 @@ const CourseStudyBoard: React.FC = () => {
             video={currentLesson.content.video?.url || ""}
             lectureTitle={`${currentLessonIndex! + 1}. ${currentLesson.title}`}
             lessonId={currentLesson.id}
-            onMarkComplete={handleMarkLessonComplete}
-            isCompleted={completedLessons.includes(currentLesson.id)}
           />
         );
       case LessonType.CODING: {
@@ -605,7 +559,10 @@ const CourseStudyBoard: React.FC = () => {
         <div className="fixed left-0 top-0 w-1/5 h-[100vh] bg-[#111111] overflow-y-auto z-50">
           <SideBar
             course={course}
-            setCurrentLesson={handleLessonChange}
+            setCurrentLesson={(lesson, index) => {
+              setCurrentLesson(lesson);
+              setCurrentLessonIndex(index);
+            }}
             isSidebarVisible={isSidebarVisible}
             setIsSidebarVisible={setIsSidebarVisible}
             currentLesson={currentLesson}

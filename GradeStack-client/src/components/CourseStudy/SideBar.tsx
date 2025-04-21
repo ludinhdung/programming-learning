@@ -31,7 +31,7 @@ const SideBar: React.FC<SideBarProps> = ({
   progress,
   completedLessons,
 }) => {
-  
+
   // Add helper function to check if a lesson is accessible
   const isLessonAccessible = (
     moduleIndex: number,
@@ -92,12 +92,11 @@ const SideBar: React.FC<SideBarProps> = ({
           ),
           label: (
             <div
-              className={`flex flex-col py-2 ${
-                (!isEnrolled && !lesson.isPreview) ||
+              className={`flex flex-col py-2 ${(!isEnrolled && !lesson.isPreview) ||
                 (isEnrolled && !isAccessible)
-                  ? "cursor-not-allowed opacity-50"
-                  : ""
-              }`}
+                ? "cursor-not-allowed opacity-50"
+                : ""
+                }`}
               onClick={() =>
                 (isEnrolled && isAccessible) || lesson.isPreview
                   ? setCurrentLesson(lesson, lessonIndex)
@@ -110,12 +109,11 @@ const SideBar: React.FC<SideBarProps> = ({
                     {lesson.title}
                   </div>
                   <div
-                    className={`text-xs font-semibold flex items-center gap-4 ${
-                      (!isEnrolled && !lesson.isPreview) ||
+                    className={`text-xs font-semibold flex items-center gap-4 ${(!isEnrolled && !lesson.isPreview) ||
                       (isEnrolled && !isAccessible)
-                        ? "text-gray-600"
-                        : "text-gray-400"
-                    }`}
+                      ? "text-gray-600"
+                      : "text-gray-400"
+                      }`}
                   >
                     {lesson.lessonType === LessonType.VIDEO ? (
                       <>
