@@ -8,6 +8,7 @@ import userService from "../../services/user.service";
 import { formatVND } from "../../utils/formatCurrency";
 import SigninForm from "../../components/SigninForm/SigninForm";
 import { learnerService } from "../../services/api";
+import CourseFeedback from "../../components/CourseFeedback/CourseFeedback";
 import Footer from "../../components/Footer/Footer";
 
 // Styled components
@@ -114,6 +115,7 @@ interface EnrollmentRecord {
     id: string;
   };
 }
+
 
 const CourseDetail: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -777,6 +779,7 @@ const CourseDetail: React.FC = () => {
             </div>
           </div>
         </div>
+          <CourseFeedback />
       </main>
 
       <Modal
