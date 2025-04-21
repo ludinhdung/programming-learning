@@ -18,7 +18,7 @@ router.get('/:id/wallet', instructorController.getInstructorWallet);
 router.put('/:id/profile', instructorController.updateProfile);
 router.put('/:id/avatar', instructorController.updateAvatar);
 router.post('/upload-video', uploadVideo, instructorController.uploadVideo);
-router.get('/:instructorId/transactions', authenticate, instructorController.getTransactions);
+router.get('/:instructorId/transactions', instructorController.getTransactions);
 
 
 
@@ -27,5 +27,6 @@ router.post('/:id/bank-info', instructorController.createBankInfoByInstructor);
 router.get('/:id/bank-info', instructorController.getBankInfoByInstructor);
 router.put('/:id/bank-info', instructorController.updateBankInfoByInstructor);
 router.delete('/:id/bank-info', instructorController.deleteBankInfoByInstructor);
+router.post('/hook/vietqr', instructorController.handleVietQRHook);
 
 export default router;

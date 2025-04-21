@@ -62,11 +62,13 @@ const Transactions = () => {
     const calculateTotals = () => {
         const totals = transactions.reduce((acc, transaction) => {
             if (transaction.status === 'APPROVED') {
+                const amount = Number(transaction.amount);
                 if (transaction.type === 'REVENUE') {
-                    acc.actualRevenue += Math.round(transaction.amount / (1 - COMMISSION_RATE));
-                    acc.commission += Math.round((transaction.amount / (1 - COMMISSION_RATE)) * COMMISSION_RATE);
+                    const actualAmount = amount / (1 - COMMISSION_RATE);
+                    acc.actualRevenue += Math.round(actualAmount);
+                    acc.commission += Math.round(actualAmount * COMMISSION_RATE);
                 } else {
-                    acc.withdrawal += transaction.amount;
+                    acc.withdrawal += amount;
                 }
             }
             return acc;
@@ -301,7 +303,7 @@ const Transactions = () => {
                                                         </button>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-gray-500 text-sm">
+                                                    <span className="text-gray-500 text-sm text-center block">
                                                         {transaction.status === 'APPROVED' ? 'Completed' : 'No QR Available'}
                                                     </span>
                                                 )}

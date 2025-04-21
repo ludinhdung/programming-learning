@@ -701,4 +701,33 @@ export class InstructorController {
             next(error);
         }
     };
+
+    handleVietQRHook = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { data } = req.body;
+            console.log('VietQR Hook Data:', data);
+
+            const rawTransactionId = data[0].description;
+
+            const convertToUUID = (hexString: string): string => {
+                const cleanHex = hexString.replace(/[^a-fA-F0-9]/g, '').slice(0, 32);
+                const padded = cleanHex.padEnd(32, '0');
+                return `${padded.slice(0, 8)}-${padded.slice(8, 12)}-${padded.slice(12, 16)}-${padded.slice(16, 20)}-${padded.slice(20, 32)}`;
+            };
+
+            const transactionId = convertToUUID(rawTransactionId);
+
+            const transaction = await this.instructorService.updateTransactionStatus(transactionId);
+
+            res.status(200).json({
+                success: true,
+                data: {
+                    transaction
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
 }

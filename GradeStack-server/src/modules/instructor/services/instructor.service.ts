@@ -9,6 +9,7 @@ import {
   Workshop,
   Role,
   Topic,
+  TransactionStatus,
 } from "@prisma/client";
 import { PrismaClient } from "@prisma/client";
 import { PrismaErrorHandler } from "../../../shared/errors/prisma-error-handler";
@@ -1432,20 +1433,29 @@ export class InstructorService extends InstructorBaseService<
       throw new AppError('Insufficient balance for withdrawal', 400);
     }
 
-    const description = randomUUID();
-
-    const qrUrl = generateVietQRUrl(bank, accountNumber, accountHolder, description, amount)
-
+    // Create transaction first
     const transaction = await prisma.transaction.create({
       data: {
         walletId: wallet.id,
         amount: amount,
         type: 'WITHDRAWAL',
-        qrCodeUrl: qrUrl,
         status: 'PENDING'
       }
     });
 
+    // Generate QR code with transaction ID
+    const description = transaction.id;
+    const qrUrl = generateVietQRUrl(bank, accountNumber, accountHolder, description, amount);
+
+    // Update transaction with QR code URL
+    const updatedTransaction = await prisma.transaction.update({
+      where: { id: transaction.id },
+      data: {
+        qrCodeUrl: qrUrl
+      }
+    });
+
+    // Update wallet balance
     await prisma.wallet.update({
       where: { id: wallet.id },
       data: {
@@ -1455,7 +1465,7 @@ export class InstructorService extends InstructorBaseService<
       }
     });
 
-    return transaction;
+    return updatedTransaction;
   }
 
 
@@ -1593,5 +1603,30 @@ export class InstructorService extends InstructorBaseService<
     } catch (error) {
       throw PrismaErrorHandler.handle(error, "BankInfo");
     }
+  }
+
+
+  async updateTransactionStatus(transactionId: string) {
+    console.log('Updating transaction status for ID:', transactionId);
+
+    const transaction = await prisma.transaction.findFirst({
+      where: { id: transactionId }
+    });
+
+    if (!transaction) {
+      console.error('Transaction not found:', transactionId);
+      throw ApiError.notFound(`Không tìm thấy giao dịch với ID ${transactionId}`);
+    }
+
+    console.log('Found transaction:', transaction);
+
+    const updatedTransaction = await prisma.transaction.update({
+      where: { id: transactionId },
+      data: { status: TransactionStatus.APPROVED }
+    });
+
+    console.log('Updated transaction:', updatedTransaction);
+
+    return updatedTransaction;
   }
 }
