@@ -23,6 +23,7 @@ import { commentRoutes } from './modules/comment';
 import coursesRouter from './modules/courses/routes/course.routes';
 import progressRoutes from './modules/progress/routes/progress.routes';
 import adminRoutes from './modules/admin/admin.route'
+import finalTestRoutes from "./modules/final_test/routes/final_test.route"
 const app = express();
 
 app.use(cors());
@@ -55,6 +56,8 @@ app.use('/api/checkout', checkoutRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/progress', progressRoutes);
+app.use("/api/final-test", finalTestRoutes);
+
 app.use(errorHandler);
 
 export default app;

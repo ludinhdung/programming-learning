@@ -232,14 +232,14 @@ const CourseStudyBoard: React.FC = () => {
           instructorId: response.instructorId || response.instructor?.userId,
           instructor: response.instructor
             ? {
-              id: response.instructor.id,
-              userId: response.instructor.userId,
-              user: response.instructor.user,
-              organization: response.instructor.organization,
-              avatar: response.instructor.avatar,
-              bio: response.instructor.bio,
-              socials: response.instructor.socials,
-            }
+                id: response.instructor.id,
+                userId: response.instructor.userId,
+                user: response.instructor.user,
+                organization: response.instructor.organization,
+                avatar: response.instructor.avatar,
+                bio: response.instructor.bio,
+                socials: response.instructor.socials,
+              }
             : undefined,
           createdAt: new Date(response.createdAt),
           updatedAt: new Date(response.updatedAt),
@@ -306,10 +306,10 @@ const CourseStudyBoard: React.FC = () => {
             .sort((a: Module, b: Module) => (a.order || 0) - (b.order || 0)),
           CourseTopic: Array.isArray(response.CourseTopic)
             ? response.CourseTopic.map((topic: any) => ({
-              id: topic.topicId || topic.id || "",
-              name: topic.topic?.name || "",
-              thumbnail: topic.topic?.thumbnail || "",
-            }))
+                id: topic.topicId || topic.id || "",
+                name: topic.topic?.name || "",
+                thumbnail: topic.topic?.thumbnail || "",
+              }))
             : [],
         };
         setCourse(courseData);
@@ -605,10 +605,11 @@ const CourseStudyBoard: React.FC = () => {
       )}
 
       <div
-        className={`${isSidebarVisible
-          ? "ml-[20%] w-4/5 duration-500 transition-all"
-          : "w-full duration-200 transition-transform"
-          } min-h-[calc(100vh-64px)] bg-[#0d0d0e]  `}
+        className={`${
+          isSidebarVisible
+            ? "ml-[20%] w-4/5 duration-500 transition-all"
+            : "w-full duration-200 transition-transform"
+        } min-h-[calc(100vh-64px)] bg-[#0d0d0e]  `}
       >
         <div className="p-4">
           <div className="bg-[#0e1721] rounded-lg mb-4">
