@@ -8,10 +8,39 @@ type FilterType = 'REVENUE' | 'WITHDRAWAL';
 
 const COMMISSION_RATE = 0.15;
 
+const QRModal = ({ isOpen, onClose, qrUrl }: { isOpen: boolean; onClose: () => void; qrUrl: string }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-zinc-800 rounded-xl w-full max-w-2xl p-8 shadow-xl">
+                <div className="flex items-center justify-between mb-8">
+                    <h2 className="text-2xl font-semibold text-white">QR Code</h2>
+                    <button
+                        onClick={onClose}
+                        className="text-gray-400 hover:text-white transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div className="flex justify-center">
+                    <img src={qrUrl} alt="QR Code" className="w-96 h-100" />
+                </div>
+                <div className="mt-6 text-center text-gray-400 text-base">
+                    Scan this QR code to complete the payment
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const Transactions = () => {
     const [activeTab, setActiveTab] = useState<FilterType>('REVENUE');
     const [transactions, setTransactions] = useState<AdminTransaction[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedQR, setSelectedQR] = useState<string | null>(null);
 
     useEffect(() => {
         fetchTransactions();
@@ -29,15 +58,6 @@ const Transactions = () => {
         }
     };
 
-    const handleUpdateStatus = async (id: string, newStatus: 'APPROVED' | 'REJECTED') => {
-        try {
-            await adminService.updateTransactionStatus(id, newStatus);
-            message.success('Transaction status updated successfully');
-            fetchTransactions();
-        } catch {
-            message.error('Failed to update transaction status');
-        }
-    };
 
     const calculateTotals = () => {
         const totals = transactions.reduce((acc, transaction) => {
@@ -271,21 +291,19 @@ const Transactions = () => {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                {transaction.status === 'PENDING' && (
-                                                    <div className="flex justify-center gap-2">
+                                                {transaction.qrUrl && transaction.status !== 'APPROVED' ? (
+                                                    <div className="flex justify-center">
                                                         <button
-                                                            onClick={() => handleUpdateStatus(transaction.id, 'APPROVED')}
-                                                            className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                                                            onClick={() => setSelectedQR(transaction.qrUrl)}
+                                                            className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
                                                         >
-                                                            Approve
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleUpdateStatus(transaction.id, 'REJECTED')}
-                                                            className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                                                        >
-                                                            Reject
+                                                            Show QR
                                                         </button>
                                                     </div>
+                                                ) : (
+                                                    <span className="text-gray-500 text-sm">
+                                                        {transaction.status === 'APPROVED' ? 'Completed' : 'No QR Available'}
+                                                    </span>
                                                 )}
                                             </td>
                                         </tr>
@@ -296,6 +314,12 @@ const Transactions = () => {
                     </>
                 )}
             </div>
+
+            <QRModal
+                isOpen={!!selectedQR}
+                onClose={() => setSelectedQR(null)}
+                qrUrl={selectedQR || ''}
+            />
         </div>
     );
 };

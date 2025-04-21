@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
 import { formatVND } from '../../../../utils/formatCurrency';
 
+interface BankInfo {
+    bankName: string;
+    accountNumber: string;
+    accountName: string;
+}
+
 interface WithdrawalModalProps {
     isOpen: boolean;
     onClose: () => void;
     balance: number;
-    onSuccess: (amount: number) => void;
+    onSuccess: (amount: number, accountNumber: string, accountHolder: string, bank: string) => void;
     isLoading: boolean;
+    bankInfo: BankInfo | null;
 }
 
 const WithdrawalModal = ({
@@ -15,6 +22,7 @@ const WithdrawalModal = ({
     balance,
     onSuccess,
     isLoading,
+    bankInfo
 }: WithdrawalModalProps) => {
     const [amount, setAmount] = useState("");
     const [error, setError] = useState<string>('');
@@ -43,8 +51,13 @@ const WithdrawalModal = ({
             return;
         }
 
+        if (!bankInfo) {
+            setError("Bank information is missing");
+            return;
+        }
+
         setError('');
-        onSuccess(numericAmount);
+        onSuccess(numericAmount, bankInfo.accountNumber, bankInfo.accountName, bankInfo.bankName);
         setAmount('');
     };
 
@@ -69,6 +82,28 @@ const WithdrawalModal = ({
                     <div className="text-gray-400 mb-2">Available Balance</div>
                     <div className="text-2xl font-bold text-white">{formatVND(balance)}</div>
                 </div>
+
+                {/* Bank Information */}
+                {bankInfo ? (
+                    <div className="mb-6 p-4 bg-zinc-700/50 rounded-lg">
+                        <div className="text-gray-400 mb-2">Bank Information</div>
+                        <div className="space-y-1">
+                            <div className="text-white">
+                                <span className="text-gray-400">Bank:</span> {bankInfo.bankName}
+                            </div>
+                            <div className="text-white">
+                                <span className="text-gray-400">Account Number:</span> {bankInfo.accountNumber}
+                            </div>
+                            <div className="text-white">
+                                <span className="text-gray-400">Account Holder:</span> {bankInfo.accountName}
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="mb-6 p-4 bg-zinc-700/50 rounded-lg text-red-500">
+                        Please add your bank information before requesting a withdrawal
+                    </div>
+                )}
 
                 {/* Withdrawal Form */}
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -96,15 +131,8 @@ const WithdrawalModal = ({
                         )}
                     </div>
 
-                    {/* Notes */}
-                    <div className="text-gray-400 text-sm bg-zinc-700/30 p-4 rounded-lg">
-                        <p className="font-medium mb-2">Note:</p>
-                        <ul className="list-disc ml-4 space-y-1">
-                            <li>Minimum withdrawal amount: 100,000 VND</li>
-                            <li>Processing time: 1-3 business days</li>
-                            <li>Withdrawal requests cannot be cancelled once submitted</li>
-                        </ul>
-                    </div>
+
+
 
                     {/* Action Buttons */}
                     <div className="flex gap-4">
@@ -117,7 +145,7 @@ const WithdrawalModal = ({
                         </button>
                         <button
                             type="submit"
-                            disabled={isLoading || !!error || parseFloat(amount) <= 0 || parseFloat(amount) > balance}
+                            disabled={isLoading || !!error || parseFloat(amount) <= 0 || parseFloat(amount) > balance || !bankInfo}
                             className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-600/50 disabled:cursor-not-allowed transition-colors"
                         >
                             {isLoading ? 'Processing...' : 'Submit Request'}

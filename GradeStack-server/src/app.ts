@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { response } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
 import authRouter from './modules/auth/routes/auth.routes';
@@ -24,6 +24,7 @@ import coursesRouter from './modules/courses/routes/course.routes';
 import progressRoutes from './modules/progress/routes/progress.routes';
 import adminRoutes from './modules/admin/admin.route'
 import finalTestRoutes from "./modules/final_test/routes/final_test.route"
+import { generateVietQRUrl } from './shared/utils/generateVietQRUrl';
 const app = express();
 
 app.use(cors());
@@ -57,6 +58,7 @@ app.use('/api/notes', noteRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/progress', progressRoutes);
 app.use("/api/final-test", finalTestRoutes);
+
 
 app.use(errorHandler);
 

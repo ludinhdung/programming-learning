@@ -616,7 +616,7 @@ export class InstructorController {
     public requestWithdrawal = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const { id } = req.params;
-            const { amount } = req.body;
+            const { amount, accountNumber, accountHolder, bank } = req.body;
 
             // Validate required fields
             if (!amount || typeof amount !== 'number') {
@@ -624,10 +624,78 @@ export class InstructorController {
                 return;
             }
 
-            const transaction = await this.instructorService.requestWithdrawal(id, amount);
+            const transaction = await this.instructorService.requestWithdrawal(id, amount, accountNumber, accountHolder, bank);
             res.status(200).json({
                 success: true,
                 data: transaction
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    createBankInfoByInstructor = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { id } = req.params;
+            const { bankName, accountNumber, accountName } = req.body;
+
+
+            if (!bankName || !accountNumber || !accountName) {
+                res.status(400).json({ message: 'Missing required bank information fields' });
+                return;
+            }
+
+            const bankInfo = await this.instructorService.createBankInfo(id, bankName, accountNumber, accountName);
+            res.status(201).json({
+                success: true,
+                data: bankInfo
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    getBankInfoByInstructor = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { id } = req.params;
+            const bankInfo = await this.instructorService.getBankInfoByInstructor(id);
+            res.status(200).json({
+                success: true,
+                data: bankInfo
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    updateBankInfoByInstructor = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { id } = req.params;
+            const { bankName, accountNumber, accountName } = req.body;
+
+            // Validate required fields
+            if (!bankName || !accountNumber || !accountName) {
+                res.status(400).json({ message: 'Missing required bank information fields' });
+                return;
+            }
+
+            const bankInfo = await this.instructorService.updateBankInfo(id, bankName, accountNumber, accountName);
+            res.status(200).json({
+                success: true,
+                data: bankInfo
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    deleteBankInfoByInstructor = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { id } = req.params;
+            const bankInfo = await this.instructorService.deleteBankInfo(id);
+            res.status(200).json({
+                success: true,
+                data: bankInfo
             });
         } catch (error) {
             next(error);

@@ -34,6 +34,7 @@ export class AdminService {
                 amount: transaction.amount,
                 type: transaction.type,
                 status: transaction.status,
+                qrUrl: transaction.qrCodeUrl,
                 createdAt: transaction.createdAt,
                 instructor: transaction.wallet.instructor ? {
                     firstName: transaction.wallet.instructor.user.firstName,
