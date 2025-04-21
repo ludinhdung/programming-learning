@@ -16,4 +16,6 @@ router.get("/all", courseController.getAllCourses);
 router.get("/verify/unpublished", courseController.getUnpublishedCourses.bind(courseController));
 router.patch("/verify/:courseId/publish", courseController.toggleCoursePublishStatus.bind(courseController));
 
+// Get student enrolled courses
+router.get("/course/:courseId/students", courseController.getStudentEnrolledCourses.bind(courseController));
 export default router;

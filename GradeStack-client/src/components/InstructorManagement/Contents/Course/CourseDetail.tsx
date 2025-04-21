@@ -85,6 +85,7 @@ const CourseDetail: React.FC = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
 
+  const [studentsEnrolledCourse, setStudentsEnrolledCourse] = useState<any[]>([]);
   useEffect(() => {
     const fetchCourse = async () => {
       try {
@@ -153,6 +154,20 @@ const CourseDetail: React.FC = () => {
 
     fetchCourse();
   }, [courseId]);
+
+  useEffect(() => {
+    const fetchStudentsEnrolledCourse = async () => {
+      try {
+        const response = await instructorService.getStudentEnrolledCourses(courseId!);
+        setStudentsEnrolledCourse(response.data);
+        console.log("studentsEnrolledCourse response", response);
+        
+      } catch (error) {
+        console.error("Error fetching students enrolled course:", error);
+      }
+    }
+    fetchStudentsEnrolledCourse();
+  }, [courseId])
 
   if (loading) {
     return (
@@ -723,12 +738,68 @@ const CourseDetail: React.FC = () => {
                   </>
                 )}
 
-                {activeTab === "students" && (
+                {activeTab === "students" &&
+                studentsEnrolledCourse.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white rounded-lg overflow-hidden">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Student Name
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Email
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Progress
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Enrolled Date
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {studentsEnrolledCourse.map((student) => (
+                          <tr key={student.id}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">
+                                {student.learner.firstName}{" "}
+                                {student.learner.lastName}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-500">
+                                {student.learner.email}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                  <div
+                                    className="bg-blue-600 h-2.5 rounded-full"
+                                    style={{ width: `${student.progress}%` }}
+                                  ></div>
+                                </div>
+                                <span className="ml-2 text-sm text-gray-500">
+                                  {student.progress}%
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-500">
+                                {new Date(
+                                  student.enrolledAt
+                                ).toLocaleString()}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
                   <div className="text-center">
-                    <h3 className="text-xl font-bold">Student List</h3>
-                    <p className="mt-2 text-gray-500">
-                      {course._count?.EnrolledCourse || 0} students enrolled
-                    </p>
+                    <h3 className="text-xl font-bold">No students enrolled</h3>
                   </div>
                 )}
               </div>
