@@ -102,4 +102,22 @@ export class CourseController {
       next(error);
     }
   };
+
+  getStudentEnrolledCourses = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+   try {
+     const { courseId } = req.params;
+     const enrolledStudents = await this.courseService.getStudentEnrolledCourses(courseId);
+     res.status(200).json({
+       success: true,
+       data: enrolledStudents
+     })
+   } catch (error) {
+    next(error)
+    }
+  };
+
 }

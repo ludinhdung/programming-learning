@@ -156,9 +156,9 @@ export class CourseService {
     const averageRating =
       course.CourseFeedback.length > 0
         ? course.CourseFeedback.reduce(
-          (sum, feedback) => sum + feedback.rating,
-          0
-        ) / course.CourseFeedback.length
+            (sum, feedback) => sum + feedback.rating,
+            0
+          ) / course.CourseFeedback.length
         : 0;
 
     const { modules, CourseFeedback, ...courseWithoutModules } = course;
@@ -174,7 +174,6 @@ export class CourseService {
     const course = await prisma.course.findUnique({
       where: { id: courseId },
       include: {
-        
         CourseTopic: {
           include: {
             topic: true,
@@ -248,34 +247,34 @@ export class CourseService {
   async getUnpublishedCourses() {
     return await prisma.course.findMany({
       where: {
-        isPublished: false
+        isPublished: false,
       },
       include: {
         instructor: {
           include: {
-            user: true
-          }
+            user: true,
+          },
         },
         modules: {
           include: {
-            lessons: true
-          }
+            lessons: true,
+          },
         },
         CourseTopic: {
           include: {
-            topic: true
-          }
-        }
+            topic: true,
+          },
+        },
       },
       orderBy: {
-        updatedAt: 'desc'
-      }
+        updatedAt: "desc",
+      },
     });
   }
 
   async toggleCoursePublishStatus(courseId: string) {
     const course = await prisma.course.findUnique({
-      where: { id: courseId }
+      where: { id: courseId },
     });
 
     if (!course) {
@@ -286,8 +285,28 @@ export class CourseService {
       where: { id: courseId },
       data: {
         isPublished: !course.isPublished,
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      },
     });
+  }
+
+  async getStudentEnrolledCourses(courseId: string) {
+    const enrolledStudents = await prisma.enrolledCourse.findMany({
+      where: {
+        courseId: courseId,
+      },
+      include: {
+        learner: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    return enrolledStudents;
   }
 }
