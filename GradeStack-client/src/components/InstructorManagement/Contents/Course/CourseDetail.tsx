@@ -85,7 +85,9 @@ const CourseDetail: React.FC = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
 
-  const [studentsEnrolledCourse, setStudentsEnrolledCourse] = useState<any[]>([]);
+  const [studentsEnrolledCourse, setStudentsEnrolledCourse] = useState<any[]>(
+    []
+  );
   useEffect(() => {
     const fetchCourse = async () => {
       try {
@@ -158,16 +160,17 @@ const CourseDetail: React.FC = () => {
   useEffect(() => {
     const fetchStudentsEnrolledCourse = async () => {
       try {
-        const response = await instructorService.getStudentEnrolledCourses(courseId!);
+        const response = await instructorService.getStudentEnrolledCourses(
+          courseId!
+        );
         setStudentsEnrolledCourse(response.data);
         console.log("studentsEnrolledCourse response", response);
-        
       } catch (error) {
         console.error("Error fetching students enrolled course:", error);
       }
-    }
+    };
     fetchStudentsEnrolledCourse();
-  }, [courseId])
+  }, [courseId]);
 
   if (loading) {
     return (
@@ -787,9 +790,7 @@ const CourseDetail: React.FC = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-gray-500">
-                                {new Date(
-                                  student.enrolledAt
-                                ).toLocaleString()}
+                                {new Date(student.enrolledAt).toLocaleString()}
                               </div>
                             </td>
                           </tr>
