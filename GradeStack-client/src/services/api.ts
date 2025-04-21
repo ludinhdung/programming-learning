@@ -361,6 +361,12 @@ export const instructorService = {
     const response = await api.get(`/instructors/${instructorId}/transactions`);
     return response.data;
   },
+
+  async getStudentEnrolledCourses(courseId: string) {
+    const response = await api.get(`/courses/course/${courseId}/students`);
+    return response.data;
+  },
+  
 };
 
 export const learnerService = {
