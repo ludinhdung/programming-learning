@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:4000/api/courses';
-
+const API_URL = `${import.meta.env.VITE_API_URL}/api/courses`;
 class CourseVerificationService {
     async getUnpublishedCourses() {
         const response = await axios.get(`${API_URL}/verify/unpublished`);

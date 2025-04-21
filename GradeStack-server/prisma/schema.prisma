@@ -64,6 +64,7 @@ model Instructor {
   Workshop     Workshop[]
   Topic        Topic[]
   LearningPath LearningPath[]
+  BankInfo     BankInfo?
 }
 
 model Course {
@@ -136,8 +137,8 @@ model Lesson {
   comments         Comment[]
   notes            Note[]
   completedLessons CompletedLesson[]
-  
-  createdAt        DateTime          @default(now())
+
+  createdAt DateTime @default(now())
 }
 
 model Comment {
@@ -268,6 +269,7 @@ model Transaction {
   amount    Decimal
   type      TransactionType
   status    TransactionStatus @default(PENDING)
+  qrCodeUrl String?
   createdAt DateTime          @default(now())
 }
 
@@ -465,4 +467,19 @@ model CompletedLesson {
   @@unique([learnerId, lessonId])
   @@index([courseId]) // Thêm index để tối ưu query
   @@index([learnerId, courseId]) // Thêm composite index để tối ưu việc tìm kiếm completed lessons của user trong một khóa học
+}
+
+model BankInfo {
+  id String @id @default(uuid())
+
+  bankName      String
+  accountNumber String
+  accountName   String
+  isActive      Boolean @default(true)
+
+  instructor   Instructor @relation(fields: [instructorId], references: [userId])
+  instructorId String     @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

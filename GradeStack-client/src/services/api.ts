@@ -366,7 +366,7 @@ export const instructorService = {
     const response = await api.get(`/courses/course/${courseId}/students`);
     return response.data;
   },
-  
+
 };
 
 export const learnerService = {
@@ -424,14 +424,14 @@ export const learnerService = {
     );
     return response;
   },
-  
+
   async checkFinalTestSubmission(learnerId: string, lessonId: string) {
-  const response = await api.get(
-    `/final-test/learner/${learnerId}/lesson/${lessonId}/check-submission`
-  );
-  return response.data;
+    const response = await api.get(
+      `/final-test/learner/${learnerId}/lesson/${lessonId}/check-submission`
+    );
+    return response.data;
   },
-  
+
   async submitFinalTest(learnerId: string, finalTestId: string, score: number) {
     const response = await api.post(
       `/final-test/${finalTestId}/learner/${learnerId}/submit`,
@@ -459,6 +459,24 @@ export const courseVerificationService = {
     const respone = await api.get(`/courses/course/${courseId}`);
     return respone.data;
   },
+};
+
+export const fetchBankList = async (): Promise<{ name: string; code: string }[]> => {
+  try {
+    const response = await fetch('https://api.vietqr.io/v2/banks');
+    const data = await response.json();
+
+    if (data.code === '00') {
+      return data.data.map((bank: any) => ({
+        name: bank.shortName,
+        code: bank.bin
+      }));
+    }
+    throw new Error('Failed to fetch bank list');
+  } catch (error) {
+    console.error('Error fetching bank list:', error);
+    throw error;
+  }
 };
 
 export default api;

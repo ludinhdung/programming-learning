@@ -5,6 +5,7 @@ export interface AdminTransaction {
     amount: number;
     type: 'REVENUE' | 'WITHDRAWAL';
     status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    qrUrl: string;
     createdAt: string;
     instructor: {
         firstName: string;

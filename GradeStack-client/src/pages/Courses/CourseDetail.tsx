@@ -66,6 +66,7 @@ interface CourseData {
   duration: number;
   thumbnail: string;
   updatedAt: string;
+  isPublished: boolean;
   instructor: {
     userId: string;
     organization: string;
@@ -335,6 +336,14 @@ const CourseDetail: React.FC = () => {
     return (
       <div className="min-h-screen bg-[#0a1321] flex items-center justify-center">
         <div className="text-white text-xl">{error || "Course not found"}</div>
+      </div>
+    );
+  }
+
+  if (!courseData.isPublished) {
+    return (
+      <div className="min-h-screen bg-[#0a1321] flex items-center justify-center">
+        <div className="text-white text-xl">This course is not available yet. Please check back later.</div>
       </div>
     );
   }
@@ -779,7 +788,7 @@ const CourseDetail: React.FC = () => {
             </div>
           </div>
         </div>
-          <CourseFeedback />
+        <CourseFeedback />
       </main>
 
       <Modal

@@ -26,6 +26,8 @@ import {
 import { z } from "zod";
 import bcrypt from "bcrypt";
 import { AppError } from '../../../shared/middleware/error.middleware';
+import { generateVietQRUrl } from "../../../shared/utils/generateVietQRUrl";
+import { randomUUID } from "crypto";
 const prisma = new PrismaClient();
 
 export class InstructorService extends InstructorBaseService<
@@ -1409,56 +1411,187 @@ export class InstructorService extends InstructorBaseService<
     return instructor.Wallet.transactions;
   }
 
-  async requestWithdrawal(instructorId: string, amount: number) {
+  async requestWithdrawal(instructorId: string, amount: number, accountNumber: string, accountHolder: string, bank: string) {
+    const wallet = await prisma.wallet.findUnique({
+      where: { instructorId }
+    });
+
+    if (!wallet) {
+      throw new AppError('Wallet not found', 404);
+    }
+
+    if (amount <= 0) {
+      throw new AppError('Withdrawal amount must be greater than 0', 400);
+    }
+
+    if (amount < 100000) {
+      throw new AppError('Minimum withdrawal amount is 100,000 VND', 400);
+    }
+
+    if (Number(wallet.balance) < amount) {
+      throw new AppError('Insufficient balance for withdrawal', 400);
+    }
+
+    const description = randomUUID();
+
+    const qrUrl = generateVietQRUrl(bank, accountNumber, accountHolder, description, amount)
+
+    const transaction = await prisma.transaction.create({
+      data: {
+        walletId: wallet.id,
+        amount: amount,
+        type: 'WITHDRAWAL',
+        qrCodeUrl: qrUrl,
+        status: 'PENDING'
+      }
+    });
+
+    await prisma.wallet.update({
+      where: { id: wallet.id },
+      data: {
+        balance: {
+          decrement: amount
+        }
+      }
+    });
+
+    return transaction;
+  }
+
+
+  async createBankInfo(instructorId: string, bankName: string, accountNumber: string, accountName: string) {
     try {
-      // Get the instructor's wallet
-      const wallet = await prisma.wallet.findUnique({
-        where: { instructorId }
-      });
-
-      if (!wallet) {
-        throw new AppError('Wallet not found', 404);
+      // Check if instructor exists
+      const instructor = await this.findByUserId(instructorId);
+      if (!instructor) {
+        throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
       }
 
-      // Check if the withdrawal amount is valid
-      if (amount <= 0) {
-        throw new AppError('Withdrawal amount must be greater than 0', 400);
-      }
-
-      // Check minimum withdrawal amount (100,000 VND)
-      if (amount < 100000) {
-        throw new AppError('Minimum withdrawal amount is 100,000 VND', 400);
-      }
-
-      // Check if the wallet has sufficient balance
-      if (Number(wallet.balance) < amount) {
-        throw new AppError('Insufficient balance for withdrawal', 400);
-      }
-
-      // Create a withdrawal transaction
-      const transaction = await prisma.transaction.create({
-        data: {
-          walletId: wallet.id,
-          amount: amount,
-          type: 'WITHDRAWAL',
-          status: 'PENDING'
+      // Check if bank info already exists
+      const existingBankInfo = await prisma.bankInfo.findFirst({
+        where: {
+          instructorId: instructorId,
+          isActive: true
         }
       });
 
-      // Update wallet balance
-      await prisma.wallet.update({
-        where: { id: wallet.id },
+      if (existingBankInfo) {
+        throw ApiError.conflict('Giảng viên đã có thông tin ngân hàng');
+      }
+
+      // Create new bank info
+      const bankInfo = await prisma.bankInfo.create({
         data: {
-          balance: {
-            decrement: amount
-          }
+          bankName,
+          accountNumber,
+          accountName,
+          instructorId
         }
       });
 
-      return transaction;
+      return bankInfo;
     } catch (error) {
-      if (error instanceof AppError) throw error;
-      throw new AppError('Failed to process withdrawal request', 500);
+      throw PrismaErrorHandler.handle(error, "BankInfo");
+    }
+  }
+
+  async getBankInfoByInstructor(instructorId: string) {
+    try {
+      // Check if instructor exists
+      const instructor = await this.findByUserId(instructorId);
+      if (!instructor) {
+        throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+      }
+
+      // Get active bank info
+      const bankInfo = await prisma.bankInfo.findFirst({
+        where: {
+          instructorId: instructorId,
+          isActive: true
+        }
+      });
+
+      if (!bankInfo) {
+        throw ApiError.notFound('Không tìm thấy thông tin ngân hàng');
+      }
+
+      return bankInfo;
+    } catch (error) {
+      throw PrismaErrorHandler.handle(error, "BankInfo");
+    }
+  }
+
+  async updateBankInfo(instructorId: string, bankName: string, accountNumber: string, accountName: string) {
+    try {
+      // Check if instructor exists
+      const instructor = await this.findByUserId(instructorId);
+      if (!instructor) {
+        throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+      }
+
+      // Get active bank info
+      const existingBankInfo = await prisma.bankInfo.findFirst({
+        where: {
+          instructorId: instructorId,
+          isActive: true
+        }
+      });
+
+      if (!existingBankInfo) {
+        throw ApiError.notFound('Không tìm thấy thông tin ngân hàng');
+      }
+
+      // Update bank info
+      const bankInfo = await prisma.bankInfo.update({
+        where: {
+          id: existingBankInfo.id
+        },
+        data: {
+          bankName,
+          accountNumber,
+          accountName
+        }
+      });
+
+      return bankInfo;
+    } catch (error) {
+      throw PrismaErrorHandler.handle(error, "BankInfo");
+    }
+  }
+
+  async deleteBankInfo(instructorId: string) {
+    try {
+      // Check if instructor exists
+      const instructor = await this.findByUserId(instructorId);
+      if (!instructor) {
+        throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+      }
+
+      // Get active bank info
+      const existingBankInfo = await prisma.bankInfo.findFirst({
+        where: {
+          instructorId: instructorId,
+          isActive: true
+        }
+      });
+
+      if (!existingBankInfo) {
+        throw ApiError.notFound('Không tìm thấy thông tin ngân hàng');
+      }
+
+      // Soft delete by setting isActive to false
+      const bankInfo = await prisma.bankInfo.update({
+        where: {
+          id: existingBankInfo.id
+        },
+        data: {
+          isActive: false
+        }
+      });
+
+      return bankInfo;
+    } catch (error) {
+      throw PrismaErrorHandler.handle(error, "BankInfo");
     }
   }
 }
