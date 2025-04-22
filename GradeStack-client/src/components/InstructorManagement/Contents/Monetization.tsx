@@ -108,7 +108,7 @@ const Monetization = () => {
       await bankService.createBankInfo(instructorId, bankInfo);
       message.success("Bank information added successfully");
       setIsBankInfoModalOpen(false);
-      fetchBankInfo(); // Refresh bank info
+      fetchBankInfo(); 
     } catch (error: unknown) {
       console.error("Error creating bank info", error);
       const apiError = error as ApiError;
@@ -128,7 +128,7 @@ const Monetization = () => {
       await bankService.updateBankInfo(instructorId, bankInfo);
       message.success("Bank information updated successfully");
       setIsBankInfoModalOpen(false);
-      fetchBankInfo(); // Refresh bank info
+      fetchBankInfo(); 
     } catch (error: unknown) {
       console.error("Error updating bank info", error);
       const apiError = error as ApiError;

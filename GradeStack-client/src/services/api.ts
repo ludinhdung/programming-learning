@@ -461,22 +461,4 @@ export const courseVerificationService = {
   },
 };
 
-export const fetchBankList = async (): Promise<{ name: string; code: string }[]> => {
-  try {
-    const response = await fetch('https://api.vietqr.io/v2/banks');
-    const data = await response.json();
-
-    if (data.code === '00') {
-      return data.data.map((bank: any) => ({
-        name: bank.shortName,
-        code: bank.bin
-      }));
-    }
-    throw new Error('Failed to fetch bank list');
-  } catch (error) {
-    console.error('Error fetching bank list:', error);
-    throw error;
-  }
-};
-
 export default api;

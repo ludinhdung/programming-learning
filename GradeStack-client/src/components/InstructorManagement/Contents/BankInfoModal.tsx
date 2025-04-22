@@ -1,5 +1,6 @@
 import { useState, useEffect, ChangeEvent } from "react";
-import { fetchBankList } from "../../../services/api";
+import { fetchBankList } from "../../../services/bank.service";
+import { Bank } from "../../../types/bank";
 
 interface BankInfo {
     bankName: string;
@@ -22,7 +23,7 @@ const BankInfoModal = ({ isOpen, onClose, onSuccess, existingBankInfo }: BankInf
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<Partial<BankInfo>>({});
-    const [bankList, setBankList] = useState<{ name: string; code: string }[]>([]);
+    const [bankList, setBankList] = useState<Bank[]>([]);
     const [isLoadingBanks, setIsLoadingBanks] = useState(false);
 
     useEffect(() => {
@@ -100,7 +101,6 @@ const BankInfoModal = ({ isOpen, onClose, onSuccess, existingBankInfo }: BankInf
             ...prev,
             [name]: value
         }));
-        // Clear error when user starts typing
         if (errors[name as keyof BankInfo]) {
             setErrors(prev => ({
                 ...prev,
