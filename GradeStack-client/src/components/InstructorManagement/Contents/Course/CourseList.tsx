@@ -5,13 +5,14 @@ import { useState, useEffect } from "react";
 import { instructorService } from "../../../../services/api";
 import { formatDuration } from "../../../../utils/formatDuration";
 import { formatVND } from "../../../../utils/formatCurrency";
-import { message } from "antd";
+import { message, Rate } from "antd";
 
 interface Course {
   id: string;
   title: string;
   description: string;
   thumbnail: string;
+  averageRating: number;
   price: number;
   duration: number;
   CourseTopic: {
@@ -205,7 +206,8 @@ const CourseList = () => {
                       >
                         {course.isPublished ? "Published" : "Pending Approval"}
                       </Badge>
-                    </span>
+                      </span>
+                      <Rate disabled allowHalf defaultValue={course.averageRating} />
                   </div>
 
                   <p className="text-gray-300 mb-4 line-clamp-2">

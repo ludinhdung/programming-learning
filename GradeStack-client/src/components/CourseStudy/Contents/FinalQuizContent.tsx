@@ -5,6 +5,7 @@ import confetti from "canvas-confetti";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { learnerService } from "../../../services/api";
+import { feedbackService } from "../../../services/api";
 
 interface FinalQuizContentProps {
   lesson: Lesson;
@@ -21,6 +22,7 @@ interface SubmissionStatus {
 const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
   lesson,
   onMarkComplete,
+  courseId,
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<{
@@ -78,7 +80,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
     });
   }, []);
 
-  // Thêm useEffect mới để handle beforeunload event
+  // useEffect mới để handle beforeunload event
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (showFeedback) {
@@ -98,7 +100,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
     };
   }, [showFeedback]);
 
-  // Thêm useEffect để handle các phím tắt
+  // useEffect để handle các phím tắt
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (showFeedback) {
@@ -150,32 +152,35 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
   };
 
   const handleSubmitFeedback = async () => {
-    // if (rating === 0) {
-    //   message.error("Please provide a rating");
-    //   return;
-    // }
-    // try {
-    //   setIsSubmittingFeedback(true);
-    //   const userData = localStorage.getItem("user");
-    //   if (!userData) {
-    //     message.error("User not found. Please login again.");
-    //     return;
-    //   }
-    //   const user = JSON.parse(userData);
-    //   await learnerService.submitCourseFeedback({
-    //     learnerId: user.id,
-    //     courseId: courseId,
-    //     rating: rating,
-    //     comment: comment.trim() || null,
-    //   });
-    //   message.success("Thank you for your feedback!");
-    //   setShowFeedback(false);
-    // } catch (error) {
-    //   console.error("Failed to submit feedback:", error);
-    //   message.error("Failed to submit feedback. Please try again.");
-    // } finally {
-    //   setIsSubmittingFeedback(false);
-    // }
+    if (rating === 0 || comment.trim() === "") {
+      message.error("Please provide a rating and comment");
+      return;
+    }
+
+    try {
+      setIsSubmittingFeedback(true);
+
+      const userData = localStorage.getItem("user");
+      if (!userData) {
+        message.error("User not found. Please login again.");
+        return;
+      }
+
+      const user = JSON.parse(userData);
+
+      // Chỉ gọi create feedback, không xử lý update
+      await feedbackService.createFeedback(courseId, user.id, {
+        rating: rating,
+        comment: comment.trim() || undefined,
+      });
+
+      message.success("Thank you for your feedback!");
+      setShowFeedback(false);
+    } catch (error: unknown) {
+      console.error("Failed to submit feedback:", error);
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
   };
 
   // Submit test
@@ -201,16 +206,16 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
         }
         const user = JSON.parse(userData);
         await learnerService.submitFinalTest(user.id, lesson.id, score);
-        message.success("Your Final Test has been submit");
+        message.success("You have successfully completed this test");
         await onMarkComplete(lesson.id);
         setTimeout(() => {
           setShowFeedback(true);
-        }, 1500);
+        }, 2000);
       } catch (error) {
         console.error("Failed to submit final test:", error);
       }
     }
-  }, [selectedAnswers, questions, passingScore]);
+  }, [selectedAnswers, questions, passingScore, lesson.id, onMarkComplete]);
 
   // Xử lý countdown timer
   useEffect(() => {
@@ -228,7 +233,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
 
       return () => clearInterval(timer);
     }
-  }, [isStart, isSubmitted, handleSubmit]);
+  }, [isStart, isSubmitted, handleSubmit, timeLeft]);
 
   // Thêm warning khi thời gian sắp hết
   const getTimeColor = () => {

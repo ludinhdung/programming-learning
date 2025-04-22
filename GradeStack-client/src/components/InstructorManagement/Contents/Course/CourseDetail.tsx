@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { instructorService } from "../../../../services/api";
+import { instructorService, feedbackService } from "../../../../services/api";
 import { formatDuration } from "../../../../utils/formatDuration";
 import { formatVND } from "../../../../utils/formatCurrency";
-import { message } from "antd";
+import { message, Rate, Spin, Empty } from "antd";
 import EditModuleDrawer from "./EditModuleDrawer";
 import CreateModuleDrawer from "./CreateModuleDrawer";
+import { formatTimeAgo } from "../../../../utils/formatTimeAgo";
 
 interface Module {
   id: string;
@@ -55,6 +56,7 @@ interface Course {
   title: string;
   description: string;
   thumbnail: string | null;
+  averageRating: number;
   price: number;
   duration: number;
   isPublished: boolean;
@@ -73,6 +75,30 @@ interface Course {
   };
 }
 
+interface FeedbackItem {
+  id: string;
+  rating: number;
+  comment?: string;
+  createdAt: string;
+  learner: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
+}
+
+interface EnrolledStudent {
+  id: string;
+  progress: number;
+  enrolledAt: string;
+  learner: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
+
 const CourseDetail: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const [course, setCourse] = useState<Course | null>(null);
@@ -84,10 +110,14 @@ const CourseDetail: React.FC = () => {
   const [moduleToDelete, setModuleToDelete] = useState<Module | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
+  const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
 
-  const [studentsEnrolledCourse, setStudentsEnrolledCourse] = useState<any[]>(
-    []
-  );
+  const [studentsEnrolledCourse, setStudentsEnrolledCourse] = useState<
+    EnrolledStudent[]
+  >([]);
+
   useEffect(() => {
     const fetchCourse = async () => {
       try {
@@ -164,13 +194,33 @@ const CourseDetail: React.FC = () => {
           courseId!
         );
         setStudentsEnrolledCourse(response.data);
-        console.log("studentsEnrolledCourse response", response);
       } catch (error) {
         console.error("Error fetching students enrolled course:", error);
       }
     };
     fetchStudentsEnrolledCourse();
   }, [courseId]);
+
+  useEffect(() => {
+    // Load feedbacks when feedback tab is active
+    if (activeTab === "feedback" && courseId) {
+      const fetchFeedbacks = async () => {
+        try {
+          setFeedbackLoading(true);
+          const response = await feedbackService.getCourseFeedback(courseId);
+          setFeedbacks(response.data || response);
+          setFeedbackError(null);
+        } catch (error) {
+          console.error("Error fetching feedbacks:", error);
+          setFeedbackError("Failed to load feedbacks");
+        } finally {
+          setFeedbackLoading(false);
+        }
+      };
+
+      fetchFeedbacks();
+    }
+  }, [activeTab, courseId]);
 
   if (loading) {
     return (
@@ -374,7 +424,14 @@ const CourseDetail: React.FC = () => {
               <div className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h2 className="text-2xl font-bold">{course.title}</h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">{course.title}</h2>
+                      <Rate
+                        disabled
+                        allowHalf
+                        defaultValue={course.averageRating}
+                      />
+                    </div>
                     <div className="mt-2 flex gap-2 items-center">
                       <span
                         className={`rounded-full px-3 py-1 text-sm font-medium ${
@@ -541,6 +598,16 @@ const CourseDetail: React.FC = () => {
                     onClick={() => setActiveTab("students")}
                   >
                     Students
+                  </button>
+                  <button
+                    className={`px-4 py-2 text-sm font-medium ${
+                      activeTab === "feedback"
+                        ? "border-b-2 border-blue-500 text-blue-600"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                    onClick={() => setActiveTab("feedback")}
+                  >
+                    Feedback
                   </button>
                 </nav>
               </div>
@@ -741,66 +808,130 @@ const CourseDetail: React.FC = () => {
                   </>
                 )}
 
-                {activeTab === "students" &&
-                studentsEnrolledCourse.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full bg-white rounded-lg overflow-hidden">
-                      <thead className="bg-gray-100">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Student Name
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Email
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Progress
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Enrolled Date
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {studentsEnrolledCourse.map((student) => (
-                          <tr key={student.id}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">
-                                {student.learner.firstName}{" "}
-                                {student.learner.lastName}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">
-                                {student.learner.email}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                {activeTab === "students" && (
+                  <>
+                    {studentsEnrolledCourse.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full bg-white rounded-lg overflow-hidden">
+                          <thead className="bg-gray-100">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Student Name
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Email
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Progress
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Enrolled Date
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            {studentsEnrolledCourse.map((student) => (
+                              <tr key={student.id}>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {student.learner.firstName}{" "}
+                                    {student.learner.lastName}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="text-sm text-gray-500">
+                                    {student.learner.email}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="flex items-center">
+                                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                      <div
+                                        className="bg-blue-600 h-2.5 rounded-full"
+                                        style={{
+                                          width: `${student.progress}%`,
+                                        }}
+                                      ></div>
+                                    </div>
+                                    <span className="ml-2 text-sm text-gray-500">
+                                      {student.progress}%
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="text-sm text-gray-500">
+                                    {new Date(
+                                      student.enrolledAt
+                                    ).toLocaleString()}
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <h3 className="text-xl font-bold">
+                          No students enrolled
+                        </h3>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {activeTab === "feedback" && (
+                  <div>
+                    {feedbackLoading ? (
+                      <div className="flex justify-center items-center py-10">
+                        <Spin tip="Loading feedback..." />
+                      </div>
+                    ) : feedbackError ? (
+                      <div className="text-red-500 text-center py-5">
+                        {feedbackError}
+                      </div>
+                    ) : feedbacks.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Empty description="No feedback available for this course" />
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {feedbacks.map((feedback) => (
+                          <div
+                            key={feedback.id}
+                            className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200"
+                          >
+                            <div className="flex items-start justify-between">
                               <div className="flex items-center">
-                                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                                  <div
-                                    className="bg-blue-600 h-2.5 rounded-full"
-                                    style={{ width: `${student.progress}%` }}
-                                  ></div>
+                                <div className="w-10 h-10 rounded-full overflow-hidden shadow-sm bg-gradient-to-r from-blue-200 to-indigo-200 flex items-center justify-center text-indigo-600 font-medium">
+                                  {feedback.learner.firstName[0]}
+                                  {feedback.learner.lastName[0]}
                                 </div>
-                                <span className="ml-2 text-sm text-gray-500">
-                                  {student.progress}%
-                                </span>
+                                <div className="ml-3">
+                                  <h3 className="font-medium text-gray-800">
+                                    {feedback.learner.firstName}{" "}
+                                    {feedback.learner.lastName}
+                                  </h3>
+                                  <div className="flex items-center mt-1">
+                                    <Rate
+                                      disabled
+                                      value={feedback.rating}
+                                      style={{ fontSize: 14 }}
+                                    />
+                                    <span className="ml-2 text-xs text-gray-500">
+                                      {formatTimeAgo(feedback.createdAt)}
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">
-                                {new Date(student.enrolledAt).toLocaleString()}
-                              </div>
-                            </td>
-                          </tr>
+                            </div>
+                            <p className="mt-3 text-gray-600 text-sm">
+                              {feedback.comment || "No comment provided"}
+                            </p>
+                          </div>
                         ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <h3 className="text-xl font-bold">No students enrolled</h3>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

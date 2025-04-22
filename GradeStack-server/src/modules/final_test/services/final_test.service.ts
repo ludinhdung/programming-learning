@@ -37,7 +37,7 @@ export class FinalTestService {
         500
       );
     }
-   };
+  }
 
   async submitFinalTest(learnerId: string, lessonId: string, score: number) {
     try {

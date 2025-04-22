@@ -25,6 +25,7 @@ import progressRoutes from './modules/progress/routes/progress.routes';
 import adminRoutes from './modules/admin/admin.route'
 import finalTestRoutes from "./modules/final_test/routes/final_test.route"
 import { generateVietQRUrl } from './shared/utils/generateVietQRUrl';
+import feedbackRoutes from "./modules/feedback/routes/feedback.route"
 const app = express();
 
 app.use(cors());
@@ -58,6 +59,7 @@ app.use('/api/notes', noteRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/progress', progressRoutes);
 app.use("/api/final-test", finalTestRoutes);
+app.use("/api/feedback", feedbackRoutes);
 
 
 app.use(errorHandler);
