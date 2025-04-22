@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../components/Header/Header";
-import { Button, Modal } from "antd";
+import { Button, Modal, Rate } from "antd";
 import styled from "styled-components";
 import axios from "axios";
 import { useParams } from "react-router-dom";
@@ -65,6 +65,7 @@ interface CourseData {
   price: string;
   duration: number;
   thumbnail: string;
+  averageRating: number;
   updatedAt: string;
   isPublished: boolean;
   instructor: {
@@ -607,6 +608,15 @@ const CourseDetail: React.FC = () => {
                       {courseTopic.topic.name}
                     </span>
                   ))}
+                  <div className="flex items-center">
+                    <span className="text-white text-[4px] font-medium mb-2 ml-2 inline-block border-l-2 border-[#5a646f] px-4">
+                      <Rate
+                        disabled
+                        allowHalf
+                        value={courseData.averageRating}
+                      />
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="w-full md:w-1/3">
@@ -699,16 +709,18 @@ const CourseDetail: React.FC = () => {
                   </div>
 
                   <div
-                    className={`transition-all duration-500 ease-in-out overflow-hidden ${expandedSections.includes(module.id)
-                      ? "max-h-[2000px] opacity-100"
-                      : "max-h-0 opacity-0"
-                      }`}
+                    className={`transition-all duration-500 ease-in-out overflow-hidden ${
+                      expandedSections.includes(module.id)
+                        ? "max-h-[2000px] opacity-100"
+                        : "max-h-0 opacity-0"
+                    }`}
                   >
                     {module.lessons.map((lesson) => (
                       <div
                         key={lesson.id}
-                        className={`mb-4 rounded-none bg-[#14202e] p-4 border border-transparent ${!lesson.isPreview && !isEnrolled ? "opacity-60" : ""
-                          } cursor-pointer transition-all duration-500 ease-in-out hover:border-[#1b55ac]`}
+                        className={`mb-4 rounded-none bg-[#14202e] p-4 border border-transparent ${
+                          !lesson.isPreview && !isEnrolled ? "opacity-60" : ""
+                        } cursor-pointer transition-all duration-500 ease-in-out hover:border-[#1b55ac]`}
                         onClick={() => {
                           if (lesson.isPreview || isEnrolled) {
                             window.location.href = `/course-study/${courseId}?lesson=${lesson.id}`;
@@ -717,17 +729,19 @@ const CourseDetail: React.FC = () => {
                       >
                         <div className="flex items-center">
                           <div
-                            className={`mr-4 flex-shrink-0 rounded-full  ${completedLessons.includes(lesson.id)
-                              ? "border-blue-500 border-2"
-                              : "border-[#0a1321] border-4"
-                              } p-4 text-center w-16 h-16 flex items-center justify-center`}
+                            className={`mr-4 flex-shrink-0 rounded-full  ${
+                              completedLessons.includes(lesson.id)
+                                ? "border-blue-500 border-2"
+                                : "border-[#0a1321] border-4"
+                            } p-4 text-center w-16 h-16 flex items-center justify-center`}
                           >
                             {lesson.isPreview || isEnrolled ? (
                               <span
-                                className={`text-2xl font-bold ${completedLessons.includes(lesson.id)
-                                  ? "text-blue-500"
-                                  : "text-white"
-                                  }`}
+                                className={`text-2xl font-bold ${
+                                  completedLessons.includes(lesson.id)
+                                    ? "text-blue-500"
+                                    : "text-white"
+                                }`}
                               >
                                 {lesson.order}
                               </span>
@@ -773,10 +787,10 @@ const CourseDetail: React.FC = () => {
                               {formatDuration(lesson.duration)}
                               {(isEnrolled ||
                                 (!isEnrolled && lesson.isPreview)) && (
-                                  <span className="ml-4 p-1 text-[#3b82f6] bg-[#1c2432]">
-                                    {isEnrolled ? "" : "Free to Learn!"}
-                                  </span>
-                                )}
+                                <span className="ml-4 p-1 text-[#3b82f6] bg-[#1c2432]">
+                                  {isEnrolled ? "" : "Free to Learn!"}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -788,7 +802,7 @@ const CourseDetail: React.FC = () => {
             </div>
           </div>
         </div>
-        <CourseFeedback />
+        <CourseFeedback courseId={courseId} />
       </main>
 
       <Modal
@@ -799,8 +813,8 @@ const CourseDetail: React.FC = () => {
         className="auth-modal"
       >
         <SigninForm
-          onSwitchForm={() => { }}
-          onForgotPassword={() => { }}
+          onSwitchForm={() => {}}
+          onForgotPassword={() => {}}
           onLoginSuccess={handleLoginSuccess}
         />
       </Modal>
