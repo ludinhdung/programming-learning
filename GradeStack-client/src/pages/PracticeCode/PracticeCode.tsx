@@ -16,7 +16,6 @@ import {
   DownOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import { useParams } from "react-router-dom";
 import practiceCodeService, {
   CompileResult,
   CodingExercise,
@@ -84,7 +83,7 @@ const ChatboxContainer = styled.div<{
   pointer-events: ${(props) => (props.isHidden ? "none" : "auto")};
 `;
 
-const FloatingChatButton = styled(Button)<{ $isHidden: boolean }>`
+const FloatingChatButton = styled(Button) <{ $isHidden: boolean }>`
   position: fixed;
   bottom: 20px;
   right: 20px;
@@ -513,9 +512,10 @@ interface Message {
 
 interface PracticeCodeProps {
   lessonId?: string;
+  onMarkComplete?: (lessonId: string) => Promise<void>;
 }
 
-const PracticeCode: React.FC<PracticeCodeProps> = ({ lessonId }) => {
+const PracticeCode: React.FC<PracticeCodeProps> = ({ lessonId, onMarkComplete }) => {
   const [exercise, setExercise] = useState<CodingExercise | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [code, setCode] = useState<string>("");
@@ -548,6 +548,8 @@ const PracticeCode: React.FC<PracticeCodeProps> = ({ lessonId }) => {
   const [isReplacing, setIsReplacing] = useState(false);
   const [runCount, setRunCount] = useState(0);
   const [isHintVisible, setIsHintVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const suggestedQuestions = [
     "Can you explain this problem?",
@@ -579,7 +581,6 @@ const PracticeCode: React.FC<PracticeCodeProps> = ({ lessonId }) => {
 
   const renderMessage = (content: string, isUser: boolean) => {
     if (isUser) {
-      // Check if the message contains code block
       const codeBlockMatch = content.match(/```(\w+)\n([\s\S]*?)```/);
       if (codeBlockMatch) {
         const [fullMatch, language, code] = codeBlockMatch;
@@ -769,9 +770,8 @@ const PracticeCode: React.FC<PracticeCodeProps> = ({ lessonId }) => {
           );
         } else {
           setIsError(true);
-          let finalOutput = `Execution failed\n${
-            error || "Unknown error occurred"
-          }`;
+          let finalOutput = `Execution failed\n${error || "Unknown error occurred"
+            }`;
           if (truncated) {
             finalOutput += "\n\n[Output was truncated due to size limits]";
           }
@@ -844,6 +844,74 @@ const PracticeCode: React.FC<PracticeCodeProps> = ({ lessonId }) => {
     }
   };
 
+  const handleSubmitCode = async () => {
+    if (!lessonId) {
+      message.error('No lesson ID available');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      // First compile the solution code
+      const solutionCompileResult = await practiceCodeService.compileAndExecuteCode(
+        language.toLowerCase(),
+        exercise?.solution || ""
+      );
+
+      // Then compile the submitted code
+      const submittedCompileResult = await practiceCodeService.compileAndExecuteCode(
+        language.toLowerCase(),
+        code
+      );
+
+      // Compare the outputs
+      if (solutionCompileResult.success && submittedCompileResult.success) {
+        // Normalize the outputs by trimming whitespace and newlines
+        const solutionOutput = solutionCompileResult.output?.trim().replace(/\r\n/g, '\n');
+        const submittedOutput = submittedCompileResult.output?.trim().replace(/\r\n/g, '\n');
+
+        if (solutionOutput === submittedOutput) {
+          // Outputs match, proceed with submission
+          const submission = await practiceCodeService.submitCode(lessonId, code);
+          message.success('Code submitted successfully!');
+          console.log('Submission:', submission);
+
+          // Mark the lesson as complete if the code matches the solution
+          if (onMarkComplete) {
+            try {
+              await onMarkComplete(lessonId);
+              message.success('Lesson marked as complete!');
+            } catch (error) {
+              console.error('Error marking lesson as complete:', error);
+              message.error('Failed to mark lesson as complete');
+            }
+          }
+        } else {
+          // Outputs don't match
+          message.error('Your code output does not match the expected solution. Please try again.');
+          // Show the differences in the console
+          setOutput(`Your output:\n${submittedOutput}\n\nExpected output:\n${solutionOutput}`);
+          setIsError(true);
+        }
+      } else {
+        // Compilation failed for either code
+        const errorMessage = solutionCompileResult.success
+          ? 'Your code failed to compile. Please fix the errors and try again.'
+          : 'Solution code failed to compile. Please contact support.';
+
+        message.error(errorMessage);
+        setOutput(`Compilation error:\n${submittedCompileResult.error || 'Unknown error'}`);
+        setIsError(true);
+      }
+    } catch (error) {
+      console.error('Error submitting code:', error);
+      message.error('Failed to submit code. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   useEffect(() => {
     const fetchExercise = async () => {
       if (!lessonId) {
@@ -855,6 +923,13 @@ const PracticeCode: React.FC<PracticeCodeProps> = ({ lessonId }) => {
       try {
         setLoading(true);
         console.log("Fetching exercise with lesson ID:", lessonId);
+
+        // First check if there's a submission
+        const submission = await practiceCodeService.getSubmission(lessonId);
+        if (submission) {
+          setHasSubmitted(true);
+          setCode(submission.submittedCode);
+        }
 
         let exerciseData: CodingExercise;
         try {
@@ -913,14 +988,17 @@ const PracticeCode: React.FC<PracticeCodeProps> = ({ lessonId }) => {
         );
         setLanguage(localLanguage);
 
-        const codeToUse = exerciseData.codeSnippet || "";
-        console.log(
-          "Setting code:",
-          codeToUse
-            ? "Using code (first 20 chars): " + codeToUse.substring(0, 20)
-            : "No code available"
-        );
-        setCode(codeToUse);
+        // Only set code from codeSnippet if there's no submission
+        if (!submission) {
+          const codeToUse = exerciseData.codeSnippet || "";
+          console.log(
+            "Setting code:",
+            codeToUse
+              ? "Using code (first 20 chars): " + codeToUse.substring(0, 20)
+              : "No code available"
+          );
+          setCode(codeToUse);
+        }
       } catch (error) {
         console.error("Overall error in fetchExercise:", error);
         message.error("Failed to load coding exercise");
@@ -1046,14 +1124,21 @@ const PracticeCode: React.FC<PracticeCodeProps> = ({ lessonId }) => {
                   <div className="flex gap-3">
                     <Button
                       type={buttonType}
-                      icon={
-                        isRunning ? <LoadingOutlined /> : <PlayCircleOutlined />
-                      }
+                      icon={isRunning ? <LoadingOutlined /> : <PlayCircleOutlined />}
                       onClick={handleRunCode}
                       disabled={isRunning}
                       className={`bg-[#29324a] text-[#fff] text-xs font-medium rounded-none hover:border-[#1b55ac] hover:bg-[#1c2e48] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#29324a] disabled:hover:border-transparent`}
                     >
                       {isRunning ? "Running..." : "Run Code"}
+                    </Button>
+                    <Button
+                      type={buttonType}
+                      icon={isSubmitting ? <LoadingOutlined /> : <SendOutlined />}
+                      onClick={handleSubmitCode}
+                      disabled={isSubmitting}
+                      className={`bg-[#29324a] text-[#fff] text-xs font-medium rounded-none hover:border-[#1b55ac] hover:bg-[#1c2e48] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#29324a] disabled:hover:border-transparent`}
+                    >
+                      {isSubmitting ? "Submitting..." : hasSubmitted ? "Update Submission" : "Submit Code"}
                     </Button>
                     {runCount >= 3 && (
                       <Button
@@ -1068,7 +1153,7 @@ const PracticeCode: React.FC<PracticeCodeProps> = ({ lessonId }) => {
                   </div>
                 </div>
 
-                <div className="border border-blue-500 border-opacity-15">
+                <div className="border border-blue-500 border-opacity-15 ">
                   <EditorContainer>
                     {isReplacing && (
                       <div
@@ -1271,13 +1356,12 @@ const PracticeCode: React.FC<PracticeCodeProps> = ({ lessonId }) => {
                         Console Output
                       </ConsoleHeader>
                       <div
-                        className={`flex-1 p-4 ${
-                          isError
-                            ? "text-red-500"
-                            : hasWarnings
+                        className={`flex-1 p-4 ${isError
+                          ? "text-red-500"
+                          : hasWarnings
                             ? "text-yellow-500"
                             : "text-zinc-300"
-                        }`}
+                          }`}
                       >
                         <pre className="h-full overflow-auto font-mono font-bold text-sm p-4">
                           {output || "Run your code to see the output here..."}
