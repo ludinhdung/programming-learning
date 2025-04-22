@@ -353,7 +353,10 @@ export const instructorService = {
   },
 
   async requestWithdrawal(instructorId: string, amount: number) {
-    const response = await api.post(`/instructors/${instructorId}/wallet/withdraw`, { amount });
+    const response = await api.post(
+      `/instructors/${instructorId}/wallet/withdraw`,
+      { amount }
+    );
     return response.data;
   },
 
@@ -366,7 +369,6 @@ export const instructorService = {
     const response = await api.get(`/courses/course/${courseId}/students`);
     return response.data;
   },
-
 };
 
 export const learnerService = {
@@ -461,22 +463,116 @@ export const courseVerificationService = {
   },
 };
 
-export const fetchBankList = async (): Promise<{ name: string; code: string }[]> => {
+export const fetchBankList = async (): Promise<
+  { name: string; code: string }[]
+> => {
   try {
-    const response = await fetch('https://api.vietqr.io/v2/banks');
+    const response = await fetch("https://api.vietqr.io/v2/banks");
     const data = await response.json();
 
-    if (data.code === '00') {
+    if (data.code === "00") {
       return data.data.map((bank: any) => ({
         name: bank.shortName,
-        code: bank.bin
+        code: bank.bin,
       }));
     }
-    throw new Error('Failed to fetch bank list');
+    throw new Error("Failed to fetch bank list");
   } catch (error) {
-    console.error('Error fetching bank list:', error);
+    console.error("Error fetching bank list:", error);
     throw error;
   }
+};
+
+export const feedbackService = {
+  // Create new feedback
+  async createFeedback(
+    courseId: string,
+    learnerId: string,
+    data: { rating: number; comment?: string }
+  ) {
+    try {
+      const response = await api.post(
+        `/feedback/course/${courseId}/learner/${learnerId}`,
+        data
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error(`Error creating feedback for course ${courseId}:`, error);
+      throw error;
+    }
+  },
+
+  // Update feedback
+  async updateFeedback(
+    courseId: string,
+    learnerId: string,
+    data: { rating: number; comment?: string }
+  ) {
+    try {
+      const response = await api.put(
+        `/feedback/course/${courseId}/learner/${learnerId}`,
+        data
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error(`Error updating feedback for course ${courseId}:`, error);
+      throw error;
+    }
+  },
+
+  // Get all feedback for a course
+  async getCourseFeedback(courseId: string) {
+    try {
+      const response = await api.get(`/feedback/course/${courseId}`);
+      return response.data;
+    } catch (error: unknown) {
+      console.error(`Error getting feedbacks for course ${courseId}:`, error);
+      throw error;
+    }
+  },
+
+  // Get feedback of a specific learner for a course
+  async getLearnerFeedback(courseId: string, learnerId: string) {
+    try {
+      const response = await api.get(
+        `/feedback/course/${courseId}/learner/${learnerId}`
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error(
+        `Error getting learner feedback for course ${courseId}:`,
+        error
+      );
+      throw error;
+    }
+  },
+
+  // Get course rating statistics
+  async getCourseRatingStats(courseId: string) {
+    try {
+      const response = await api.get(`/feedback/course/${courseId}/stats`);
+      return response.data;
+    } catch (error: unknown) {
+      console.error(
+        `Error getting rating stats for course ${courseId}:`,
+        error
+      );
+      throw error;
+    }
+  },
+
+  // Delete feedback
+  async deleteFeedback(courseId: string, learnerId: string) {
+    try {
+      const response = await api.delete(
+        `/feedback/course/${courseId}/learner/${learnerId}`
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error(`Error deleting feedback for course ${courseId}:`, error);
+      throw error;
+    }
+  },
 };
 
 export default api;
