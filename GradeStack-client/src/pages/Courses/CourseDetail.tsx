@@ -250,6 +250,16 @@ const CourseDetail: React.FC = () => {
         });
       });
     }
+    course.modules?.forEach((module: any) => {
+      if (module.lessons && module.lessons.length > 0) {
+        module.lessons.forEach((lesson: any) => {
+          if (lesson.lessonType === "FINAL_TEST" && lesson.finalTest) {
+            totalDurationInSeconds +=
+              (lesson.finalTest.estimatedDuration || 0) * 60;
+          }
+        });
+      }
+    });
 
     return totalDurationInSeconds;
   };
