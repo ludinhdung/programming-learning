@@ -173,7 +173,7 @@ const InstructorDetail = () => {
             ...instructorData,
             Course: courses.map((course: Course) => ({
                ...course,
-               duration: calculateCourseDuration(course),
+              duration: calculateCourseDuration(course),
               instructorId: course.instructorId || instructorData.userId,
               price: course.price || 0,
               isPublished: course.isPublished || false,
