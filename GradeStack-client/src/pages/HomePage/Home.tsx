@@ -479,7 +479,7 @@ const Home: React.FC = () => {
               <a
                 key={index}
                 className="block"
-                href={`/instructors/${instructor.userId}`}
+                href={`/instructor/${instructor.userId}`}
               >
                 <figure className="relative group overflow-hidden h-full flex rounded-lg">
                   <img
