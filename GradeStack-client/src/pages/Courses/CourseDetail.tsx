@@ -9,7 +9,7 @@ import { formatVND } from "../../utils/formatCurrency";
 import SigninForm from "../../components/SigninForm/SigninForm";
 import { learnerService } from "../../services/api";
 import CourseFeedback from "../../components/CourseFeedback/CourseFeedback";
-import Footer from "../../components/Footer/Footer";
+import { formatDuration } from "../../utils/formatDuration";
 
 // Styled components
 export const LoadingBar = styled.div`
@@ -108,6 +108,10 @@ interface CourseData {
         problem: string;
         hint: string;
       };
+      finalTest?: {
+        estimatedDuration: number;
+        passingScore: number;
+      };
     }>;
   }>;
 }
@@ -117,7 +121,6 @@ interface EnrollmentRecord {
     id: string;
   };
 }
-
 
 const CourseDetail: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -132,6 +135,8 @@ const CourseDetail: React.FC = () => {
     "buy" | "bookmark" | null
   >(null);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  // Total duration of Course
+  const [totalDuration, setTotalDuration] = useState<number>(0);
 
   const checkAuth = () => {
     const userData = localStorage.getItem("user");
@@ -231,6 +236,24 @@ const CourseDetail: React.FC = () => {
     }
   };
 
+  const calculateCourseDuration = (course: CourseData) => {
+    let totalDurationInSeconds = 0;
+
+    if (course.modules && course.modules.length > 0) {
+      course.modules.forEach((module) => {
+        module.lessons.forEach((lesson) => {
+          if (lesson.lessonType === "VIDEO" && lesson.video) {
+            totalDurationInSeconds += lesson.video.duration || 0;
+          } else {
+            totalDurationInSeconds += lesson.duration || 0;
+          }
+        });
+      });
+    }
+
+    return totalDurationInSeconds;
+  };
+
   useEffect(() => {
     const fetchCourseData = async () => {
       setLoading(true);
@@ -311,6 +334,13 @@ const CourseDetail: React.FC = () => {
     }
   }, [isEnrolled, courseId]);
 
+  // Calculate total duration of Course
+  useEffect(() => {
+    if (courseData) {
+      setTotalDuration(calculateCourseDuration(courseData));
+    }
+  }, [courseData]);
+
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) =>
       prev.includes(sectionId)
@@ -319,11 +349,6 @@ const CourseDetail: React.FC = () => {
     );
   };
 
-  const formatDuration = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-  };
 
   if (loading) {
     return (
@@ -344,7 +369,9 @@ const CourseDetail: React.FC = () => {
   if (!courseData.isPublished) {
     return (
       <div className="min-h-screen bg-[#0a1321] flex items-center justify-center">
-        <div className="text-white text-xl">This course is not available yet. Please check back later.</div>
+        <div className="text-white text-xl">
+          This course is not available yet. Please check back later.
+        </div>
       </div>
     );
   }
@@ -657,7 +684,7 @@ const CourseDetail: React.FC = () => {
                     clipRule="evenodd"
                   />
                 </svg>
-                {formatDuration(courseData.duration)}
+                {formatDuration(totalDuration)}
               </span>
             </div>
 
@@ -784,7 +811,11 @@ const CourseDetail: React.FC = () => {
                                   className="fill-current"
                                 />
                               </svg>
-                              {formatDuration(lesson.duration)}
+                              {lesson.lessonType === "VIDEO"
+                                ? formatDuration(lesson.video?.duration || 0)
+                                : lesson.lessonType === "FINAL_TEST"
+                                ? `${lesson.finalTest?.estimatedDuration || 0}m`
+                                : `${lesson.duration || 0}m`}
                               {(isEnrolled ||
                                 (!isEnrolled && lesson.isPreview)) && (
                                 <span className="ml-4 p-1 text-[#3b82f6] bg-[#1c2432]">

@@ -21,7 +21,9 @@ import LearningPaths from "./pages/LearningPaths/LearningPaths";
 import LearningPathDetail from "./pages/LearningPaths/LearningPathDetail";
 import Checkout from "./pages/Checkout/Checkout";
 import Profile from "./pages/Profile/Profile";
+import InstructorDetail from "./pages/Instructor/InstructorDetail";
 // import CreateCourse from "./pages/CreateCourse/CreateCourse";
+
 // Instructor Dashboard
 import InstructorManagement from "./pages/InstructorDashboard/InstructorDashboard";
 import Overview from "./components/InstructorManagement/Contents/Overview";
@@ -87,6 +89,10 @@ const App: React.FC = () => {
           {/* <Route path="/create-course" element={<CreateCourse />} /> */}
           <Route path="/courses" element={<CourseList />} />
           <Route path="/courses/:courseId" element={<CourseDetail />} />
+          <Route
+            path="/instructor/:instructorId"
+            element={<InstructorDetail />}
+          />
           <Route path="/topics" element={<Topics />} />
           <Route path="/learning-paths" element={<LearningPaths />} />
           <Route
@@ -95,9 +101,10 @@ const App: React.FC = () => {
           />
           <Route path="/checkout/:courseId" element={<Checkout />} />
           <Route path="/profile" element={<Profile />} />
-          {/* Instructor Dashboard*/}
+
           <Route path="/profile" element={<Profile />} />
           <Route path="/dashboard" element={<UserDashboard />} />
+          {/* Instructor Dashboard*/}
           <Route
             path="/instructor-management"
             element={<InstructorManagement />}
@@ -114,7 +121,10 @@ const App: React.FC = () => {
             <Route path="monetization" element={<InstructorMonetization />} />
             <Route path="transactions" element={<TransactionList />} />
             <Route path="verify-courses" element={<CourseVerificationList />} />
-            <Route path="verify-courses/:courseId" element={<CourseVerificationDetail />} />
+            <Route
+              path="verify-courses/:courseId"
+              element={<CourseVerificationDetail />}
+            />
           </Route>
           {/* Supporter Dashboard*/}
           <Route path="/supporter-management" element={<SupporterDashboard />}>
