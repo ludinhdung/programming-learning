@@ -30,6 +30,7 @@ import Overview from "./components/InstructorManagement/Contents/Overview";
 import InstructorCourseList from "./components/InstructorManagement/Contents/Course/CourseList";
 import InstructorCreateCourse from "./components/InstructorManagement/Contents/Course/CreateCourse";
 import InstructorCourseDetail from "./components/InstructorManagement/Contents/Course/CourseDetail";
+import InstructorProfile from "./components/InstructorManagement/Contents/Profile";
 // Topic Management
 import TopicList from "./pages/InstructorDashboard/Topics/TopicList";
 import CreateTopic from "./pages/InstructorDashboard/Topics/CreateTopic";
@@ -125,6 +126,7 @@ const App: React.FC = () => {
               path="verify-courses/:courseId"
               element={<CourseVerificationDetail />}
             />
+            <Route path="profile" element={<InstructorProfile />} />
           </Route>
           {/* Supporter Dashboard*/}
           <Route path="/supporter-management" element={<SupporterDashboard />}>

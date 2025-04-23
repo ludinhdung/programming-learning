@@ -14,6 +14,8 @@ const instructorController = new InstructorController();
 router.post('/', instructorController.createInstructor);
 router.get('/', instructorController.getAllInstructors);
 router.get('/:id', instructorController.getInstructor);
+router.get('/instructor/:id/profile', instructorController.getInstructorProfile);
+router.put('/instructor/:id/profile', instructorController.updateInstructorProfile);
 router.get('/:id/wallet', instructorController.getInstructorWallet);
 router.put('/:id/profile', instructorController.updateProfile);
 router.put('/:id/avatar', instructorController.updateAvatar);

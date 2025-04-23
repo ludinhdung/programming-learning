@@ -595,6 +595,38 @@ export class InstructorController {
   };
 
   /**
+   * Get instructor profile
+   */
+  public getInstructorProfile = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const instructor = await this.instructorService.getInstructorProfile(id);
+      res.status(200).json({
+        success: true,
+        data: instructor,
+      });
+    } catch (error) {
+      this.handleError(res, error);
+    }
+  };
+
+  /**
+   * Update instructor profile
+   */
+  public updateInstructorProfile = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const profileData = req.body;
+      const instructor = await this.instructorService.updateInstructorProfile(id, profileData);
+      res.status(200).json({
+        success: true,
+        data: instructor,
+      });
+    } catch (error) {
+      this.handleError(res, error);
+    }
+  };
+  /**
    * Get all topics
    */
   public getAllTopics = async (req: Request, res: Response): Promise<void> => {

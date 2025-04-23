@@ -1253,6 +1253,35 @@ export class InstructorService extends InstructorBaseService<
       throw PrismaErrorHandler.handle(error, "VideoLesson");
     }
   }
+  async getInstructorProfile(instructorId: string) {
+    const instructor = await prisma.instructor.findUnique({
+      where: { userId: instructorId },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+    return instructor;
+  }
+
+  async updateInstructorProfile(instructorId: string, profileData: {
+    firstName: string;
+    lastName: string;
+    bio: string;
+    socials: string[];
+  }) {
+    const instructor = await prisma.instructor.update({
+      where: { userId: instructorId },
+      data: profileData,
+    });
+    return instructor;
+  }
 
   // Get all topics
   async getAllTopics(): Promise<Topic[]> {

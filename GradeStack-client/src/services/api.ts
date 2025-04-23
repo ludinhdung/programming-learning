@@ -98,6 +98,27 @@ export const instructorService = {
     return respone.data;
   },
 
+  async getInstructorProfile(instructorId: string) {
+    const respone = await api.get(
+      `/instructors/instructor/${instructorId}/profile`
+    );
+    return respone.data;
+  },
+
+  async updateInstructorProfile(
+    instructorId: string,
+    profileData: {
+      bio: string;
+      socials: string[];
+    }
+  ) {
+    const respone = await api.put(
+      `/instructors/instructor/${instructorId}/profile`,
+      profileData
+    );
+    return respone.data;
+  },
+
   async uploadVideo(file: RcFile) {
     const formData = new FormData();
     formData.append("video", file);

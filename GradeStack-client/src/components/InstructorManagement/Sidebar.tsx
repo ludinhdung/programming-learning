@@ -8,6 +8,7 @@ import {
   MdAttachMoney,
   MdCategory,
   MdTimeline,
+  MdPerson,
 } from "react-icons/md";
 import { instructorService } from "../../services/api";
 import { message } from "antd";
@@ -25,6 +26,7 @@ interface InstructorData {
   organization?: string;
   avatar?: string;
   bio?: string;
+  socials?: string[];
 }
 
 interface NavItemProps {
@@ -151,6 +153,11 @@ const Sidebar = () => {
       text: "Monetization",
       href: "/instructor-management/monetization",
     },
+    {
+      icon: MdPerson,
+      text: "Profile",
+      href: "/instructor-management/profile",
+    }
   ];
 
   // Additional items only for INSTRUCTOR_LEAD
