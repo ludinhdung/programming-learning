@@ -881,10 +881,8 @@ const PracticeCode: React.FC<PracticeCodeProps> = ({ lessonId, onMarkComplete })
           if (onMarkComplete) {
             try {
               await onMarkComplete(lessonId);
-              message.success('Lesson marked as complete!');
             } catch (error) {
               console.error('Error marking lesson as complete:', error);
-              message.error('Failed to mark lesson as complete');
             }
           }
         } else {
