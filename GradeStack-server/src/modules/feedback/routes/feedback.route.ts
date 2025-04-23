@@ -44,6 +44,9 @@ router.get(
   feedbackController.getCourseRatingStats
 );
 
+// Get all feedback
+router.get("/", feedbackController.getAllFeedback);
+
 // Delete feedback
 router.delete(
   "/course/:courseId/learner/:learnerId",

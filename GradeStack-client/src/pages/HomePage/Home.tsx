@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
-import { learnerService } from "../../services/api";
+import { feedbackService, learnerService } from "../../services/api";
 
 //React-bits components
 import BlurText from "../../components/React-bitsComponents/BlurText";
@@ -40,57 +40,27 @@ interface Instructor {
   };
 }
 
+interface Feedback {
+  id: string;
+  learnerId: string;
+  courseId: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  course: {
+    id: string;
+    title: string;
+  };
+  learner: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
+}
+
 const handleAnimationComplete = () => {
   console.log("Animation completed!");
 };
-
-const testimonials = [
-  {
-    text: "Laracasts is the best resource for any PHP Developer, and Jeffrey Way is the best teacher! A proud Laracasts subscriber for life.",
-    name: "Gerhard Botha",
-    image: "https://ik.imagekit.io/laracasts/reviews/gerhard.jpg",
-  },
-  {
-    text: "I bought a Laracasts subscription hoping to understand Laravel better. Not only has it done that, but it's made me a better developer in all aspects of PHP.",
-    name: "Matt Brunt",
-    image: "https://ik.imagekit.io/laracasts/reviews/matt-brunt.jpg",
-  },
-  {
-    text: "Laracasts has made me a better developer in not only Laravel/PHP, but in programming in general. With every screencast, I've learned something new. I highly recommend it!",
-    name: "Chris Bogardo",
-    image: "https://ik.imagekit.io/laracasts/reviews/chris.jpg",
-  },
-  {
-    text: "Laracasts is the best resource for any PHP Developer, and Jeffrey Way is the best teacher! A proud Laracasts subscriber for life.",
-    name: "Gerhard Botha",
-    image: "https://ik.imagekit.io/laracasts/reviews/gerhard.jpg",
-  },
-  {
-    text: "I bought a Laracasts subscription hoping to understand Laravel better. Not only has it done that, but it's made me a better developer in all aspects of PHP.",
-    name: "Matt Brunt",
-    image: "https://ik.imagekit.io/laracasts/reviews/matt-brunt.jpg",
-  },
-  {
-    text: "Laracasts has made me a better developer in not only Laravel/PHP, but in programming in general. With every screencast, I've learned something new. I highly recommend it!",
-    name: "Chris Bogardo",
-    image: "https://ik.imagekit.io/laracasts/reviews/chris.jpg",
-  },
-  {
-    text: "Laracasts is the best resource for any PHP Developer, and Jeffrey Way is the best teacher! A proud Laracasts subscriber for life.",
-    name: "Gerhard Botha",
-    image: "https://ik.imagekit.io/laracasts/reviews/gerhard.jpg",
-  },
-  {
-    text: "I bought a Laracasts subscription hoping to understand Laravel better. Not only has it done that, but it's made me a better developer in all aspects of PHP.",
-    name: "Matt Brunt",
-    image: "https://ik.imagekit.io/laracasts/reviews/matt-brunt.jpg",
-  },
-  {
-    text: "Laracasts has made me a better developer in not only Laravel/PHP, but in programming in general. With every screencast, I've learned something new. I highly recommend it!Laracasts has made me a better developer in not only Laravel/PHP, but in programming in general. With every screencast, I've learned something new. I highly recommend it!",
-    name: "Chris Bogardo",
-    image: "https://ik.imagekit.io/laracasts/reviews/chris.jpg",
-  },
-];
 
 const creatorSeries = [
   {
@@ -346,12 +316,12 @@ const topicsMockup = [
 const Home: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         const response = await learnerService.getCourses();
-        console.log("course", response.data);
         
         setCourses(response.data);
       } catch (error) {
@@ -367,9 +337,20 @@ const Home: React.FC = () => {
         console.error("Error fetching instructors:", error);
       }
     };
+    
+    const fetchFeedbacks = async () => {
+      try {
+        const response = await feedbackService.getAllFeedback();
+        console.log("feedback", response.data);
+        setFeedbacks(response.data);
+      } catch (error) {
+        console.error("Error fetching feedbacks:", error);
+      }
+    };
 
     fetchCourses();
     fetchInstructors();
+    fetchFeedbacks();
   }, []);
 
   return (
@@ -504,7 +485,7 @@ const Home: React.FC = () => {
           </div>
         </div>
       </div>
-      {/*Testimonial*/}
+      {/*Feedback section - replaced testimonials with real feedback*/}
       <div className="relative w-full h-[350px] bg-[#0d1118] overflow-hidden">
         <div className="absolute w-fit top-[50px]">
           <div
@@ -515,29 +496,39 @@ const Home: React.FC = () => {
               textOverflow: "ellipsis",
             }}
           >
-            {[...testimonials, ...testimonials].map((testimonial, index) => (
-              <div
-                key={index}
-                className="bg-gray-800 bg-opacity-50 shadow-lg rounded-lg p-6 flex-shrink-0 w-72 max-h-[220px] transition-transform"
-              >
-                <p className="text-sm font-semibold text-gray-200 line-clamp-6 whitespace-normal">
-                  "{testimonial.text}"
-                </p>
-                <div className="flex items-center justify-between mt-4">
-                  <cite className="text-xs font-semibold uppercase text-gray-500">
-                    {testimonial.name}
-                  </cite>
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    className="w-8 h-8 rounded-full border border-gray-300"
-                  />
+            {feedbacks.length > 0 ? (
+              [...feedbacks, ...feedbacks, ...feedbacks, ...feedbacks, ...feedbacks].map((feedback, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-800 bg-opacity-50 shadow-lg rounded-lg p-6 flex-shrink-0 w-72 max-h-[220px] transition-transform"
+                >
+                  <p className="text-sm font-semibold text-gray-200 line-clamp-6 whitespace-normal">
+                    "{feedback.comment}"
+                  </p>
+                  <div className="flex items-center justify-between mt-4">
+                    <div>
+                      <cite className="text-xs font-semibold uppercase text-gray-500">
+                        {feedback.learner.firstName} {feedback.learner.lastName}
+                      </cite>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#3b82f6] to-[#482c95] flex items-center justify-center text-white font-medium">
+                        {feedback.learner.firstName[0]}
+                        {feedback.learner.lastName[0]}
+                      </div>
+                    </div>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="flex justify-center items-center w-full text-white">
+                Loading feedback...
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
+
       {/* Stream of Courses Container */}
       <div className="relative bg-[#0d1118] left-0 right-0 top-0 w-full">
         <div className="px-10 pt-5">
@@ -575,7 +566,9 @@ const Home: React.FC = () => {
                           alt={`${course.instructor.user.firstName} ${course.instructor.user.lastName}'s avatar`}
                           className="w-[22px] h-[22px] rounded-full mr-2"
                         />
-                        <span className="font-bold">with {course.instructor.user.firstName}</span>
+                        <span className="font-bold">
+                          with {course.instructor.user.firstName}
+                        </span>
                       </div>
                     </header>
                     <img

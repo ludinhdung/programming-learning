@@ -561,6 +561,12 @@ export const feedbackService = {
     }
   },
 
+  // Get all feedback
+  async getAllFeedback() {
+    const response = await api.get("/feedback");
+    return response.data;
+  },
+
   // Delete feedback
   async deleteFeedback(courseId: string, learnerId: string) {
     try {
