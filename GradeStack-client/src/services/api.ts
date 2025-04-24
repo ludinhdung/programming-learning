@@ -484,6 +484,20 @@ export const userService = {
     const respone = await api.get(`/users/${userId}/enrollments`);
     return respone.data;
   },
+  async forgotPassword(email: string) {
+    const response = await api.post("/users/forgot-password", { email });
+    return response.data;
+  },
+  async verifyResetCode(email: string, code: string) {
+    const response = await api.post("/users/verify-reset-code", { email, code });
+    return response.data;
+  },
+  async resetPassword(email: string, code: string, newPassword: string) {
+    const response = await api.post("/users/reset-password", { email, code, newPassword });
+    return response.data;
+  },
+  
+  
 };
 
 export const courseVerificationService = {

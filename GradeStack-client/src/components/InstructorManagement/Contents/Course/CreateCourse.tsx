@@ -2008,9 +2008,9 @@ const CreateCourse: React.FC = () => {
       setError(null);
 
       const userData = JSON.parse(localStorage.getItem("user") || "{}");
-      if (!userData.id || userData.role !== "INSTRUCTOR") {
+      if (!userData.id || userData.role !== "INSTRUCTOR" && userData.role !== "INSTRUCTOR_LEAD") {
         throw new Error(
-          "You must be logged in as an instructor to create a course"
+          "You must be logged in as an instructor or instructor lead to create a course"
         );
       }
 

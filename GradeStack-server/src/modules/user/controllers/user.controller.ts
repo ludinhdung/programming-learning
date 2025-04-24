@@ -115,4 +115,68 @@ export class UserController {
             next(error);
         }
     }
+
+    // forgot password
+    async forgotPassword(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { email } = req.body;
+            if (!email) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Email is required"
+                })
+            }
+            const result = await this.userService.forgotPassword(email);
+            res.status(200).json({
+                success: true,
+                message: "Verification code sent to email"
+            });
+
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async verifyResetCode(req: Request, res: Response, next: NextFunction) { 
+        try {
+            const { email, code } = req.body;
+
+            if (!email || !code) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Email and code are required"
+                })
+            }
+
+            const result = await this.userService.verifyResetCode(email, code);
+            res.status(200).json({
+                success: true,
+                message: "Verification code verified successfully"
+            });
+
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async resetPassword(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { email, newPassword } = req.body;
+            if (!email || !newPassword) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Email and new password are required"
+                })
+            }
+
+            const result = await this.userService.resetPassword(email, newPassword);
+            res.status(200).json({
+                success: true,
+                message: "Password reset successfully"
+            });
+
+        } catch (error) {
+            next(error);
+        }
+    }
 }
