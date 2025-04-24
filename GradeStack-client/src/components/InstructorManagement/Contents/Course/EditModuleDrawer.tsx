@@ -457,10 +457,7 @@ const EditModuleDrawer: React.FC<EditModuleDrawerProps> = ({
               Preview Video
             </label>
             <div className="flex justify-center">
-              <iframe
-                src={lesson.content?.video?.url}
-                allowFullScreen
-              ></iframe>
+              <iframe src={lesson.content?.video?.url} allowFullScreen></iframe>
             </div>
           </div>
         )}

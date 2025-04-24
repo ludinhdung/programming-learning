@@ -40,6 +40,7 @@ interface Lesson {
     codeSnippet: string;
   };
   finalTest?: {
+    estimatedDuration: number;
     questions: Array<{
       content: string;
       order: number;
@@ -133,6 +134,7 @@ const CourseDetail: React.FC = () => {
         const user = JSON.parse(userData);
 
         const data = await instructorService.getCourse(user.id, courseId!);
+        console.log("data", data);
 
         // Transform the data to match the Module type
         const transformedData = {
@@ -158,6 +160,7 @@ const CourseDetail: React.FC = () => {
                 }),
                 ...(lesson.lessonType === "FINAL_TEST" && {
                   finalTest: {
+                    estimatedDuration: lesson.finalTest?.estimatedDuration || 0,
                     questions:
                       lesson.finalTest?.questions?.map((q) => ({
                         content: q.content,
@@ -172,6 +175,16 @@ const CourseDetail: React.FC = () => {
                 }),
               },
             })),
+            // Tính toán lại tổng duration cho module
+            videoDuration: module.lessons.reduce((total, lesson) => {
+              if (lesson.lessonType === "VIDEO") {
+                return total + (lesson.video?.duration || 0);
+              } else if (lesson.lessonType === "FINAL_TEST") {
+                // Chuyển từ phút sang giây
+                return total + (lesson.finalTest?.estimatedDuration || 0) * 60;
+              }
+              return total;
+            }, 0),
           })),
         };
         console.log("transformedData", transformedData);
@@ -193,6 +206,7 @@ const CourseDetail: React.FC = () => {
         const response = await instructorService.getStudentEnrolledCourses(
           courseId!
         );
+        console.log("response", response);
         setStudentsEnrolledCourse(response.data);
       } catch (error) {
         console.error("Error fetching students enrolled course:", error);
@@ -275,10 +289,15 @@ const CourseDetail: React.FC = () => {
   const handleSaveModule = async (updatedModule: Module) => {
     try {
       // Tính toán videoDuration từ tất cả lessons
-      const totalDuration = updatedModule.lessons.reduce(
-        (total, lesson) => total + (lesson.video?.duration || 0),
-        0
-      );
+      const totalDuration = updatedModule.lessons.reduce((total, lesson) => {
+        if (lesson.lessonType === "VIDEO") {
+          return total + (lesson.video?.duration || 0);
+        } else if (lesson.lessonType === "FINAL_TEST") {
+          // Chuyển từ phút sang giây
+          return total + (lesson.finalTest?.estimatedDuration || 0) * 60;
+        }
+        return total;
+      }, 0);
       await instructorService.updateModule(updatedModule.id, {
         title: updatedModule.title,
         description: updatedModule.description,
@@ -348,6 +367,7 @@ const CourseDetail: React.FC = () => {
             }),
             ...(lesson.lessonType === "FINAL_TEST" && {
               finalTest: {
+                estimatedDuration: lesson.finalTest?.estimatedDuration || 0,
                 questions:
                   lesson.finalTest?.questions?.map((q) => ({
                     content: q.content,
@@ -786,9 +806,16 @@ const CourseDetail: React.FC = () => {
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                                       />
                                     </svg>
-                                    {formatDuration(
-                                      lesson.video?.duration || 0
-                                    )}
+                                    {lesson.lessonType === "VIDEO"
+                                      ? formatDuration(
+                                          lesson.video?.duration || 0
+                                        )
+                                      : lesson.lessonType === "FINAL_TEST"
+                                      ? formatDuration(
+                                          (lesson.finalTest
+                                            ?.estimatedDuration || 0) * 60
+                                        )
+                                      : "N/A"}
                                   </div>
                                 </div>
                               </li>
