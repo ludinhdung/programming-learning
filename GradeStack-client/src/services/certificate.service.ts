@@ -5,3 +5,7 @@ export const generateCertificate = async (learnerId: string, courseId: string, n
     return response.data;
 }
 
+export const getCertificatesByLearnerId = async (learnerId: string) => {
+    const response = await api.get(`/learners/${learnerId}/certificates`);
+    return response.data;
+}

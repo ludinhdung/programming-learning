@@ -1,8 +1,9 @@
 import { FC, useState, useEffect } from 'react';
 import { Layout, Menu, Button, message, Spin, Alert, Form, Input, Tabs, Card, Tag, Avatar } from 'antd';
-import { UserOutlined, CreditCardOutlined, StarOutlined, BookOutlined, CheckCircleOutlined, SyncOutlined } from '@ant-design/icons';
+import { UserOutlined, CreditCardOutlined, StarOutlined, BookOutlined, CheckCircleOutlined, SyncOutlined, FileTextOutlined } from '@ant-design/icons';
 import Header from '../../components/Header/Header';
 import userService from '../../services/user.service';
+import { getCertificatesByLearnerId } from '../../services/certificate.service';
 import type {
   UserProfile,
   EnrollmentRecord,
@@ -12,6 +13,20 @@ import type {
 import { formatVND } from '../../utils/formatCurrency';
 import { Link } from 'react-router-dom';
 const { Sider, Content } = Layout;
+
+interface Certificate {
+  id: string;
+  learnerId: string;
+  courseId: string;
+  issuedAt: string;
+  certificateUrl: string;
+  course: {
+    id: string;
+    title: string;
+    description: string;
+    thumbnail: string;
+  };
+}
 
 const Profile: FC = () => {
   const [selectedKey, setSelectedKey] = useState('profile');
@@ -28,6 +43,9 @@ const Profile: FC = () => {
   const [purchases, setPurchases] = useState<PurchaseRecord[]>([]);
   const [loadingPurchases, setLoadingPurchases] = useState(false);
   const [errorPurchases, setErrorPurchases] = useState<string | null>(null);
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [loadingCertificates, setLoadingCertificates] = useState(false);
+  const [errorCertificates, setErrorCertificates] = useState<string | null>(null);
   const [loadingChangePassword, setLoadingChangePassword] = useState(false);
   const [changePasswordError, setChangePasswordError] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
@@ -121,6 +139,24 @@ const Profile: FC = () => {
     fetchPurchases();
   }, [selectedKey, profileData]);
 
+  // Fetch certificates when selected
+  useEffect(() => {
+    const fetchCertificates = async () => {
+      if (selectedKey === 'certificates' && profileData?.id) {
+        setLoadingCertificates(true);
+        try {
+          const data = await getCertificatesByLearnerId(profileData.id);
+          setCertificates(data);
+        } catch (err) {
+          message.error('Failed to load certificates.');
+        } finally {
+          setLoadingCertificates(false);
+        }
+      }
+    };
+    fetchCertificates();
+  }, [selectedKey, profileData]);
+
   const handleChangePassword = async () => {
     setLoadingChangePassword(true);
     setChangePasswordError(null);
@@ -162,6 +198,7 @@ const Profile: FC = () => {
                     children: [
                       { key: 'enrolled', icon: <BookOutlined />, label: 'Enrolled Courses' },
                       { key: 'bookmarks', icon: <StarOutlined />, label: 'My Bookmarks' },
+                      { key: 'certificates', icon: <FileTextOutlined />, label: 'My Certificates' },
                     ]
                   },
                   {
@@ -389,6 +426,53 @@ const Profile: FC = () => {
                                   href={`/course/${bookmark.course.id}`}
                                 >
                                   View Course
+                                </Button>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {selectedKey === 'certificates' && (
+                  <>
+                    <SectionTitle title="MY CERTIFICATES" />
+                    {loadingCertificates && <div className="text-center py-8"><Spin size="large" /></div>}
+                    {errorCertificates && <Alert message="Error" description={errorCertificates} type="error" showIcon className="mb-4" />}
+                    {!loadingCertificates && !errorCertificates && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {certificates.length === 0 ? (
+                          <p className="text-[#94a3b8] text-center py-4 col-span-full">You haven't earned any certificates yet.</p>
+                        ) : (
+                          certificates.map((certificate) => (
+                            <div key={certificate.id} className="bg-[#13151f] rounded-lg hover:bg-[#1a1f2e] transition-colors overflow-hidden shadow-md">
+                              <div className="flex gap-4 p-4">
+                                <div className="w-20 h-20 bg-[#1e2736] rounded-lg flex items-center justify-center shrink-0">
+                                  <FileTextOutlined className="text-2xl text-[#10b981]" />
+                                </div>
+                                <div className="flex-1">
+                                  <h3 className="text-white text-lg font-semibold mb-1">{certificate.course.title}</h3>
+                                  <div className="flex flex-wrap gap-2 mb-2">
+                                    <Tag className="rounded-full px-3 py-1 border-0 bg-[#0f2d1e] text-[#10b981] font-medium">
+                                      Issued: {new Date(certificate.issuedAt).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric'
+                                      })}
+                                    </Tag>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="bg-[#1e2736] py-2 px-4 flex justify-end">
+                                <Button
+                                  type="text"
+                                  className="text-[#10b981] hover:text-[#34d399] hover:bg-[#1a1f2e]"
+                                  href={certificate.certificateUrl}
+                                  target="_blank"
+                                >
+                                  View Certificate
                                 </Button>
                               </div>
                             </div>
