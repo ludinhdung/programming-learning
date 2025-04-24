@@ -92,6 +92,8 @@ interface EnrolledStudent {
   id: string;
   progress: number;
   enrolledAt: string;
+  // trường này lấy từ certificate
+  completedAt?: string;
   learner: {
     id: string;
     firstName: string;
@@ -207,7 +209,36 @@ const CourseDetail: React.FC = () => {
           courseId!
         );
         console.log("response", response);
-        setStudentsEnrolledCourse(response.data);
+
+        // Lấy danh sách học viên
+        const enrolledStudents = response.data;
+
+        // Lấy thông tin certificate cho từng học viên
+        const studentsWithCertificates = await Promise.all(
+          enrolledStudents.map(async (student: EnrolledStudent) => {
+            try {
+                // Gọi API để lấy thông tin chứng chỉ
+                const certificateData =
+                  await instructorService.getCertificateByLearnerAndCourse(
+                    student.learner.id,
+                    courseId!
+                  );
+
+                if (certificateData && certificateData.issuedAt) {
+                  return {
+                    ...student,
+                    completedAt: certificateData.issuedAt,
+                  };
+                }
+              return student;
+            } catch (error) {
+              console.error("Error fetching certificate for student:", error);
+              return student;
+            }
+          })
+        );
+
+        setStudentsEnrolledCourse(studentsWithCertificates);
       } catch (error) {
         console.error("Error fetching students enrolled course:", error);
       }
@@ -854,6 +885,9 @@ const CourseDetail: React.FC = () => {
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Enrolled Date
                               </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Finished Date
+                              </th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-200">
@@ -872,9 +906,9 @@ const CourseDetail: React.FC = () => {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="flex items-center">
-                                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div className="w-32 bg-gray-200 rounded-full h-3">
                                       <div
-                                        className="bg-blue-600 h-2.5 rounded-full"
+                                        className="bg-blue-600 h-3 rounded-full"
                                         style={{
                                           width: `${student.progress}%`,
                                         }}
@@ -890,6 +924,15 @@ const CourseDetail: React.FC = () => {
                                     {new Date(
                                       student.enrolledAt
                                     ).toLocaleString()}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="text-sm text-gray-500">
+                                    {student.completedAt
+                                      ? new Date(
+                                          student.completedAt
+                                        ).toLocaleString()
+                                      : "Not done"}
                                   </div>
                                 </td>
                               </tr>

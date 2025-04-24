@@ -403,6 +403,11 @@ export const instructorService = {
     const response = await api.get(`/courses/course/${courseId}/students`);
     return response.data;
   },
+
+  async getCertificateByLearnerAndCourse(learnerId: string, courseId: string) {
+    const response = await api.get(`/learners/${learnerId}/courses/${courseId}/certificate`);
+    return response.data;
+  },
 };
 
 export const learnerService = {
