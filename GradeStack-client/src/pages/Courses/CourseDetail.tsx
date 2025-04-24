@@ -260,7 +260,6 @@ const CourseDetail: React.FC = () => {
         });
       }
     });
-
     return totalDurationInSeconds;
   };
 
@@ -824,7 +823,10 @@ const CourseDetail: React.FC = () => {
                               {lesson.lessonType === "VIDEO"
                                 ? formatDuration(lesson.video?.duration || 0)
                                 : lesson.lessonType === "FINAL_TEST"
-                                ? `${lesson.finalTest?.estimatedDuration || 0}m`
+                                ? formatDuration(
+                                    (lesson.finalTest?.estimatedDuration ||
+                                      0) * 60
+                                  )
                                 : `${lesson.duration || 0}m`}
                               {(isEnrolled ||
                                 (!isEnrolled && lesson.isPreview)) && (

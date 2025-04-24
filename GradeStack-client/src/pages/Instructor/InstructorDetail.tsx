@@ -6,7 +6,6 @@ import { instructorService } from "../../services/api";
 import { Rate, Tooltip } from "antd";
 import { formatDuration } from "../../utils/formatDuration";
 
-
 interface User {
   firstName: string;
   lastName: string;
@@ -201,12 +200,15 @@ const InstructorDetail = () => {
     let totalDurationInSeconds = 0;
 
     if (course.modules && course.modules.length > 0) {
-      totalDurationInSeconds += course.modules.reduce(
-        (sum: number, module: Module) => {
-          return sum + (module.videoDuration || 0);
-        },
-        0
-      );
+      course.modules.forEach((module) => {
+        module.lessons.forEach((lesson) => {
+          if (lesson.lessonType === "VIDEO" && lesson.video) {
+            totalDurationInSeconds += lesson.video.duration || 0;
+          } else {
+            totalDurationInSeconds += lesson.duration || 0;
+          }
+        });
+      });
     }
 
     course.modules?.forEach((module: Module) => {
@@ -219,6 +221,7 @@ const InstructorDetail = () => {
         });
       }
     });
+
     return totalDurationInSeconds;
   };
 
@@ -288,19 +291,22 @@ const InstructorDetail = () => {
 
   const { user, organization, avatar, bio, Course } = instructor;
 
+  // Chỉ lấy các khóa học đã public
+  const publicCourses = Course.filter((course) => course.isPublished);
+
   const featuredCourse =
-    Course && Course.length > 0
-      ? Course.reduce((highgestRatedCourse, currentCourse) => {
+    publicCourses && publicCourses.length > 0
+      ? publicCourses.reduce((highgestRatedCourse, currentCourse) => {
           const highgestRating = highgestRatedCourse.averageRating || 0;
           const currentRating = currentCourse.averageRating || 0;
 
           return currentRating > highgestRating
             ? currentCourse
             : highgestRatedCourse;
-        }, Course[0])
+        }, publicCourses[0])
       : null;
 
-  const totalStudentEnrolled = Course.reduce((total, course) => {
+  const totalStudentEnrolled = publicCourses.reduce((total, course) => {
     return total + (course._count?.EnrolledCourse || 0);
   }, 0);
 
@@ -308,7 +314,9 @@ const InstructorDetail = () => {
     <>
       <Header />
       <div>
-        { loading&& <LoadingBar />}
+        {loading && (
+          <div className="fixed top-0 left-0 w-full h-1 bg-blue-600 z-50"></div>
+        )}
         <div className="relative px-20 bg-[#0a1321] text-white overflow-hidden min-h-[85vh]">
           {/* Background Image & Gradient */}
           <div className="absolute inset-0 pointer-events-none">
@@ -340,7 +348,7 @@ const InstructorDetail = () => {
                     {organization}
                   </span>
                   <span className="border-2 border-white/10 px-3 py-1">
-                    Courses: {Course?.length || 0}
+                    Courses: {publicCourses?.length || 0}
                   </span>
                   <span className="border-2 border-white/10 px-3 py-1">
                     Student Enrolled: {totalStudentEnrolled}
@@ -423,12 +431,14 @@ const InstructorDetail = () => {
                         >
                           View Course
                         </a>
-                        <button
-                          onClick={scrollToCourses}
-                          className="btn btn-secondary bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded flex items-center justify-center"
-                        >
-                          View All Courses
-                        </button>
+                        {publicCourses.length > 1 && (
+                          <button
+                            onClick={scrollToCourses}
+                            className="btn btn-secondary bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded flex items-center justify-center"
+                          >
+                            View All Courses
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -438,62 +448,88 @@ const InstructorDetail = () => {
           </div>
 
           {/*Courses*/}
-          <div className="mt-20 mb-16" ref={coursesRef}>
-            <div className="flex items-center justify-between">
-              <div className="flex text-2xl justify-start uppercase font-extrabold mb-6">
-                <span className="text-blue-600 mr-2">//</span>
-                <span className="text-white">Courses by {user.firstName}</span>
-              </div>
-              <div className="flex text-[80px] text-slate-800 justify-end uppercase font-extrabold">
-                <p>expert knowledge</p>
-              </div>
-            </div>
 
-            <div className="-mt-8">
-              <div
-                className="cards grid overflow-auto gap-2 xl:gap-4 w-auto justify-start grid-flow-col auto-cols-[380px] pr-24 scrolling-container hide-scrollbar"
-                style={{
-                  maskImage:
-                    "linear-gradient(to right, black calc(100% - 10rem), transparent)",
-                }}
-              >
-                {Course.map((course, index) => (
-                  <a
-                    key={index}
-                    className="group flex h-[min-content] aspect-[1/.7] lg:h-auto lg:aspect-auto lg:max-w-none series-card"
-                  >
+          {publicCourses.length > 0 ? (
+            <div className="mt-20 mb-16" ref={coursesRef}>
+              <div className="flex items-center justify-between">
+                <div className="flex text-2xl justify-start uppercase font-extrabold mb-6">
+                  <span className="text-blue-600 mr-2">//</span>
+                  <span className="text-white">
+                    Courses by {user.firstName}
+                  </span>
+                </div>
+                <div className="flex text-[80px] text-slate-800 justify-end uppercase font-extrabold">
+                  <p>expert knowledge</p>
+                </div>
+              </div>
+              <div className="-mt-8">
+                <div
+                  className="cards grid overflow-auto gap-2 xl:gap-4 w-auto justify-start grid-flow-col auto-cols-[380px] pr-24 scrolling-container hide-scrollbar"
+                  style={{
+                    maskImage:
+                      "linear-gradient(to right, black calc(100% - 10rem), transparent)",
+                  }}
+                >
+                  {publicCourses.map((course, index) => (
                     <a
-                      href={`/courses/${course.id}`}
-                      className="panel relative transition-colors duration-300 px-4 lg:px-5 py-4 flex-1 overflow-hidden text-center aspect-square bg-slate-800 rounded-lg hover:bg-blue-800"
+                      key={index}
+                      className="group flex h-[min-content] aspect-[1/.7] lg:h-auto lg:aspect-auto lg:max-w-none series-card"
                     >
-                      <header className="flex flex-col items-center justify-center text-center h-[9.38rem]">
-                        <h2 className="text-white mb-3 inline-flex items-center text-balance font-semibold leading-tight text-2xl">
-                          {course.title}
-                        </h2>
-                        <div className="flex text-gray-400 text-sm items-center">
-                          <img
-                            src={avatar}
-                            alt={`${user.firstName} ${user.lastName}'s avatar`}
-                            className="w-[22px] h-[22px] rounded-full mr-2"
-                          />
-                          <span className="font-bold">
-                            with {user.firstName}
-                          </span>
-                        </div>
-                      </header>
-                      <img
-                        loading="lazy"
-                        className="bottom-0 left-0 right-0 w-full translate-y-[55%] scale-[200%] group-hover:scale-[205%] transition-transform duration-300"
-                        src={course.thumbnail}
-                        alt={`${course.title} thumbnail`}
-                        style={{ width: "15.3rem" }}
-                      />
+                      <a
+                        href={`/courses/${course.id}`}
+                        className="panel relative transition-colors duration-300 px-4 lg:px-5 py-4 flex-1 overflow-hidden text-center aspect-square bg-slate-800 rounded-lg hover:bg-blue-800"
+                      >
+                        <header className="flex flex-col items-center justify-center text-center h-[9.38rem]">
+                          <h2 className="text-white mb-3 inline-flex items-center text-balance font-semibold leading-tight text-2xl">
+                            {course.title}
+                          </h2>
+                          <div className="flex text-gray-400 text-sm items-center">
+                            <img
+                              src={avatar}
+                              alt={`${user.firstName} ${user.lastName}'s avatar`}
+                              className="w-[22px] h-[22px] rounded-full mr-2"
+                            />
+                            <span className="font-bold">
+                              with {user.firstName}
+                            </span>
+                          </div>
+                        </header>
+                        <img
+                          loading="lazy"
+                          className="bottom-0 left-0 right-0 w-full translate-y-[55%] scale-[200%] group-hover:scale-[205%] transition-transform duration-300"
+                          src={course.thumbnail}
+                          alt={`${course.title} thumbnail`}
+                          style={{ width: "15.3rem" }}
+                        />
+                      </a>
                     </a>
-                  </a>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="mt-52 mb-16">
+              <div className="flex items-center justify-between">
+                <div className="flex text-2xl justify-start uppercase font-extrabold mb-6">
+                  <span className="text-blue-600 mr-2">//</span>
+                  <span className="text-white">
+                    Courses by {user.firstName}
+                  </span>
+                </div>
+                <div className="flex text-[80px] text-slate-800 justify-end uppercase font-extrabold">
+                  <p>expert knowledge</p>
+                </div>
+              </div>
+              <div className="text-center py-20 bg-gray-800/30 rounded-lg">
+                <p className="text-xl text-gray-400">
+                  No published courses available at this time.
+                </p>
+                <p className="text-gray-500 mt-2">
+                  Check back later for new courses from {user.firstName}.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       <Footer />
