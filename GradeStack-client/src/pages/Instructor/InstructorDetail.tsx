@@ -6,6 +6,7 @@ import { instructorService } from "../../services/api";
 import { Rate, Tooltip } from "antd";
 import { formatDuration } from "../../utils/formatDuration";
 
+
 interface User {
   firstName: string;
   lastName: string;
@@ -307,6 +308,7 @@ const InstructorDetail = () => {
     <>
       <Header />
       <div>
+        { loading&& <LoadingBar />}
         <div className="relative px-20 bg-[#0a1321] text-white overflow-hidden min-h-[85vh]">
           {/* Background Image & Gradient */}
           <div className="absolute inset-0 pointer-events-none">

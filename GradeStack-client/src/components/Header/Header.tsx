@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogPanel,
   PopoverGroup,
-  Listbox,
   Menu,
   MenuButton,
   MenuItem,
@@ -44,6 +43,7 @@ const Header: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentForm, setCurrentForm] = useState<FormType>("signin");
   const [user, setUser] = useState<User | null>(null);
+  const [currentPath, setCurrentPath] = useState("");
 
   useEffect(() => {
     // Check for user data in localStorage on component mount
@@ -51,7 +51,17 @@ const Header: React.FC = () => {
     if (userStr) {
       setUser(JSON.parse(userStr));
     }
+
+    // Set current path
+    setCurrentPath(window.location.pathname);
   }, []);
+
+  // Function to check if menu item is active
+  const isActiveLink = (href: string) => {
+    if (href === "/" && currentPath === "/") return true;
+    if (href !== "/" && currentPath.startsWith(href)) return true;
+    return false;
+  };
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -101,6 +111,9 @@ const Header: React.FC = () => {
         <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white text-lg">
           {user?.firstName?.[0]?.toUpperCase()}
         </div>
+        <span className="text-sm/6 font-semibold text-white">
+          {user?.firstName} {user?.lastName}
+        </span>
         <ChevronDownIcon className="size-4 fill-white/60" />
       </MenuButton>
 
@@ -168,7 +181,11 @@ const Header: React.FC = () => {
                 <a
                   key={item.name}
                   href={item.href}
-                  className="text-sm/6 font-semibold text-gray-300"
+                  className={`text-sm/6 font-semibold relative ${
+                    isActiveLink(item.href)
+                      ? "text-gray-100 after:absolute after:bottom-[-8px] after:left-0 after:right-0 after:h-[3px] after:bg-blue-600 after:rounded-full"
+                      : "text-gray-300 hover:text-blue-600 transition-colors duration-200"
+                  }`}
                 >
                   {item.name}
                 </a>
@@ -237,7 +254,11 @@ const Header: React.FC = () => {
                     <a
                       key={item.name}
                       href={item.href}
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-gray-300 hover:bg-gray-800"
+                      className={`-mx-3 block rounded-lg px-3 py-2 text-base font-semibold ${
+                        isActiveLink(item.href)
+                          ? "text-blue-600 bg-blue-950/50"
+                          : "text-gray-300 hover:bg-gray-800"
+                      }`}
                     >
                       {item.name}
                     </a>

@@ -53,7 +53,7 @@ import UserDashboard from "./pages/UserDashboard/UserDashboard";
 import PracticeCode from "./pages/PracticeCode/PracticeCode";
 import { TransactionList } from "./components/InstructorManagement/Contents/Transaction";
 import { CourseVerificationList } from "./components/InstructorManagement/Contents/CourseVerification";
-import CourseVerificationDetail from "./components/InstructorManagement/Contents/CourseVerification/CourseVerificationDetail"
+import CourseVerificationDetail from "./components/InstructorManagement/Contents/CourseVerification/CourseVerificationDetail";
 import AdminOverview from "./pages/AdminDashboard/components/Overview";
 import AdminTransactions from "./pages/AdminDashboard/components/Transactions";
 import AdminSupporterManagement from "./pages/AdminDashboard/components/SupporterManagement";
