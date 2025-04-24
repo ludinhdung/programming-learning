@@ -61,7 +61,15 @@ app.use('/api/progress', progressRoutes);
 app.use("/api/final-test", finalTestRoutes);
 app.use("/api/feedback", feedbackRoutes);
 
-
+// CertificateService.generateCertificate(
+//     {
+//         name: 'Dung',
+//         email: 'dungdung23092002@gmail.com'
+//     },
+//     'Java Basic',
+//     '2025-04-23',
+//     '2025-10-25'
+// ).then(console.log).catch(console.error);
 
 
 app.use(errorHandler);

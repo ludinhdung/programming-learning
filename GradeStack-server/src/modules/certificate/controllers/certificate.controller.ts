@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { CertificateService } from '../services/certificate.service';
 import { createCertificateSchema, updateCertificateSchema } from '../validation/certificate.validation';
 
@@ -153,4 +153,15 @@ export class CertificateController {
             this.handleError(res, error);
         }
     }
+
+    public generateCertificate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const { learnerId, courseId, name } = req.body;
+            const certificate = await this.certificateService.generateCertificate(learnerId, courseId, name);
+            res.status(200).json(certificate);
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    }
+
 }

@@ -6,6 +6,7 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import { learnerService } from "../../../services/api";
 import { feedbackService } from "../../../services/api";
+import CertificateModal from './CertificateModal';
 
 interface FinalQuizContentProps {
   lesson: Lesson;
@@ -17,6 +18,12 @@ interface SubmissionStatus {
   submitted: boolean;
   score: number;
   submittedAt: string;
+}
+
+interface User {
+  id: string;
+  name?: string;
+  email?: string;
 }
 
 const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
@@ -44,6 +51,9 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+
+  const [showCertificateModal, setShowCertificateModal] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
 
   // Check submission status when component mounts
   useEffect(() => {
@@ -151,6 +161,14 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
     }, 100);
   };
 
+  // Add this useEffect to get user data
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
   const handleSubmitFeedback = async () => {
     if (rating === 0 || comment.trim() === "") {
       message.error("Please provide a rating and comment");
@@ -160,15 +178,11 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
     try {
       setIsSubmittingFeedback(true);
 
-      const userData = localStorage.getItem("user");
-      if (!userData) {
+      if (!user) {
         message.error("User not found. Please login again.");
         return;
       }
 
-      const user = JSON.parse(userData);
-
-      // Chỉ gọi create feedback, không xử lý update
       await feedbackService.createFeedback(courseId, user.id, {
         rating: rating,
         comment: comment.trim() || undefined,
@@ -176,6 +190,8 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
 
       message.success("Thank you for your feedback!");
       setShowFeedback(false);
+      // Show certificate modal after feedback submission
+      setShowCertificateModal(true);
     } catch (error: unknown) {
       console.error("Failed to submit feedback:", error);
     } finally {
@@ -193,7 +209,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
           questions[Number(qIndex)].answers[aIndex].isCorrect
       ).length /
         questions.length) *
-        100
+      100
     );
 
     if (score >= passingScore) {
@@ -394,9 +410,8 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
                       <div>
                         <div className="text-xs text-gray-400">Time Left</div>
                         <div
-                          className={`font-semibold ${getTimeColor()} ${
-                            timeLeft <= 60 ? "animate-pulse" : ""
-                          }`}
+                          className={`font-semibold ${getTimeColor()} ${timeLeft <= 60 ? "animate-pulse" : ""
+                            }`}
                         >
                           {formatTime(timeLeft)}
                         </div>
@@ -467,29 +482,26 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
                             onClick={() =>
                               handleAnswerSelect(currentQuestionIndex, index)
                             }
-                            className={`group relative p-4 rounded-lg cursor-pointer transition-all duration-200 border ${
-                              selectedAnswers[currentQuestionIndex] === index
-                                ? "bg-[#0d1117] border-blue-500"
-                                : "bg-[#0d1117] border-[#29334a] hover:border-blue-500/30"
-                            } ${
-                              isSubmitted
+                            className={`group relative p-4 rounded-lg cursor-pointer transition-all duration-200 border ${selectedAnswers[currentQuestionIndex] === index
+                              ? "bg-[#0d1117] border-blue-500"
+                              : "bg-[#0d1117] border-[#29334a] hover:border-blue-500/30"
+                              } ${isSubmitted
                                 ? answer.isCorrect
                                   ? "bg-green-500/10 border-green-500"
                                   : selectedAnswers[currentQuestionIndex] ===
                                     index
-                                  ? "bg-red-500/10 border-red-500/50"
-                                  : ""
+                                    ? "bg-red-500/10 border-red-500/50"
+                                    : ""
                                 : ""
-                            }`}
+                              }`}
                           >
                             <div className="flex items-center gap-4">
                               <div
-                                className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
-                                  selectedAnswers[currentQuestionIndex] ===
+                                className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${selectedAnswers[currentQuestionIndex] ===
                                   index
-                                    ? "bg-blue-500/20 text-blue-400 border-blue-500"
-                                    : "bg-[#1c2936] text-gray-400 border border-[#29334a] group-hover:border-blue-500/30"
-                                }`}
+                                  ? "bg-blue-500/20 text-blue-400 border-blue-500"
+                                  : "bg-[#1c2936] text-gray-400 border border-[#29334a] group-hover:border-blue-500/30"
+                                  }`}
                               >
                                 {String.fromCharCode(65 + index)}
                               </div>
@@ -526,13 +538,12 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
                     <div
                       key={index}
                       onClick={() => setCurrentQuestionIndex(index)}
-                      className={`w-2.5 h-2.5 rounded-full cursor-pointer transition-all duration-300 ${
-                        currentQuestionIndex === index
-                          ? "bg-blue-500 w-4"
-                          : selectedAnswers[index] !== undefined
+                      className={`w-2.5 h-2.5 rounded-full cursor-pointer transition-all duration-300 ${currentQuestionIndex === index
+                        ? "bg-blue-500 w-4"
+                        : selectedAnswers[index] !== undefined
                           ? "bg-green-500"
                           : "bg-[#29334a]"
-                      }`}
+                        }`}
                     />
                   ))}
                 </div>
@@ -601,7 +612,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
                             questions[Number(qIndex)].answers[aIndex].isCorrect
                         ).length /
                           questions.length) *
-                          100
+                        100
                       )}
                       %
                     </div>
@@ -616,7 +627,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
                         questions[Number(qIndex)].answers[aIndex].isCorrect
                     ).length /
                       questions.length) *
-                      100
+                    100
                   ) >= passingScore ? (
                     <div className="text-green-400 text-xl font-bold mb-4">
                       🎉 Congratulations! You passed the quiz! 🎉
@@ -646,7 +657,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
       <Drawer
         title={<span className="text-gray-200">Course Feedback</span>}
         placement="right"
-        onClose={() => {}}
+        onClose={() => { }}
         open={showFeedback}
         width={400}
         maskClosable={false}
@@ -724,6 +735,13 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
           </Button>
         </div>
       </Drawer>
+
+      <CertificateModal
+        isOpen={showCertificateModal}
+        onClose={() => setShowCertificateModal(false)}
+        courseId={courseId}
+        learnerId={user?.id || ''}
+      />
     </>
   );
 };
