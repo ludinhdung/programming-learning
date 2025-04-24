@@ -110,13 +110,26 @@ export const instructorService = {
     profileData: {
       bio: string;
       socials: string[];
+      firstName?: string;
+      lastName?: string;
     }
   ) {
-    const respone = await api.put(
+    const response = await api.put(
       `/instructors/instructor/${instructorId}/profile`,
       profileData
     );
-    return respone.data;
+    return response.data;
+  },
+
+  async changePassword(
+    instructorId: string,
+    data: { oldPassword: string; newPassword: string }
+  ) {
+    const response = await api.post(
+      `/instructors/instructor/${instructorId}/change-password`,
+      data
+    );
+    return response.data;
   },
 
   async uploadVideo(file: RcFile) {

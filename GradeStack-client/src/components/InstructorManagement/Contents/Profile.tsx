@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Form, Button, Avatar, Card, message, Tooltip } from "antd";
 import { EditOutlined, SaveOutlined, CloseOutlined } from "@ant-design/icons";
 import { instructorService } from "../../../services/api";
+import { Modal, PasswordInput, Button as MantineButton } from "@mantine/core";
 
 interface Instructor {
   userId: string;
@@ -93,6 +94,20 @@ const Profile = () => {
   const [editingSocials, setEditingSocials] = useState(false);
   const [form] = Form.useForm();
   const [socialInputs, setSocialInputs] = useState<string[]>([]);
+  const [user, setUser] = useState<{
+    id: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    email: string;
+  } | null>(null);
+  const [requirePasswordChange, setRequirePasswordChange] = useState(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -100,9 +115,20 @@ const Profile = () => {
       try {
         const userData = localStorage.getItem("user");
         if (userData) {
-          const user = JSON.parse(userData);
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+
+          // Kiểm tra xem cần đổi mật khẩu không
+          const requirePwdChange = localStorage.getItem(
+            "requirePasswordChange"
+          );
+          if (requirePwdChange === "true") {
+            setRequirePasswordChange(true);
+            setPasswordModalOpen(true);
+          }
+
           const response = await instructorService.getInstructorProfile(
-            user.id
+            parsedUser.id
           );
           if (response.success && response.data) {
             setInstructor(response.data);
@@ -188,11 +214,11 @@ const Profile = () => {
   const handleSocialRemove = (index: number) => {
     const newSocials = [...socialInputs];
     //Thay đổi trực tiếp mảng gốc.  Bắt đầu tại index , xoá 1 phần tử
-   //  const arr = [1, 2, 3, 4, 5];
-   //  const removed = arr.splice(1, 2); // Bắt đầu tại index 1, xoá 2 phần tử
-   //  console.log(removed); // [2, 3]
-     //  console.log(arr); // [1, 4, 5] (đã thay đổi)
-     
+    //  const arr = [1, 2, 3, 4, 5];
+    //  const removed = arr.splice(1, 2); // Bắt đầu tại index 1, xoá 2 phần tử
+    //  console.log(removed); // [2, 3]
+    //  console.log(arr); // [1, 4, 5] (đã thay đổi)
+
     newSocials.splice(index, 1);
     setSocialInputs(newSocials);
   };
@@ -229,6 +255,71 @@ const Profile = () => {
     }
   };
 
+  // Password change handling
+  const handlePasswordSubmit = async () => {
+    // Reset error state
+    setPasswordError("");
+
+    // Validate inputs
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      setPasswordError("All fields are required");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New password and confirmation do not match");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError("Password must be at least 6 characters long");
+      return;
+    }
+
+    // Submit to API
+    try {
+      setIsChangingPassword(true);
+
+      if (user) {
+        const response = await instructorService.changePassword(user.id, {
+          oldPassword,
+          newPassword,
+        });
+
+        if (response.success) {
+          message.success("Password changed successfully");
+          setPasswordModalOpen(false);
+
+          // Update localStorage and state
+          localStorage.removeItem("requirePasswordChange");
+          setRequirePasswordChange(false);
+
+          // Clear password fields
+          setOldPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+        }
+      }
+    } catch (error) {
+      console.error("Failed to change password:", error);
+      setPasswordError(
+        "Failed to change password. Please check your current password."
+      );
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  // Password Modal Close Handler
+  const handleModalClose = () => {
+    // Only allow closing if not required
+    if (!requirePasswordChange) {
+      setPasswordModalOpen(false);
+    } else {
+      message.warning("You must change your password before continuing");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col w-full min-h-screen bg-gradient-to-b from-zinc-900 to-zinc-800 p-8 items-center justify-center">
@@ -247,6 +338,75 @@ const Profile = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-gradient-to-b from-zinc-900 to-zinc-800 p-8">
+      {/* Password Change Modal */}
+      <Modal
+        opened={passwordModalOpen}
+        onClose={handleModalClose}
+        title="Change Password"
+        radius="md"
+        centered
+        overlayProps={{
+          blur: 3,
+          opacity: 0.55,
+        }}
+        closeOnClickOutside={!requirePasswordChange}
+        closeOnEscape={!requirePasswordChange}
+        withCloseButton={!requirePasswordChange}
+      >
+        <div className="space-y-4">
+          {requirePasswordChange && (
+            <div className="bg-amber-100 text-amber-700 p-3 rounded-md text-sm mb-4">
+              You must change your password before continuing to use the system.
+            </div>
+          )}
+
+          {passwordError && (
+            <div className="bg-red-100 text-red-700 p-3 rounded-md text-sm mb-4">
+              {passwordError}
+            </div>
+          )}
+
+          <PasswordInput
+            label="Current Password"
+            placeholder="Enter your current password"
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+            required
+            disabled={isChangingPassword}
+          />
+
+          <PasswordInput
+            label="New Password"
+            placeholder="Enter new password"
+            description="Password must be at least 6 characters long"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            required
+            disabled={isChangingPassword}
+          />
+
+          <PasswordInput
+            label="Confirm New Password"
+            placeholder="Confirm new password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            disabled={isChangingPassword}
+          />
+
+          <div className="flex justify-end pt-4">
+            <MantineButton
+              onClick={handlePasswordSubmit}
+              loading={isChangingPassword}
+              variant="filled"
+              color="blue"
+            >
+              Change Password
+            </MantineButton>
+          </div>
+        </div>
+      </Modal>
+
       <h1 className="text-white text-2xl font-bold mb-8 relative">
         <span className="relative z-10">Instructor Profile</span>
       </h1>
@@ -397,6 +557,7 @@ const Profile = () => {
               )}
             </div>
 
+            {/* Hiển thị social media */}
             {!editingSocials ? (
               <div className="flex flex-wrap gap-3 bg-zinc-800 p-4 rounded-lg">
                 {instructor.socials.map((social: string, index: number) => (

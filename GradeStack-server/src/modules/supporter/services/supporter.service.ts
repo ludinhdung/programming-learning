@@ -78,6 +78,7 @@ export class SupporterService {
         email: instructorData.email,
         password: hashedPassword,
         role: instructorData.role,
+        requirePasswordChange: true,
       },
     });
 
