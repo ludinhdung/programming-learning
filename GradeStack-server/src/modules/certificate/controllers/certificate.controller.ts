@@ -29,9 +29,9 @@ export class CertificateController {
             // Validate using Zod schema
             const validationResult = createCertificateSchema.safeParse(certificateData);
             if (!validationResult.success) {
-                res.status(400).json({ 
-                    message: 'Validation error', 
-                    errors: validationResult.error.format() 
+                res.status(400).json({
+                    message: 'Validation error',
+                    errors: validationResult.error.format()
                 });
                 return;
             }
@@ -118,9 +118,9 @@ export class CertificateController {
             // Validate using Zod schema
             const validationResult = updateCertificateSchema.safeParse(certificateData);
             if (!validationResult.success) {
-                res.status(400).json({ 
-                    message: 'Validation error', 
-                    errors: validationResult.error.format() 
+                res.status(400).json({
+                    message: 'Validation error',
+                    errors: validationResult.error.format()
                 });
                 return;
             }
@@ -144,4 +144,13 @@ export class CertificateController {
             this.handleError(res, error);
         }
     };
+
+    public handleWebhook = async (req: Request, res: Response): Promise<void> => {
+        try {
+            console.log(req.body);
+            res.status(200).json({ message: "ok" });
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    }
 }

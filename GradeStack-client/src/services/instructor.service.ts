@@ -33,5 +33,30 @@ export const bankService = {
         const response = await api.post(`/instructors/${instructorId}/wallet/withdraw`, { amount, accountNumber, accountHolder, bank });
         return response.data;
     }
+
+    // Instructor Statistics
+};
+
+export const instructorService = {
+    // Statistics
+    async getInstructorStatistics(instructorId: string, courseId?: string, dateRange: '7d' | '30d' | 'all' = 'all') {
+        const response = await api.get(`/instructors/${instructorId}/statistics`, {
+            params: {
+                courseId,
+                dateRange
+            }
+        });
+        return response.data;
+    },
+
+    // Get statistics for all courses
+    async getAllCoursesStatistics(instructorId: string, dateRange: '7d' | '30d' | 'all' = 'all') {
+        return this.getInstructorStatistics(instructorId, undefined, dateRange);
+    },
+
+    // Get statistics for a specific course
+    async getCourseStatistics(instructorId: string, courseId: string, dateRange: '7d' | '30d' | 'all' = 'all') {
+        return this.getInstructorStatistics(instructorId, courseId, dateRange);
+    }
 };
 

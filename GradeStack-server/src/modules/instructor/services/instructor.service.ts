@@ -10,6 +10,7 @@ import {
   Role,
   Topic,
   TransactionStatus,
+  TransactionType,
 } from "@prisma/client";
 import { PrismaClient } from "@prisma/client";
 import { PrismaErrorHandler } from "../../../shared/errors/prisma-error-handler";
@@ -1628,5 +1629,158 @@ export class InstructorService extends InstructorBaseService<
     console.log('Updated transaction:', updatedTransaction);
 
     return updatedTransaction;
+  }
+
+  // Get instructor statistics
+  async getInstructorStatistics(
+    instructorId: string,
+    courseId?: string,
+    dateRange: '7d' | '30d' | 'all' = 'all'
+  ): Promise<any> {
+    try {
+      // Check if instructor exists
+      const instructor = await this.findByUserId(instructorId);
+
+      if (!instructor) {
+        throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+      }
+
+      // Calculate date range
+      let startDate: Date | undefined;
+      if (dateRange === '7d') {
+        startDate = new Date();
+        startDate.setDate(startDate.getDate() - 7);
+      } else if (dateRange === '30d') {
+        startDate = new Date();
+        startDate.setDate(startDate.getDate() - 30);
+      }
+
+      // Base where clause for instructor's courses
+      const courseWhere = {
+        instructor: {
+          userId: instructorId,
+        },
+        ...(courseId && { id: courseId }),
+      };
+
+      // Get total courses (only if not filtering by specific course)
+      const totalCourses = courseId ? 1 : await prisma.course.count({
+        where: courseWhere,
+      });
+
+      // Get total enrollments with date range
+      const totalEnrollments = await prisma.enrolledCourse.count({
+        where: {
+          course: courseWhere,
+          ...(startDate && {
+            enrolledAt: {
+              gte: startDate,
+            },
+          }),
+        },
+      });
+
+      // Get total earnings from approved transactions with date range
+      const totalEarnings = await prisma.transaction.aggregate({
+        where: {
+          wallet: {
+            instructor: {
+              userId: instructorId,
+            },
+          },
+          status: TransactionStatus.APPROVED,
+          type: TransactionType.REVENUE,
+          ...(startDate && {
+            createdAt: {
+              gte: startDate,
+            },
+          }),
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+
+      // Get rating statistics
+      const ratingStats = await prisma.courseFeedback.aggregate({
+        where: {
+          course: courseWhere,
+          ...(startDate && {
+            createdAt: {
+              gte: startDate,
+            },
+          }),
+        },
+        _avg: {
+          rating: true,
+        },
+        _count: {
+          rating: true,
+        },
+      });
+
+      // Get recent transactions with date range
+      const recentTransactions = await prisma.transaction.findMany({
+        where: {
+          wallet: {
+            instructor: {
+              userId: instructorId,
+            },
+          },
+          ...(startDate && {
+            createdAt: {
+              gte: startDate,
+            },
+          }),
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: 5,
+      });
+
+      // Get course enrollments by month for the selected date range
+      const enrollmentsByMonth = await prisma.enrolledCourse.groupBy({
+        by: ['enrolledAt'],
+        where: {
+          course: courseWhere,
+          ...(startDate && {
+            enrolledAt: {
+              gte: startDate,
+            },
+          }),
+        },
+        _count: true,
+      });
+
+      // Get course details if specific course is requested
+      const courseDetails = courseId ? await prisma.course.findUnique({
+        where: { id: courseId },
+        include: {
+          modules: {
+            include: {
+              lessons: true,
+            },
+          },
+        },
+      }) : null;
+
+      return {
+        totalCourses,
+        totalEnrollments,
+        totalEarnings: totalEarnings._sum?.amount || 0,
+        totalRatings: ratingStats._count.rating || 0,
+        averageRating: ratingStats._avg?.rating || 0,
+        recentTransactions,
+        enrollmentsByMonth,
+        dateRange,
+        ...(courseDetails && { courseDetails }),
+      };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw PrismaErrorHandler.handle(error, "Instructor");
+    }
   }
 }

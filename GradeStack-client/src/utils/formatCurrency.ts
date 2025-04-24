@@ -10,3 +10,10 @@ export const parseVND = (value: string): number => {
   // Remove all non-digit characters and convert to number
   return parseInt(value.replace(/\D/g, ""), 10);
 };
+
+export const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+  }).format(amount);
+};

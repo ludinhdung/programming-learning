@@ -875,4 +875,31 @@ export class InstructorController {
       next(error);
     }
   };
+
+  /**
+   * Get instructor statistics
+   */
+  public getInstructorStatistics = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { id: instructorId } = req.params;
+      const { courseId, dateRange } = req.query;
+
+      const statistics = await this.instructorService.getInstructorStatistics(
+        instructorId,
+        courseId as string,
+        (dateRange as '7d' | '30d' | 'all') || 'all'
+      );
+
+      res.json({
+        success: true,
+        data: statistics,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

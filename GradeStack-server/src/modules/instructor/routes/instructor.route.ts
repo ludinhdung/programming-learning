@@ -19,8 +19,7 @@ router.put('/:id/profile', instructorController.updateProfile);
 router.put('/:id/avatar', instructorController.updateAvatar);
 router.post('/upload-video', uploadVideo, instructorController.uploadVideo);
 router.get('/:instructorId/transactions', instructorController.getTransactions);
-
-
+router.get('/:id/statistics', instructorController.getInstructorStatistics);
 
 router.post('/:id/wallet/withdraw', authenticate, instructorController.requestWithdrawal);
 router.post('/:id/bank-info', instructorController.createBankInfoByInstructor);

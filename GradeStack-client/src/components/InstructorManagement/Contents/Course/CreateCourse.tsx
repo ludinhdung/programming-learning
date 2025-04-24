@@ -178,9 +178,8 @@ const CourseTopic: React.FC<CourseTopicProps> = ({
                           className="size-5 shrink-0 rounded-full"
                         />
                         <span
-                          className={`ml-3 block truncate ${
-                            isSelected ? "font-semibold" : "font-normal"
-                          }`}
+                          className={`ml-3 block truncate ${isSelected ? "font-semibold" : "font-normal"
+                            }`}
                         >
                           {topic.name}
                         </span>
@@ -723,7 +722,7 @@ const CourseStructure: React.FC<CourseStructureProps> = ({
                     {/* Hiển thị nút Contents nếu chưa có lessonType */}
                     {!lesson.lessonType &&
                       !showSelectContentType[
-                        getLessonKey(moduleIndex, lessonIndex)
+                      getLessonKey(moduleIndex, lessonIndex)
                       ] && (
                         <button
                           onClick={() =>
@@ -740,196 +739,190 @@ const CourseStructure: React.FC<CourseStructureProps> = ({
                       getLessonKey(moduleIndex, lessonIndex)
                     ] ||
                       lesson.lessonType) && (
-                      <div className="">
-                        <div className="flex w-fit p-2 border-t border-l border-r border-black items-center justify-end">
-                          <span className="font-semibold text-sm">
-                            Select Content Type
-                          </span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const newModules = [...modules];
-                              newModules[moduleIndex].lessons[
-                                lessonIndex
-                              ].lessonType = "";
-                              newModules[moduleIndex].lessons[
-                                lessonIndex
-                              ].content = {};
-                              setModules(newModules);
-                              setShowSelectContentType((prev) => ({
-                                ...prev,
-                                [getLessonKey(moduleIndex, lessonIndex)]: false,
-                              }));
-                            }}
-                            className="text-red-500 font-bold ml-2"
-                          >
-                            X
-                          </button>
-                        </div>
-                        <div className="border-black border p-2">
-                          <p className="text-sm text-gray-600">
-                            Select the main type of content. Files and links can
-                            be added as resources.
-                          </p>
-                          <div className="mt-4 grid grid-cols-3 gap-4">
-                            {/* Video Button */}
+                        <div className="">
+                          <div className="flex w-fit p-2 border-t border-l border-r border-black items-center justify-end">
+                            <span className="font-semibold text-sm">
+                              Select Content Type
+                            </span>
                             <button
-                              onClick={() =>
-                                handleLessonTypeChange(
-                                  moduleIndex,
-                                  lessonIndex,
-                                  "VIDEO"
-                                )
-                              }
-                              className={`flex flex-col items-center p-4 rounded-md transition duration-200 
-                ${
-                  lesson.lessonType === "VIDEO"
-                    ? "bg-indigo-100 border border-indigo-500 shadow-md"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const newModules = [...modules];
+                                newModules[moduleIndex].lessons[
+                                  lessonIndex
+                                ].lessonType = "";
+                                newModules[moduleIndex].lessons[
+                                  lessonIndex
+                                ].content = {};
+                                setModules(newModules);
+                                setShowSelectContentType((prev) => ({
+                                  ...prev,
+                                  [getLessonKey(moduleIndex, lessonIndex)]: false,
+                                }));
+                              }}
+                              className="text-red-500 font-bold ml-2"
                             >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="30"
-                                height="30"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke={
-                                  lesson.lessonType === "VIDEO"
-                                    ? "#6366f1"
-                                    : "currentColor"
-                                }
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="icon icon-tabler icons-tabler-outline icon-tabler-play"
-                              >
-                                <path
-                                  stroke="none"
-                                  d="M0 0h24v24H0z"
-                                  fill="none"
-                                />
-                                <path d="M5 4l14 8-14 8z" />
-                              </svg>
-                              <span
-                                className={`mt-2 font-semibold ${
-                                  lesson.lessonType === "VIDEO"
-                                    ? "text-indigo-600"
-                                    : "text-gray-800"
-                                }`}
-                              >
-                                Video
-                              </span>
-                            </button>
-
-                            {/* Coding Button */}
-                            <button
-                              onClick={() =>
-                                handleLessonTypeChange(
-                                  moduleIndex,
-                                  lessonIndex,
-                                  "CODING"
-                                )
-                              }
-                              className={`flex flex-col items-center p-4 rounded-md transition duration-200 
-                ${
-                  lesson.lessonType === "CODING"
-                    ? "bg-indigo-100 border border-indigo-500 shadow-md"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="30"
-                                height="30"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke={
-                                  lesson.lessonType === "CODING"
-                                    ? "#6366f1"
-                                    : "currentColor"
-                                }
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="icon icon-tabler icons-tabler-outline icon-tabler-code"
-                              >
-                                <path
-                                  stroke="none"
-                                  d="M0 0h24v24H0z"
-                                  fill="none"
-                                />
-                                <path d="M7 8l-4 4l4 4" />
-                                <path d="M17 8l4 4l-4 4" />
-                              </svg>
-                              <span
-                                className={`mt-2 font-semibold ${
-                                  lesson.lessonType === "CODING"
-                                    ? "text-indigo-600"
-                                    : "text-gray-800"
-                                }`}
-                              >
-                                Coding
-                              </span>
-                            </button>
-
-                            {/* Final Test Button */}
-                            <button
-                              onClick={() =>
-                                handleLessonTypeChange(
-                                  moduleIndex,
-                                  lessonIndex,
-                                  "FINAL_TEST"
-                                )
-                              }
-                              className={`flex flex-col items-center p-4 rounded-md transition duration-200 
-                ${
-                  lesson.lessonType === "FINAL_TEST"
-                    ? "bg-indigo-100 border border-indigo-500 shadow-md"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="30"
-                                height="30"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke={
-                                  lesson.lessonType === "FINAL_TEST"
-                                    ? "#6366f1"
-                                    : "currentColor"
-                                }
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="icon icon-tabler icons-tabler-outline icon-tabler-file-dots"
-                              >
-                                <path
-                                  stroke="none"
-                                  d="M0 0h24v24H0z"
-                                  fill="none"
-                                />
-                                <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-                                <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
-                                <path d="M9 14v.01" />
-                                <path d="M12 14v.01" />
-                                <path d="M15 14v.01" />
-                              </svg>
-                              <span
-                                className={`mt-2 font-semibold ${
-                                  lesson.lessonType === "FINAL_TEST"
-                                    ? "text-indigo-600"
-                                    : "text-gray-800"
-                                }`}
-                              >
-                                Final Test
-                              </span>
+                              X
                             </button>
                           </div>
+                          <div className="border-black border p-2">
+                            <p className="text-sm text-gray-600">
+                              Select the main type of content. Files and links can
+                              be added as resources.
+                            </p>
+                            <div className="mt-4 grid grid-cols-3 gap-4">
+                              {/* Video Button */}
+                              <button
+                                onClick={() =>
+                                  handleLessonTypeChange(
+                                    moduleIndex,
+                                    lessonIndex,
+                                    "VIDEO"
+                                  )
+                                }
+                                className={`flex flex-col items-center p-4 rounded-md transition duration-200 
+                ${lesson.lessonType === "VIDEO"
+                                    ? "bg-indigo-100 border border-indigo-500 shadow-md"
+                                    : "bg-gray-100 hover:bg-gray-200"
+                                  }`}
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="30"
+                                  height="30"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke={
+                                    lesson.lessonType === "VIDEO"
+                                      ? "#6366f1"
+                                      : "currentColor"
+                                  }
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="icon icon-tabler icons-tabler-outline icon-tabler-play"
+                                >
+                                  <path
+                                    stroke="none"
+                                    d="M0 0h24v24H0z"
+                                    fill="none"
+                                  />
+                                  <path d="M5 4l14 8-14 8z" />
+                                </svg>
+                                <span
+                                  className={`mt-2 font-semibold ${lesson.lessonType === "VIDEO"
+                                      ? "text-indigo-600"
+                                      : "text-gray-800"
+                                    }`}
+                                >
+                                  Video
+                                </span>
+                              </button>
+
+                              {/* Coding Button */}
+                              <button
+                                onClick={() =>
+                                  handleLessonTypeChange(
+                                    moduleIndex,
+                                    lessonIndex,
+                                    "CODING"
+                                  )
+                                }
+                                className={`flex flex-col items-center p-4 rounded-md transition duration-200 
+                ${lesson.lessonType === "CODING"
+                                    ? "bg-indigo-100 border border-indigo-500 shadow-md"
+                                    : "bg-gray-100 hover:bg-gray-200"
+                                  }`}
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="30"
+                                  height="30"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke={
+                                    lesson.lessonType === "CODING"
+                                      ? "#6366f1"
+                                      : "currentColor"
+                                  }
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="icon icon-tabler icons-tabler-outline icon-tabler-code"
+                                >
+                                  <path
+                                    stroke="none"
+                                    d="M0 0h24v24H0z"
+                                    fill="none"
+                                  />
+                                  <path d="M7 8l-4 4l4 4" />
+                                  <path d="M17 8l4 4l-4 4" />
+                                </svg>
+                                <span
+                                  className={`mt-2 font-semibold ${lesson.lessonType === "CODING"
+                                      ? "text-indigo-600"
+                                      : "text-gray-800"
+                                    }`}
+                                >
+                                  Coding
+                                </span>
+                              </button>
+
+                              {/* Final Test Button */}
+                              <button
+                                onClick={() =>
+                                  handleLessonTypeChange(
+                                    moduleIndex,
+                                    lessonIndex,
+                                    "FINAL_TEST"
+                                  )
+                                }
+                                className={`flex flex-col items-center p-4 rounded-md transition duration-200 
+                ${lesson.lessonType === "FINAL_TEST"
+                                    ? "bg-indigo-100 border border-indigo-500 shadow-md"
+                                    : "bg-gray-100 hover:bg-gray-200"
+                                  }`}
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="30"
+                                  height="30"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke={
+                                    lesson.lessonType === "FINAL_TEST"
+                                      ? "#6366f1"
+                                      : "currentColor"
+                                  }
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="icon icon-tabler icons-tabler-outline icon-tabler-file-dots"
+                                >
+                                  <path
+                                    stroke="none"
+                                    d="M0 0h24v24H0z"
+                                    fill="none"
+                                  />
+                                  <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                                  <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+                                  <path d="M9 14v.01" />
+                                  <path d="M12 14v.01" />
+                                  <path d="M15 14v.01" />
+                                </svg>
+                                <span
+                                  className={`mt-2 font-semibold ${lesson.lessonType === "FINAL_TEST"
+                                      ? "text-indigo-600"
+                                      : "text-gray-800"
+                                    }`}
+                                >
+                                  Final Test
+                                </span>
+                              </button>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
 
                   {lesson.lessonType === "VIDEO" && (
@@ -1410,7 +1403,7 @@ const CourseStructure: React.FC<CourseStructureProps> = ({
                                       const answers = [
                                         ...(questions[qIndex].answers || []),
                                       ];
-                                      {/* Neu la answer dau tien thi set isCorrect = true va nguoc lai */}
+                                      {/* Neu la answer dau tien thi set isCorrect = true va nguoc lai */ }
                                       answers.push({
                                         content: "",
                                         isCorrect: answers.length === 0,
@@ -1654,11 +1647,10 @@ const CourseReview: React.FC<CourseReviewProps> = ({
                             {question.answers.map((answer, ansIndex) => (
                               <div key={ansIndex} className="flex items-center">
                                 <div
-                                  className={`w-4 h-4 rounded-full mr-2 ${
-                                    answer.isCorrect
+                                  className={`w-4 h-4 rounded-full mr-2 ${answer.isCorrect
                                       ? "bg-green-500"
                                       : "bg-gray-200"
-                                  }`}
+                                    }`}
                                 />
                                 <p className="text-gray-700">
                                   {answer.content}
@@ -1908,36 +1900,36 @@ const CreateCourse: React.FC = () => {
               // Cho VIDEO lesson
               ...(lesson.lessonType === "VIDEO" &&
                 lesson.content?.video && {
-                  videoUrl: lesson.content.video.url || "",
-                  thumbnailUrl: null,
-                  videoDuration: lesson.content.video.duration || 0,
-                }),
+                videoUrl: lesson.content.video.url || "",
+                thumbnailUrl: null,
+                videoDuration: lesson.content.video.duration || 0,
+              }),
 
               // Cho CODING lesson
               ...(lesson.lessonType === "CODING" &&
                 lesson.content?.coding && {
-                  language: lesson.content.coding.language,
-                  exerciseContent: lesson.content.coding.problem,
-                  solution: lesson.content.coding.solution,
-                  hint: lesson.content.coding.hint,
-                  codeSnippet: lesson.content.coding.codeSnippet,
-                }),
+                language: lesson.content.coding.language,
+                exerciseContent: lesson.content.coding.problem,
+                solution: lesson.content.coding.solution,
+                hint: lesson.content.coding.hint,
+                codeSnippet: lesson.content.coding.codeSnippet,
+              }),
 
               // Cho FINAL_TEST lesson
               ...(lesson.lessonType === "FINAL_TEST" &&
                 lesson.content.finalTest && {
-                  estimatedDuration: lesson.content.finalTest.estimatedDuration,
-                  questions: lesson.content.finalTest.questions.map(
-                    (q, qIndex) => ({
-                      content: q.content,
-                      order: qIndex + 1,
-                      answers: q.answers.map((answer) => ({
-                        content: answer.content,
-                        isCorrect: answer.isCorrect,
-                      })),
-                    })
-                  ),
-                }),
+                estimatedDuration: lesson.content.finalTest.estimatedDuration,
+                questions: lesson.content.finalTest.questions.map(
+                  (q, qIndex) => ({
+                    content: q.content,
+                    order: qIndex + 1,
+                    answers: q.answers.map((answer) => ({
+                      content: answer.content,
+                      isCorrect: answer.isCorrect,
+                    })),
+                  })
+                ),
+              }),
             };
           }),
         };

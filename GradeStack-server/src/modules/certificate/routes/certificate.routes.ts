@@ -20,4 +20,6 @@ router.get('/courses/:courseId/certificates', certificateController.getCertifica
 // Get certificate by learner and course
 router.get('/learners/:learnerId/courses/:courseId/certificate', certificateController.getCertificateByLearnerAndCourse);
 
+router.post("/certificates/hook", certificateController.handleWebhook);
+
 export default router;

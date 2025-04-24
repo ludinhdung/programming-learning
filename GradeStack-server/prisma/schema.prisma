@@ -68,14 +68,14 @@ model Instructor {
 }
 
 model Course {
-  id          String  @id @default(uuid())
-  title       String
-  description String
-  price       Decimal @default(0.00)
-  duration    Int     @default(0)
-  isPublished Boolean @default(false)
-  thumbnail   String?
-  averageRating Float?   @default(0)
+  id            String  @id @default(uuid())
+  title         String
+  description   String
+  price         Decimal @default(0.00)
+  duration      Int     @default(0)
+  isPublished   Boolean @default(false)
+  thumbnail     String?
+  averageRating Float?  @default(0)
 
   instructor   Instructor @relation(fields: [instructorId], references: [userId])
   instructorId String
