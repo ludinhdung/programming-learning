@@ -31,7 +31,21 @@ const SigninForm: React.FC<SigninFormProps> = ({
       localStorage.setItem("user", JSON.stringify(response.data.user));
       localStorage.setItem("role", response.data.user.role);
 
+      // Lưu trạng thái requirePasswordChange vào localStorage
+      if (response.data.requirePasswordChange) {
+        localStorage.setItem("requirePasswordChange", "true");
+      }
+
       message.success("Login successfully!", 1.5);
+
+      // Kiểm tra nếu cần đổi mật khẩu khi đăng nhập lần đầu
+      if (response.data.requirePasswordChange) {
+        setTimeout(() => {
+          message.info("You need to change your password.", 2);
+          window.location.href = "/instructor-management/profile";
+        }, 2000);
+        return;
+      }
 
       if (onLoginSuccess) {
         onLoginSuccess();
@@ -61,8 +75,10 @@ const SigninForm: React.FC<SigninFormProps> = ({
         }, 1500);
       }
     } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { data?: { message?: string } } };
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          response?: { data?: { message?: string } };
+        };
         message.error(axiosError.response?.data?.message || "Login failed");
       } else {
         message.error("Login failed");

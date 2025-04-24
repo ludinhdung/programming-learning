@@ -27,7 +27,7 @@ import {
 } from "../validation/instructor.validation";
 import { z } from "zod";
 import bcrypt from "bcrypt";
-import { AppError } from '../../../shared/middleware/error.middleware';
+import { AppError } from "../../../shared/middleware/error.middleware";
 import { generateVietQRUrl } from "../../../shared/utils/generateVietQRUrl";
 import { randomUUID } from "crypto";
 const prisma = new PrismaClient();
@@ -1254,6 +1254,38 @@ export class InstructorService extends InstructorBaseService<
       throw PrismaErrorHandler.handle(error, "VideoLesson");
     }
   }
+  async getInstructorProfile(instructorId: string) {
+    const instructor = await prisma.instructor.findUnique({
+      where: { userId: instructorId },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+    return instructor;
+  }
+
+  async updateInstructorProfile(
+    instructorId: string,
+    profileData: {
+      firstName: string;
+      lastName: string;
+      bio: string;
+      socials: string[];
+    }
+  ) {
+    const instructor = await prisma.instructor.update({
+      where: { userId: instructorId },
+      data: profileData,
+    });
+    return instructor;
+  }
 
   // Get all topics
   async getAllTopics(): Promise<Topic[]> {
@@ -1398,40 +1430,46 @@ export class InstructorService extends InstructorBaseService<
           include: {
             transactions: {
               orderBy: {
-                createdAt: 'desc'
-              }
-            }
-          }
-        }
-      }
+                createdAt: "desc",
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!instructor || !instructor.Wallet) {
-      throw new AppError('Instructor wallet not found', 404);
+      throw new AppError("Instructor wallet not found", 404);
     }
 
     return instructor.Wallet.transactions;
   }
 
-  async requestWithdrawal(instructorId: string, amount: number, accountNumber: string, accountHolder: string, bank: string) {
+  async requestWithdrawal(
+    instructorId: string,
+    amount: number,
+    accountNumber: string,
+    accountHolder: string,
+    bank: string
+  ) {
     const wallet = await prisma.wallet.findUnique({
-      where: { instructorId }
+      where: { instructorId },
     });
 
     if (!wallet) {
-      throw new AppError('Wallet not found', 404);
+      throw new AppError("Wallet not found", 404);
     }
 
     if (amount <= 0) {
-      throw new AppError('Withdrawal amount must be greater than 0', 400);
+      throw new AppError("Withdrawal amount must be greater than 0", 400);
     }
 
     if (amount < 100000) {
-      throw new AppError('Minimum withdrawal amount is 100,000 VND', 400);
+      throw new AppError("Minimum withdrawal amount is 100,000 VND", 400);
     }
 
     if (Number(wallet.balance) < amount) {
-      throw new AppError('Insufficient balance for withdrawal', 400);
+      throw new AppError("Insufficient balance for withdrawal", 400);
     }
 
     // Create transaction first
@@ -1439,21 +1477,27 @@ export class InstructorService extends InstructorBaseService<
       data: {
         walletId: wallet.id,
         amount: amount,
-        type: 'WITHDRAWAL',
-        status: 'PENDING'
-      }
+        type: "WITHDRAWAL",
+        status: "PENDING",
+      },
     });
 
     // Generate QR code with transaction ID
     const description = transaction.id;
-    const qrUrl = generateVietQRUrl(bank, accountNumber, accountHolder, description, amount);
+    const qrUrl = generateVietQRUrl(
+      bank,
+      accountNumber,
+      accountHolder,
+      description,
+      amount
+    );
 
     // Update transaction with QR code URL
     const updatedTransaction = await prisma.transaction.update({
       where: { id: transaction.id },
       data: {
-        qrCodeUrl: qrUrl
-      }
+        qrCodeUrl: qrUrl,
+      },
     });
 
     // Update wallet balance
@@ -1461,33 +1505,39 @@ export class InstructorService extends InstructorBaseService<
       where: { id: wallet.id },
       data: {
         balance: {
-          decrement: amount
-        }
-      }
+          decrement: amount,
+        },
+      },
     });
 
     return updatedTransaction;
   }
 
-
-  async createBankInfo(instructorId: string, bankName: string, accountNumber: string, accountName: string) {
+  async createBankInfo(
+    instructorId: string,
+    bankName: string,
+    accountNumber: string,
+    accountName: string
+  ) {
     try {
       // Check if instructor exists
       const instructor = await this.findByUserId(instructorId);
       if (!instructor) {
-        throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+        throw ApiError.notFound(
+          `Không tìm thấy giảng viên với ID ${instructorId}`
+        );
       }
 
       // Check if bank info already exists
       const existingBankInfo = await prisma.bankInfo.findFirst({
         where: {
           instructorId: instructorId,
-          isActive: true
-        }
+          isActive: true,
+        },
       });
 
       if (existingBankInfo) {
-        throw ApiError.conflict('Giảng viên đã có thông tin ngân hàng');
+        throw ApiError.conflict("Giảng viên đã có thông tin ngân hàng");
       }
 
       // Create new bank info
@@ -1496,8 +1546,8 @@ export class InstructorService extends InstructorBaseService<
           bankName,
           accountNumber,
           accountName,
-          instructorId
-        }
+          instructorId,
+        },
       });
 
       return bankInfo;
@@ -1511,19 +1561,21 @@ export class InstructorService extends InstructorBaseService<
       // Check if instructor exists
       const instructor = await this.findByUserId(instructorId);
       if (!instructor) {
-        throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+        throw ApiError.notFound(
+          `Không tìm thấy giảng viên với ID ${instructorId}`
+        );
       }
 
       // Get active bank info
       const bankInfo = await prisma.bankInfo.findFirst({
         where: {
           instructorId: instructorId,
-          isActive: true
-        }
+          isActive: true,
+        },
       });
 
       if (!bankInfo) {
-        throw ApiError.notFound('Không tìm thấy thông tin ngân hàng');
+        throw ApiError.notFound("Không tìm thấy thông tin ngân hàng");
       }
 
       return bankInfo;
@@ -1532,36 +1584,43 @@ export class InstructorService extends InstructorBaseService<
     }
   }
 
-  async updateBankInfo(instructorId: string, bankName: string, accountNumber: string, accountName: string) {
+  async updateBankInfo(
+    instructorId: string,
+    bankName: string,
+    accountNumber: string,
+    accountName: string
+  ) {
     try {
       // Check if instructor exists
       const instructor = await this.findByUserId(instructorId);
       if (!instructor) {
-        throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+        throw ApiError.notFound(
+          `Không tìm thấy giảng viên với ID ${instructorId}`
+        );
       }
 
       // Get active bank info
       const existingBankInfo = await prisma.bankInfo.findFirst({
         where: {
           instructorId: instructorId,
-          isActive: true
-        }
+          isActive: true,
+        },
       });
 
       if (!existingBankInfo) {
-        throw ApiError.notFound('Không tìm thấy thông tin ngân hàng');
+        throw ApiError.notFound("Không tìm thấy thông tin ngân hàng");
       }
 
       // Update bank info
       const bankInfo = await prisma.bankInfo.update({
         where: {
-          id: existingBankInfo.id
+          id: existingBankInfo.id,
         },
         data: {
           bankName,
           accountNumber,
-          accountName
-        }
+          accountName,
+        },
       });
 
       return bankInfo;
@@ -1575,29 +1634,31 @@ export class InstructorService extends InstructorBaseService<
       // Check if instructor exists
       const instructor = await this.findByUserId(instructorId);
       if (!instructor) {
-        throw ApiError.notFound(`Không tìm thấy giảng viên với ID ${instructorId}`);
+        throw ApiError.notFound(
+          `Không tìm thấy giảng viên với ID ${instructorId}`
+        );
       }
 
       // Get active bank info
       const existingBankInfo = await prisma.bankInfo.findFirst({
         where: {
           instructorId: instructorId,
-          isActive: true
-        }
+          isActive: true,
+        },
       });
 
       if (!existingBankInfo) {
-        throw ApiError.notFound('Không tìm thấy thông tin ngân hàng');
+        throw ApiError.notFound("Không tìm thấy thông tin ngân hàng");
       }
 
       // Soft delete by setting isActive to false
       const bankInfo = await prisma.bankInfo.update({
         where: {
-          id: existingBankInfo.id
+          id: existingBankInfo.id,
         },
         data: {
-          isActive: false
-        }
+          isActive: false,
+        },
       });
 
       return bankInfo;
@@ -1606,27 +1667,28 @@ export class InstructorService extends InstructorBaseService<
     }
   }
 
-
   async updateTransactionStatus(transactionId: string) {
-    console.log('Updating transaction status for ID:', transactionId);
+    console.log("Updating transaction status for ID:", transactionId);
 
     const transaction = await prisma.transaction.findFirst({
-      where: { id: transactionId }
+      where: { id: transactionId },
     });
 
     if (!transaction) {
-      console.error('Transaction not found:', transactionId);
-      throw ApiError.notFound(`Không tìm thấy giao dịch với ID ${transactionId}`);
+      console.error("Transaction not found:", transactionId);
+      throw ApiError.notFound(
+        `Không tìm thấy giao dịch với ID ${transactionId}`
+      );
     }
 
-    console.log('Found transaction:', transaction);
+    console.log("Found transaction:", transaction);
 
     const updatedTransaction = await prisma.transaction.update({
       where: { id: transactionId },
-      data: { status: TransactionStatus.APPROVED }
+      data: { status: TransactionStatus.APPROVED },
     });
 
-    console.log('Updated transaction:', updatedTransaction);
+    console.log("Updated transaction:", updatedTransaction);
 
     return updatedTransaction;
   }
@@ -1781,6 +1843,52 @@ export class InstructorService extends InstructorBaseService<
         throw error;
       }
       throw PrismaErrorHandler.handle(error, "Instructor");
+    }
+  }
+
+  // Hàm đổi mật khẩu cho instructor
+  async changePassword(
+    instructorId: string,
+    data: { oldPassword: string; newPassword: string }
+  ) {
+    try {
+      // Tìm user
+      const user = await prisma.user.findUnique({
+        where: { id: instructorId },
+      });
+
+      if (!user) {
+        throw new AppError("User not found", 404);
+      }
+
+      // Kiểm tra mật khẩu cũ
+      const isPasswordValid = await bcrypt.compare(
+        data.oldPassword,
+        user.password
+      );
+
+      if (!isPasswordValid) {
+        throw new AppError("Current password is incorrect", 400);
+      }
+
+      // Hash mật khẩu mới
+      const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+
+      // Cập nhật mật khẩu và trạng thái requirePasswordChange
+      await prisma.user.update({
+        where: { id: instructorId },
+        data: {
+          password: hashedPassword,
+          requirePasswordChange: false,
+        },
+      });
+
+      return { success: true, message: "Password changed successfully" };
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw PrismaErrorHandler.handle(error, "User");
     }
   }
 }

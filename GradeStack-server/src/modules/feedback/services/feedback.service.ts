@@ -227,6 +227,39 @@ export class FeedbackService {
     }
   }
 
+  // Get all feedback in the system
+  async getAllFeedback() {
+    try {
+      return await prisma.courseFeedback.findMany({
+        select: {
+          id: true,
+          learnerId: true,
+          courseId: true,
+          rating: true,
+          comment: true,
+          createdAt: true,
+          course: {
+            select: {
+              id: true,
+            },
+          },
+          learner: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    } catch (error) {
+      throw new AppError("Failed to get all feedback", 500);
+    }
+  }
+
   // lấy thống kê rating của course
   async getCourseRatingStats(courseId: string) {
     try {

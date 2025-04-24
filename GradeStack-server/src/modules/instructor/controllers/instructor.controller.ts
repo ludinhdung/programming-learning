@@ -140,11 +140,9 @@ export class InstructorController {
               switch (lesson.lessonType) {
                 case LessonType.VIDEO:
                   if (!lesson.videoData?.url && !lesson.videoData?.videoUrl) {
-                    res
-                      .status(400)
-                      .json({
-                        message: "Missing required video lesson fields",
-                      });
+                    res.status(400).json({
+                      message: "Missing required video lesson fields",
+                    });
                     return;
                   }
                   break;
@@ -154,11 +152,9 @@ export class InstructorController {
                     !lesson.codingData?.problem ||
                     !lesson.codingData?.solution
                   ) {
-                    res
-                      .status(400)
-                      .json({
-                        message: "Missing required coding exercise fields",
-                      });
+                    res.status(400).json({
+                      message: "Missing required coding exercise fields",
+                    });
                     return;
                   }
                   break;
@@ -167,11 +163,9 @@ export class InstructorController {
                     !lesson.finalTestData?.questions ||
                     lesson.finalTestData.questions.length === 0
                   ) {
-                    res
-                      .status(400)
-                      .json({
-                        message: "Final test must have at least one question",
-                      });
+                    res.status(400).json({
+                      message: "Final test must have at least one question",
+                    });
                     return;
                   }
 
@@ -185,12 +179,9 @@ export class InstructorController {
                     }
 
                     if (!question.answers || question.answers.length === 0) {
-                      res
-                        .status(400)
-                        .json({
-                          message:
-                            "Each question must have at least one answer",
-                        });
+                      res.status(400).json({
+                        message: "Each question must have at least one answer",
+                      });
                       return;
                     }
 
@@ -199,12 +190,10 @@ export class InstructorController {
                       (answer) => answer.isCorrect
                     );
                     if (!hasCorrectAnswer) {
-                      res
-                        .status(400)
-                        .json({
-                          message:
-                            "Each question must have at least one correct answer",
-                        });
+                      res.status(400).json({
+                        message:
+                          "Each question must have at least one correct answer",
+                      });
                       return;
                     }
                   }
@@ -595,6 +584,47 @@ export class InstructorController {
   };
 
   /**
+   * Get instructor profile
+   */
+  public getInstructorProfile = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const instructor = await this.instructorService.getInstructorProfile(id);
+      res.status(200).json({
+        success: true,
+        data: instructor,
+      });
+    } catch (error) {
+      this.handleError(res, error);
+    }
+  };
+
+  /**
+   * Update instructor profile
+   */
+  public updateInstructorProfile = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const profileData = req.body;
+      const instructor = await this.instructorService.updateInstructorProfile(
+        id,
+        profileData
+      );
+      res.status(200).json({
+        success: true,
+        data: instructor,
+      });
+    } catch (error) {
+      this.handleError(res, error);
+    }
+  };
+  /**
    * Get all topics
    */
   public getAllTopics = async (req: Request, res: Response): Promise<void> => {
@@ -901,5 +931,44 @@ export class InstructorController {
     } catch (error) {
       next(error);
     }
+  }
+
+  public changePassword = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { oldPassword, newPassword } = req.body;
+
+      // Validate required fields
+      if (!oldPassword || !newPassword) {
+        res
+          .status(400)
+          .json({ message: "Old password and new password are required" });
+        return;
+      }
+
+      // Validate new password
+      if (newPassword.length < 6) {
+        res
+          .status(400)
+          .json({ message: "New password must be at least 6 characters" });
+        return;
+      }
+
+      const result = await this.instructorService.changePassword(id, {
+        oldPassword,
+        newPassword,
+      });
+
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      this.handleError(res, error);
+    }
   };
+
 }

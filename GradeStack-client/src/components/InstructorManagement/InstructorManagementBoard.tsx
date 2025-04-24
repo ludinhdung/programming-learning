@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import React, { ReactNode } from "react";
-
+import HeaderDashboard from "../DashboardHeader/DashboardHeader";
 interface InstructorManagementBoardProps {
   children?: ReactNode;
 }
@@ -9,7 +9,7 @@ interface InstructorManagementBoardProps {
 const InstructorManagementBoard: React.FC<InstructorManagementBoardProps> = ({ children }) => {
   return (
     <div className="flex min-h-screen bg-zinc-900">
-
+      <HeaderDashboard />
       <div className="flex w-full max-w-[2000px] mx-auto mt-16">
         <div className="hidden md:block fixed top-20 h-[calc(100vh-4rem)]">
           <Sidebar />

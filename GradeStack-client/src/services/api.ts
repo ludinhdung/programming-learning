@@ -98,6 +98,40 @@ export const instructorService = {
     return respone.data;
   },
 
+  async getInstructorProfile(instructorId: string) {
+    const respone = await api.get(
+      `/instructors/instructor/${instructorId}/profile`
+    );
+    return respone.data;
+  },
+
+  async updateInstructorProfile(
+    instructorId: string,
+    profileData: {
+      bio: string;
+      socials: string[];
+      firstName?: string;
+      lastName?: string;
+    }
+  ) {
+    const response = await api.put(
+      `/instructors/instructor/${instructorId}/profile`,
+      profileData
+    );
+    return response.data;
+  },
+
+  async changePassword(
+    instructorId: string,
+    data: { oldPassword: string; newPassword: string }
+  ) {
+    const response = await api.post(
+      `/instructors/instructor/${instructorId}/change-password`,
+      data
+    );
+    return response.data;
+  },
+
   async uploadVideo(file: RcFile) {
     const formData = new FormData();
     formData.append("video", file);
@@ -559,6 +593,12 @@ export const feedbackService = {
       );
       throw error;
     }
+  },
+
+  // Get all feedback
+  async getAllFeedback() {
+    const response = await api.get("/feedback");
+    return response.data;
   },
 
   // Delete feedback

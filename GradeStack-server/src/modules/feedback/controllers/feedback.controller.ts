@@ -123,6 +123,20 @@ export class FeedbackController {
     }
   };
 
+  // Get all feedback
+  getAllFeedback = async (req: Request, res: Response) => {
+    try {
+      const feedbacks = await this.feedbackService.getAllFeedback();
+      res.status(200).json({
+        success: true,
+        data: feedbacks,
+      });
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new AppError("Failed to get all feedback", 500);
+    }
+  };
+
   // Delete feedback
   deleteFeedback = async (req: Request, res: Response) => {
     try {

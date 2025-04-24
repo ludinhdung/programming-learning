@@ -30,6 +30,7 @@ import Overview from "./components/InstructorManagement/Contents/Overview";
 import InstructorCourseList from "./components/InstructorManagement/Contents/Course/CourseList";
 import InstructorCreateCourse from "./components/InstructorManagement/Contents/Course/CreateCourse";
 import InstructorCourseDetail from "./components/InstructorManagement/Contents/Course/CourseDetail";
+import InstructorProfile from "./components/InstructorManagement/Contents/Profile";
 // Topic Management
 import TopicList from "./pages/InstructorDashboard/Topics/TopicList";
 import CreateTopic from "./pages/InstructorDashboard/Topics/CreateTopic";
@@ -52,7 +53,7 @@ import UserDashboard from "./pages/UserDashboard/UserDashboard";
 import PracticeCode from "./pages/PracticeCode/PracticeCode";
 import { TransactionList } from "./components/InstructorManagement/Contents/Transaction";
 import { CourseVerificationList } from "./components/InstructorManagement/Contents/CourseVerification";
-import CourseVerificationDetail from "./components/InstructorManagement/Contents/CourseVerification/CourseVerificationDetail"
+import CourseVerificationDetail from "./components/InstructorManagement/Contents/CourseVerification/CourseVerificationDetail";
 import AdminOverview from "./pages/AdminDashboard/components/Overview";
 import AdminTransactions from "./pages/AdminDashboard/components/Transactions";
 import AdminSupporterManagement from "./pages/AdminDashboard/components/SupporterManagement";
@@ -125,6 +126,7 @@ const App: React.FC = () => {
               path="verify-courses/:courseId"
               element={<CourseVerificationDetail />}
             />
+            <Route path="profile" element={<InstructorProfile />} />
           </Route>
           {/* Supporter Dashboard*/}
           <Route path="/supporter-management" element={<SupporterDashboard />}>
