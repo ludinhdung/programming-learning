@@ -150,8 +150,8 @@ const Sidebar = () => {
     },
     {
       icon: MdAttachMoney,
-      text: "Monetization",
-      href: "/instructor-management/monetization",
+      text: "Transactions",
+      href: "/instructor-management/transactions",
     },
     {
       icon: MdPerson,
