@@ -193,7 +193,7 @@ const Overview = () => {
   return (
     <div className="flex flex-col w-full min-h-screen bg-zinc-800 p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-white text-2xl font-bold">Dashboard</h1>
+        <h1 className="text-white text-2xl font-bold">Overview</h1>
         <div className="flex space-x-2">
           <button
             onClick={() => setDateRange('7d')}

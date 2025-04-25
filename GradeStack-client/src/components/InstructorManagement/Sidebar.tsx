@@ -26,7 +26,6 @@ interface InstructorData {
   organization?: string;
   avatar?: string;
   bio?: string;
-  socials?: string[];
 }
 
 interface NavItemProps {
@@ -150,8 +149,8 @@ const Sidebar = () => {
     },
     {
       icon: MdAttachMoney,
-      text: "Transactions",
-      href: "/instructor-management/transactions",
+      text: "Monetization",
+      href: "/instructor-management/monetization",
     },
     {
       icon: MdPerson,
