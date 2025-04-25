@@ -94,11 +94,37 @@ const CourseVerificationList = () => {
     fetchCourses();
   }, []);
 
-  const handlePublishToggle = async (courseId: string) => {
+  const handlePublishToggle = async (
+    courseId: string,
+    isCurrentlyPublished: boolean
+  ) => {
     try {
+      // Show different loading message depending on current state
+      const loadingMessage = isCurrentlyPublished
+        ? "Unpublishing course..."
+        : "Publishing course and sending email notification...";
+
+      const loadingKey = "publishToggle";
+      message.loading({
+        content: loadingMessage,
+        key: loadingKey,
+        duration: 0,
+      });
+
       await courseVerificationService.toggleCoursePublishStatus(courseId);
+
+      // Show appropriate success message
+      const successMessage = isCurrentlyPublished
+        ? "Course unpublished successfully"
+        : "Course published successfully and notification email sent to instructor";
+
+      message.success({
+        content: successMessage,
+        key: loadingKey,
+        duration: 3,
+      });
+
       fetchCourses();
-      message.success("Course status updated successfully");
     } catch (error) {
       console.error("Error toggling course status:", error);
       message.error("Failed to update course status");
@@ -200,7 +226,11 @@ const CourseVerificationList = () => {
 
                   <div className="flex flex-col items-end gap-4 ml-4">
                     <Button
-                      onClick={() => handlePublishToggle(course.id)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handlePublishToggle(course.id, course.isPublished);
+                      }}
                       variant="light"
                       color={course.isPublished ? "red" : "green"}
                       leftSection={

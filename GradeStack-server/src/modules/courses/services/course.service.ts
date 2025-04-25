@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { AppError } from "../../../shared/middleware/error.middleware";
+import { sendEmail } from "../../../shared/utils/email.service";
 
 interface FindCoursesParams {
   topicId?: string;
@@ -156,9 +157,9 @@ export class CourseService {
     const averageRating =
       course.CourseFeedback.length > 0
         ? course.CourseFeedback.reduce(
-          (sum, feedback) => sum + feedback.rating,
-          0
-        ) / course.CourseFeedback.length
+            (sum, feedback) => sum + feedback.rating,
+            0
+          ) / course.CourseFeedback.length
         : 0;
 
     const { modules, CourseFeedback, ...courseWithoutModules } = course;
@@ -275,19 +276,55 @@ export class CourseService {
   async toggleCoursePublishStatus(courseId: string) {
     const course = await prisma.course.findUnique({
       where: { id: courseId },
+      include: {
+        instructor: {
+          include: {
+            user: true,
+          },
+        },
+      },
     });
 
     if (!course) {
       throw new Error("Course not found");
     }
 
-    return await prisma.course.update({
+    const updatedCourse = await prisma.course.update({
       where: { id: courseId },
       data: {
-        isPublished: true,
+        isPublished: !course.isPublished,
         updatedAt: new Date(),
       },
     });
+
+    // If course was just published (not unpublished), send email notification
+    if (!course.isPublished && updatedCourse.isPublished) {
+      try {
+        const instructorEmail = course.instructor.user.email;
+        const instructorName = `${course.instructor.user.firstName} ${course.instructor.user.lastName}`;
+
+        const emailSubject = "Congratulations! Your course has been published";
+        const emailContent = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+            <h2 style="color: #1b55ac;">Course Verification Successful!</h2>
+            <p>Hello ${instructorName},</p>
+            <p>We're pleased to inform you that your course <strong>${course.title}</strong> has been verified and is now published on our platform.</p>
+            <p>Your course is now available for students to enroll and begin learning.</p>
+            <p style="margin-top: 30px;">Thank you for contributing to our learning community!</p>
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; color: #888; font-size: 14px;">
+              <p>GradeStacks Team</p>
+            </div>
+          </div>
+        `;
+
+        await sendEmail(instructorEmail, emailSubject, emailContent);
+      } catch (error) {
+        console.error("Failed to send email notification:", error);
+        // Don't throw - we still want to return the updated course even if email fails
+      }
+    }
+
+    return updatedCourse;
   }
 
   async getStudentEnrolledCourses(courseId: string) {
