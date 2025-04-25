@@ -1,9 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { Badge, Button, Loader } from "@mantine/core";
 import { MdAccessTime, MdVideoLibrary, MdCheck, MdClose } from "react-icons/md";
 import { formatVND } from "../../../../utils/formatCurrency";
-import { message } from 'antd';
-import courseVerificationService from '../../../../services/courseVerification.service';
+import { message } from "antd";
+import courseVerificationService from "../../../../services/courseVerification.service";
+import { formatDuration } from "../../../../utils/formatDuration";
+interface Lesson {
+  id: string;
+  title: string;
+  lessonType?: string;
+  duration?: number;
+  video?: {
+    duration: number;
+  };
+  finalTest?: {
+    estimatedDuration: number;
+  };
+}
+
+interface Module {
+  id: string;
+  title: string;
+  videoDuration?: number;
+  lessons: Lesson[];
+}
 
 interface Course {
   id: string;
@@ -15,14 +35,7 @@ interface Course {
   thumbnail: string;
   createdAt: string;
   updatedAt: string;
-  modules: {
-    id: string;
-    title: string;
-    lessons: {
-      id: string;
-      title: string;
-    }[];
-  }[];
+  modules: Module[];
   _count: {
     students: number;
     modules: number;
@@ -30,10 +43,33 @@ interface Course {
   };
 }
 
-const formatDuration = (seconds: number) => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+const calculateCourseDuration = (course: Course) => {
+  let totalDurationInSeconds = 0;
+
+  if (course.modules && course.modules.length > 0) {
+    course.modules.forEach((module) => {
+      // Add module videoDuration if available
+      if (module.videoDuration) {
+        totalDurationInSeconds += module.videoDuration;
+      }
+
+      // Add durations from lessons
+      if (module.lessons && module.lessons.length > 0) {
+        module.lessons.forEach((lesson) => {
+          if (lesson.lessonType === "VIDEO" && lesson.video) {
+            totalDurationInSeconds += lesson.video.duration || 0;
+          } else if (lesson.lessonType === "FINAL_TEST" && lesson.finalTest) {
+            totalDurationInSeconds +=
+              (lesson.finalTest.estimatedDuration || 0) * 60;
+          } else {
+            totalDurationInSeconds += lesson.duration || 0;
+          }
+        });
+      }
+    });
+  }
+
+  return totalDurationInSeconds;
 };
 
 const CourseVerificationList = () => {
@@ -44,10 +80,11 @@ const CourseVerificationList = () => {
     try {
       setLoading(true);
       const data = await courseVerificationService.getUnpublishedCourses();
+      console.log(data, "data");
       setCourses(data);
     } catch (error) {
-      console.error('Error fetching courses:', error);
-      message.error('Failed to load courses');
+      console.error("Error fetching courses:", error);
+      message.error("Failed to load courses");
     } finally {
       setLoading(false);
     }
@@ -61,10 +98,10 @@ const CourseVerificationList = () => {
     try {
       await courseVerificationService.toggleCoursePublishStatus(courseId);
       fetchCourses();
-      message.success('Course status updated successfully');
+      message.success("Course status updated successfully");
     } catch (error) {
-      console.error('Error toggling course status:', error);
-      message.error('Failed to update course status');
+      console.error("Error toggling course status:", error);
+      message.error("Failed to update course status");
     }
   };
 
@@ -98,18 +135,17 @@ const CourseVerificationList = () => {
 
       <div className="space-y-4 px-6">
         {courses.map((course) => (
-          <a href={`/instructor-management/verify-courses/${course.id}`}>
-            <div
-              key={course.id}
-              className="mt-4 bg-neutral-600 rounded-lg overflow-hidden shadow-lg hover:bg-neutral-600 transition-colors duration-200"
-            >
+          <a
+            href={`/instructor-management/verify-courses/${course.id}`}
+            key={course.id}
+          >
+            <div className="mt-4 bg-neutral-600 rounded-lg overflow-hidden shadow-lg hover:bg-neutral-600 transition-colors duration-200">
               <div className="flex p-6">
                 {/* Thumbnail */}
                 <div className="flex-shrink-0 mr-6 w-48 h-32">
                   <img
                     src={
-                      course.thumbnail ||
-                      "https://via.placeholder.com/192x128"
+                      course.thumbnail || "https://via.placeholder.com/192x128"
                     }
                     alt={course.title}
                     className="w-full h-full object-cover rounded-lg"
@@ -128,9 +164,7 @@ const CourseVerificationList = () => {
                         variant="light"
                         size="lg"
                       >
-                        {course.isPublished
-                          ? "Published"
-                          : "Pending Approval"}
+                        {course.isPublished ? "Published" : "Pending Approval"}
                       </Badge>
                     </div>
 
@@ -141,7 +175,9 @@ const CourseVerificationList = () => {
                     <div className="flex items-center gap-6 text-sm text-gray-400">
                       <div className="flex items-center gap-2 bg-neutral-800 px-3 py-1 rounded-full">
                         <MdAccessTime className="w-4 h-4" />
-                        <span>{formatDuration(course.duration)}</span>
+                        <span>
+                          {formatDuration(calculateCourseDuration(course))}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2 bg-neutral-800 px-3 py-1 rounded-full">
                         <MdVideoLibrary className="w-4 h-4" />
@@ -181,14 +217,11 @@ const CourseVerificationList = () => {
                     </Button>
                     <span className="text-xs text-gray-400">
                       Last updated:{" "}
-                      {new Date(course.updatedAt).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }
-                      )}
+                      {new Date(course.updatedAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
                     </span>
                   </div>
                 </div>
@@ -213,4 +246,4 @@ const CourseVerificationList = () => {
   );
 };
 
-export default CourseVerificationList; 
+export default CourseVerificationList;
