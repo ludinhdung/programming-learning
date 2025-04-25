@@ -26,6 +26,7 @@ import adminRoutes from './modules/admin/admin.route'
 import finalTestRoutes from "./modules/final_test/routes/final_test.route"
 import { generateVietQRUrl } from './shared/utils/generateVietQRUrl';
 import feedbackRoutes from "./modules/feedback/routes/feedback.route"
+import "./shared/events/listener"
 const app = express();
 
 app.use(cors());
@@ -70,8 +71,5 @@ app.use("/api/feedback", feedbackRoutes);
 //     '2025-04-23',
 //     '2025-10-25'
 // ).then(console.log).catch(console.error);
-
-
-app.use(errorHandler);
 
 export default app;

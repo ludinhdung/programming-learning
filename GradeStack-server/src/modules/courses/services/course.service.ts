@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { AppError } from "../../../shared/middleware/error.middleware";
+import broker from "../../../shared/events/broker"
 
 interface FindCoursesParams {
   topicId?: string;
@@ -275,19 +276,36 @@ export class CourseService {
   async toggleCoursePublishStatus(courseId: string) {
     const course = await prisma.course.findUnique({
       where: { id: courseId },
+      include: {
+        instructor: {
+          select: {
+            user: {
+              select: { email: true }
+            }
+          }
+        }
+      }
     });
 
     if (!course) {
       throw new Error("Course not found");
     }
 
-    return await prisma.course.update({
+    const updatedCourse = await prisma.course.update({
       where: { id: courseId },
       data: {
         isPublished: true,
         updatedAt: new Date(),
       },
     });
+
+    broker.publish('course_published', {
+      courseThumbnail: updatedCourse.thumbnail,
+      courseName: updatedCourse.title,
+      instructorEmail: course.instructor.user.email
+    });
+
+    return updatedCourse;
   }
 
   async getStudentEnrolledCourses(courseId: string) {
