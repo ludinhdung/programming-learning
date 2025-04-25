@@ -358,7 +358,6 @@ const CourseDetail: React.FC = () => {
     );
   };
 
-
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0a1321] flex items-center justify-center">
@@ -824,8 +823,8 @@ const CourseDetail: React.FC = () => {
                                 ? formatDuration(lesson.video?.duration || 0)
                                 : lesson.lessonType === "FINAL_TEST"
                                 ? formatDuration(
-                                    (lesson.finalTest?.estimatedDuration ||
-                                      0) * 60
+                                    (lesson.finalTest?.estimatedDuration || 0) *
+                                      60
                                   )
                                 : `${lesson.duration || 0}m`}
                               {(isEnrolled ||
