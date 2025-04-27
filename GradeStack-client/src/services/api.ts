@@ -634,4 +634,32 @@ export const feedbackService = {
   },
 };
 
+export const adminService = {
+  async getAllSupporters() {
+    const response = await api.get("/admin/supporters");
+    return response.data;
+  },
+  async getSupporterById(supporterId: string) {
+    const response = await api.get(`/admin/supporters/${supporterId}`);
+    return response.data;
+  },
+  async updateSupporterStatus(supporterId: string, isBlocked: boolean) {
+    const response = await api.patch(`/admin/supporters/${supporterId}/status`, { isBlocked });
+    return response.data;
+  },
+  async createSupporter(supporterData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+  }) {
+    const response = await api.post("/admin/create/supporter", supporterData);
+    return response.data;
+  },
+  async deleteSupporter(supporterId: string) {
+    const response = await api.delete(`/admin/supporters/${supporterId}`);
+    return response.data;
+  },
+};
+
 export default api;

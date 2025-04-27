@@ -4,8 +4,8 @@ import { Table, Switch, Button, Popconfirm, message, Input } from "antd";
 import { Link } from "react-router-dom";
 import { DeleteOutlined, WarningOutlined } from "@ant-design/icons";
 import { supporterService } from "../../../../services/api";
-import type { DrawerProps, RadioChangeEvent } from "antd";
-import { Drawer, Radio, Space } from "antd";
+import type { DrawerProps } from "antd";
+import { Drawer } from "antd";
 const { Column } = Table;
 const { TextArea } = Input;
 interface User {
