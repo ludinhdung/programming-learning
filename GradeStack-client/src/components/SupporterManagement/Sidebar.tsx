@@ -78,7 +78,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <nav className="flex flex-col relative w-full h-screen bg-zinc-900 text-white transition-all duration-300">
+    <nav className="flex flex-col relative w-64 h-screen bg-zinc-900 text-white transition-all duration-300">
       {/* Profile Section */}
       <div className="px-4 pt-4">
         <div className="flex items-center space-x-3">

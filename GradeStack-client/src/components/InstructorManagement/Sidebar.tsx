@@ -187,7 +187,7 @@ const Sidebar = () => {
     : "Instructor";
 
   return (
-    <nav className="flex flex-col relative w-full h-screen bg-zinc-900 text-white transition-all duration-300">
+    <nav className="flex flex-col relative w-64 h-screen bg-zinc-900 text-white transition-all duration-300">
       <div className="p-4 border-b border-zinc-700">
         <div className="flex items-center space-x-3">
           {loading ? (
