@@ -255,14 +255,16 @@ const CourseList = () => {
                       </button>
                     </Link>
 
-                  <div className="flex">
-                    <button
-                      onClick={() => handleDeleteClick(course.id)}
-                      className="text-white bg-red-500 hover:bg-red-700 p-1 rounded text-sm font-medium"
-                    >
-                      Delete Course
-                    </button>
-                  </div>
+                  {!course.isPublished && (
+                    <div className="flex">
+                      <button
+                        onClick={() => handleDeleteClick(course.id)}
+                        className="text-white bg-red-500 hover:bg-red-700 p-1 rounded text-sm font-medium"
+                      >
+                        Delete Course
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
