@@ -122,4 +122,16 @@ export class SupporterController {
       next(error);
     }
   }
+
+  async getSupporterById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await this.supporterService.getSupporterById(req.params.id);
+      res.status(201).json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

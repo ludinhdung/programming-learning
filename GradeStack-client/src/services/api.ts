@@ -37,6 +37,11 @@ export const authService = {
 };
 
 export const supporterService = {
+  async getSupporterById(supporterId: string) {
+    const respone = await api.get(`/supporter/${supporterId}`);
+    return respone.data;
+  },
+  
   async getAllInstructor() {
     const respone = await api.get("/supporter/instructors");
     return respone.data;

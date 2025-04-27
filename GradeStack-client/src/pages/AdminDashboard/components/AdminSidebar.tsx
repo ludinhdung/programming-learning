@@ -6,7 +6,7 @@ import {
     MdAttachMoney,
     MdSupervisorAccount,
 } from 'react-icons/md';
-
+import AdminAvatar from '../../../assets/images/admin_image.jpg';
 interface NavItemProps {
     icon: IconType;
     text: string;
@@ -34,10 +34,10 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, text, href }) => {
 
 const AdminSidebar = () => {
     const [admin] = useState({
-        firstName: 'Admin',
-        lastName: '',
-        email: 'admin@gradestack.com',
-        avatar: 'https://png.pngtree.com/png-clipart/20190629/original/pngtree-vector-administration-icon-png-image_4090499.jpg',
+      firstName: "Admin",
+      lastName: "",
+      email: "admin@gradestack.com",
+      avatar: AdminAvatar,
     });
 
     // Navigation items for admin

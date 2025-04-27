@@ -1,12 +1,22 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { IconType } from "react-icons";
-import { MdDashboard, MdPeople, MdPerson, MdForum } from "react-icons/md";
-import { Divider } from "antd";
+import { MdDashboard, MdPeople, MdPerson } from "react-icons/md";
+import { Divider, Skeleton } from "antd";
+import SupporterAvatar from "../../assets/images/supporter_image.webp";
+import { supporterService } from "../../services/api";
+
 interface NavItemProps {
   icon: IconType;
   text: string;
   href: string;
+}
+
+interface SupporterInfo {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
 }
 
 const NavItem: React.FC<NavItemProps> = ({ icon: Icon, text, href }) => {
@@ -29,6 +39,30 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, text, href }) => {
 };
 
 const Sidebar = () => {
+  const [supporter, setSupporter] = useState<SupporterInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSupporterInfo = async () => {
+      try {
+        // Lấy ID của supporter hiện tại từ localStorage
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+        if (user && user.id) {
+          // Gọi API để lấy thông tin supporter
+          const response = await supporterService.getSupporterById(user.id);
+          setSupporter(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching supporter info:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSupporterInfo();
+  }, []);
+
   const navItems = [
     { icon: MdDashboard, text: "Overview", href: "/supporter-management" },
     {
@@ -41,11 +75,6 @@ const Sidebar = () => {
       text: "Learners",
       href: "/supporter-management/learner",
     },
-    {
-      icon: MdForum,
-      text: "Community",
-      href: "/supporter-management/community",
-    },
   ];
 
   return (
@@ -54,13 +83,21 @@ const Sidebar = () => {
       <div className="px-4 pt-4">
         <div className="flex items-center space-x-3">
           <img
-            src="https://scontent.fdad3-3.fna.fbcdn.net/v/t39.30808-6/485886292_2316536695414452_3735739565780887893_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=h0-6ydB7JSsQ7kNvwGVwN9w&_nc_oc=Adk2nHKAtc7hGaYin7BfP_GdBu8TPnaP8szplTfJG0Fky8GLw3FUnI2DYZEk6nTu4wjOZETTSmxnRPTwkidxIY5c&_nc_zt=23&_nc_ht=scontent.fdad3-3.fna&_nc_gid=3SftsaOklAACZFnXzvbYIQ&oh=00_AfEnQ7iZD-YxY1CtaTbiA_u9r43-9yzKfhhJ78tBGFgqtg&oe=680A542B"
-            alt="Channel Avatar"
+            src={SupporterAvatar}
+            alt="Supporter Avatar"
             className="w-16 h-16 rounded-full"
           />
           <div className="flex flex-col">
             <div className="text-sm text-gray-400">Supporter</div>
-            <div className="font-medium">Ngoc Nhan Huynh</div>
+            {loading ? (
+              <Skeleton.Input active size="small" className="bg-gray-700" />
+            ) : (
+              <div className="font-medium">
+                {supporter
+                  ? `${supporter.firstName} ${supporter.lastName}`
+                  : "Loading..."}
+              </div>
+            )}
           </div>
         </div>
       </div>

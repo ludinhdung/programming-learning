@@ -32,5 +32,9 @@ router.delete(
   "/delete/learner/:id",
   supporterController.deleteLearner.bind(supporterController)
 );
+router.get(
+  "/:id",
+  supporterController.getSupporterById.bind(supporterController)
+);
 
 export default router;

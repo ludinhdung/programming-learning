@@ -260,4 +260,20 @@ export class SupporterService {
       where: { id: learnerId },
     });
   }
+  async getSupporterById(supporterId: string) {
+    const supporter = await prisma.user.findUnique({
+      where: { id: supporterId, role: "SUPPORTER" },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        role: true,
+        isBlocked: true,
+        requirePasswordChange: true,
+      },
+    });
+    return supporter;
+  }
+  
 }
