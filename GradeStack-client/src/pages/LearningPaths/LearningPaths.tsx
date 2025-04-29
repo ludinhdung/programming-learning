@@ -18,25 +18,25 @@ interface LearningPath {
 }
 
 const LearningPaths: FC = () => {
-  const [loading, setLoading] = useState(true);
-  const [paths, setPaths] = useState<LearningPath[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
 
   useEffect(() => {
-    const fetchLearningPaths = async () => {
+    const fetchLearningPaths = async (): Promise<void> => {
       try {
-        const data = await learningPathService.getAllLearningPaths();
-        setPaths(data);
+        const learningPathsData = await learningPathService.getAllLearningPaths();
+        setLearningPaths(learningPathsData);
       } catch (error) {
         console.error('Error fetching learning paths:', error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchLearningPaths();
   }, []);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0d1118] flex items-center justify-center">
         <Spin size="large" />
@@ -44,7 +44,7 @@ const LearningPaths: FC = () => {
     );
   }
 
-  if (paths.length === 0) {
+  if (learningPaths.length === 0) {
     return (
       <div className="min-h-screen bg-[#0d1118]">
         <Header />
@@ -72,7 +72,7 @@ const LearningPaths: FC = () => {
           <h2 className="text-2xl font-bold text-white uppercase">All Learning Paths</h2>
           <Divider className='bg-white'/>
           <div className='mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-            {paths.map((path) => (
+            {learningPaths.map((path) => (
               <div key={path.id} className='border border-gray-700 rounded-md overflow-hidden flex flex-col h-full'>
                 <div className='flex-grow'>
                   {/* Thumbnail */}
