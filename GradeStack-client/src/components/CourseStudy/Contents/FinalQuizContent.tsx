@@ -31,29 +31,31 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
   onMarkComplete,
   courseId,
 }) => {
+  // State for quiz progress and answers
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<{
     [key: number]: number;
   }>({});
-  const [isStart, setIsStart] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [submissionStatus, setSubmissionStatus] =
-    useState<SubmissionStatus | null>(null);
+  const [isQuizStarted, setIsQuizStarted] = useState(false);
+  const [isQuizSubmitted, setIsQuizSubmitted] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus | null>(null);
 
+  // Quiz configuration
   const passingScore = lesson.content.finalTest?.passingScore || 70;
-  const initialTime = (lesson.content.finalTest?.estimatedDuration || 30) * 60;
-  const [timeLeft, setTimeLeft] = useState(initialTime);
+  const initialTimeInSeconds = (lesson.content.finalTest?.estimatedDuration || 30) * 60;
+  const [remainingTime, setRemainingTime] = useState(initialTimeInSeconds);
   const questions = lesson.content.finalTest?.questions || [];
-  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+  const progressPercentage = ((currentQuestionIndex + 1) / questions.length) * 100;
 
-  //Feedback State
+  // Feedback state
   const [showFeedback, setShowFeedback] = useState(false);
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
+  const [feedbackRating, setFeedbackRating] = useState(0);
+  const [feedbackComment, setFeedbackComment] = useState("");
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
 
+  // Certificate and user state
   const [showCertificateModal, setShowCertificateModal] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   // Check submission status when component mounts
   useEffect(() => {
@@ -155,7 +157,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
       );
       return;
     }
-    setIsStart(true);
+    setIsQuizStarted(true);
     setTimeout(() => {
       AOS.refresh();
     }, 100);
@@ -165,12 +167,12 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
   useEffect(() => {
     const userData = localStorage.getItem("user");
     if (userData) {
-      setUser(JSON.parse(userData));
+      setCurrentUser(JSON.parse(userData));
     }
   }, []);
 
   const handleSubmitFeedback = async () => {
-    if (rating === 0 || comment.trim() === "") {
+    if (feedbackRating === 0 || feedbackComment.trim() === "") {
       message.error("Please provide a rating and comment");
       return;
     }
@@ -178,14 +180,14 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
     try {
       setIsSubmittingFeedback(true);
 
-      if (!user) {
+      if (!currentUser) {
         message.error("User not found. Please login again.");
         return;
       }
 
-      await feedbackService.createFeedback(courseId, user.id, {
-        rating: rating,
-        comment: comment.trim() || undefined,
+      await feedbackService.createFeedback(courseId, currentUser.id, {
+        rating: feedbackRating,
+        comment: feedbackComment.trim() || undefined,
       });
 
       message.success("Thank you for your feedback!");
@@ -201,7 +203,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
 
   // Submit test
   const handleSubmit = useCallback(async () => {
-    setIsSubmitted(true);
+    setIsQuizSubmitted(true);
 
     const score = Math.round(
       (Object.entries(selectedAnswers).filter(
@@ -235,9 +237,9 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
 
   // Xử lý countdown timer
   useEffect(() => {
-    if (isStart && !isSubmitted && timeLeft > 0) {
+    if (isQuizStarted && !isQuizSubmitted && remainingTime > 0) {
       const timer = setInterval(() => {
-        setTimeLeft((prevTime) => {
+        setRemainingTime((prevTime) => {
           if (prevTime <= 1) {
             clearInterval(timer);
             handleSubmit();
@@ -249,18 +251,18 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
 
       return () => clearInterval(timer);
     }
-  }, [isStart, isSubmitted, handleSubmit, timeLeft]);
+  }, [isQuizStarted, isQuizSubmitted, handleSubmit, remainingTime]);
 
   // Thêm warning khi thời gian sắp hết
   const getTimeColor = () => {
-    if (timeLeft <= 60) return "text-red-400";
-    if (timeLeft <= 180) return "text-yellow-400";
+    if (remainingTime <= 60) return "text-red-400";
+    if (remainingTime <= 180) return "text-yellow-400";
     return "text-blue-400";
   };
 
   //lấy ra dc câu trả lời đã chọn tại question
   const handleAnswerSelect = (questionIndex: number, answerIndex: number) => {
-    if (isSubmitted) return;
+    if (isQuizSubmitted) return;
     setSelectedAnswers({
       ...selectedAnswers,
       [questionIndex]: answerIndex,
@@ -268,10 +270,10 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
   };
 
   const handleRetry = () => {
-    setIsSubmitted(false);
+    setIsQuizSubmitted(false);
     setSelectedAnswers({});
     setCurrentQuestionIndex(0);
-    setTimeLeft(initialTime);
+    setRemainingTime(initialTimeInSeconds);
   };
 
   const fireConfetti = () => {
@@ -322,7 +324,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
   return (
     <>
       <div className="max-w-5xl mx-auto p-6">
-        {!isStart ? (
+        {!isQuizStarted ? (
           <div
             data-aos="fade-left"
             data-aos-duration="800"
@@ -342,7 +344,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-blue-400">
-                    {formatTime(initialTime)}
+                    {formatTime(initialTimeInSeconds)}
                   </div>
                   <div className="text-sm text-gray-400">Duration</div>
                 </div>
@@ -359,7 +361,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
                 </h3>
                 <ul className="text-gray-400 text-sm text-left space-y-2">
                   <li>
-                    • You have {formatTime(initialTime)} to complete the quiz
+                    • You have {formatTime(initialTimeInSeconds)} to complete the quiz
                   </li>
                   <li>• You need {passingScore}% to pass the quiz</li>
                   <li>• You cannot pause the timer once started</li>
@@ -410,10 +412,10 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
                       <div>
                         <div className="text-xs text-gray-400">Time Left</div>
                         <div
-                          className={`font-semibold ${getTimeColor()} ${timeLeft <= 60 ? "animate-pulse" : ""
+                          className={`font-semibold ${getTimeColor()} ${remainingTime <= 60 ? "animate-pulse" : ""
                             }`}
                         >
-                          {formatTime(timeLeft)}
+                          {formatTime(remainingTime)}
                         </div>
                       </div>
                     </div>
@@ -445,7 +447,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
                 </div>
               </div>
               <Progress
-                percent={progress}
+                percent={progressPercentage}
                 showInfo={false}
                 strokeColor={{
                   "0%": "#3b82f6",
@@ -485,7 +487,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
                             className={`group relative p-4 rounded-lg cursor-pointer transition-all duration-200 border ${selectedAnswers[currentQuestionIndex] === index
                               ? "bg-[#0d1117] border-blue-500"
                               : "bg-[#0d1117] border-[#29334a] hover:border-blue-500/30"
-                              } ${isSubmitted
+                              } ${isQuizSubmitted
                                 ? answer.isCorrect
                                   ? "bg-green-500/10 border-green-500"
                                   : selectedAnswers[currentQuestionIndex] ===
@@ -552,7 +554,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
                     type="primary"
                     onClick={handleSubmit}
                     disabled={
-                      isSubmitted ||
+                      isQuizSubmitted ||
                       Object.keys(selectedAnswers).length < questions.length
                     }
                     className="bg-blue-500 border-none hover:bg-blue-600"
@@ -572,7 +574,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
             </div>
 
             {/* Results Section */}
-            {isSubmitted && (
+            {isQuizSubmitted && (
               <div
                 data-aos="zoom-in"
                 data-aos-duration="1000"
@@ -691,23 +693,23 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
               <span className="text-red-500">*</span>
             </p>
             <Rate
-              value={rating}
-              onChange={setRating}
+              value={feedbackRating}
+              onChange={setFeedbackRating}
               style={{
                 fontSize: "24px",
                 color: "#3b82f6", // Màu của sao khi được chọn
               }}
               className="[&_.ant-rate-star-second]:text-gray-600" // Màu của sao chưa chọn
             />
-            {rating === 0 && (
+            {feedbackRating === 0 && (
               <p className="text-red-500 text-sm mt-1">Rating is required</p>
             )}
           </div>
           <div>
             <p className="text-gray-400 mb-2">Additional comments</p>
             <Input.TextArea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
+              value={feedbackComment}
+              onChange={(e) => setFeedbackComment(e.target.value)}
               placeholder="Share your thoughts about the course..."
               rows={4}
               style={{
@@ -729,7 +731,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
             onClick={handleSubmitFeedback}
             loading={isSubmittingFeedback}
             className="w-full bg-blue-500 border-none hover:bg-blue-600 transition-colors"
-            disabled={rating === 0 || comment.trim() === ""}
+            disabled={feedbackRating === 0 || feedbackComment.trim() === ""}
           >
             Submit Feedback
           </Button>
@@ -740,7 +742,7 @@ const FinalQuizContent: React.FC<FinalQuizContentProps> = ({
         isOpen={showCertificateModal}
         onClose={() => setShowCertificateModal(false)}
         courseId={courseId}
-        learnerId={user?.id || ''}
+        learnerId={currentUser?.id || ''}
       />
     </>
   );
