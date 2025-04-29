@@ -67,86 +67,82 @@ interface LearningPath {
 
 const LearningPathDetail: FC = () => {
   const { pathId } = useParams<{ pathId: string }>();
-  const [loading, setLoading] = useState<boolean>(true);
-  const [learningPath, setLearningPath] = useState<LearningPath | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [learningPathData, setLearningPathData] = useState<LearningPath | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   // Format time from seconds to hh:mm:ss format
   const formatDuration = (seconds: number | null): string => {
     if (!seconds) return '00:00';
-    
+
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const remainingSeconds = Math.floor(seconds % 60);
-    
+
     const formattedHours = hours > 0 ? `${hours}:` : '';
     const formattedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
     const formattedSeconds = remainingSeconds < 10 ? `0${remainingSeconds}` : `${remainingSeconds}`;
-    
+
     return `${formattedHours}${formattedMinutes}:${formattedSeconds}`;
   };
-  
-  // Calculate total duration of a course
+
+  // Calculate total duration of a course in seconds
   const calculateCourseDuration = (modules: Module[]): number => {
-    return modules.reduce((total, module) => total + (module.videoDuration || 0), 0);
+    return modules.reduce((totalDuration, module) => totalDuration + (module.videoDuration || 0), 0);
   };
-  
-  // Calculate total duration of the entire learning path
+
+  // Calculate total duration of the entire learning path in seconds
   const calculateTotalDuration = (): number => {
-    if (!learningPath || !learningPath.courses || !Array.isArray(learningPath.courses)) return 0;
-    
-    return learningPath.courses.reduce((total, pathCourse) => {
-      if (!pathCourse.course || !pathCourse.course.modules || !Array.isArray(pathCourse.course.modules)) {
-        return total;
-      }
-      return total + calculateCourseDuration(pathCourse.course.modules);
+    if (!learningPathData?.courses) return 0;
+
+    return learningPathData.courses.reduce((totalDuration, pathCourse) => {
+      if (!pathCourse.course?.modules) return totalDuration;
+      return totalDuration + calculateCourseDuration(pathCourse.course.modules);
     }, 0);
   };
-  
+
   // Calculate total number of modules in the learning path
   const calculateTotalModules = (): number => {
-    if (!learningPath || !learningPath.courses || !Array.isArray(learningPath.courses)) return 0;
-    
-    return learningPath.courses.reduce((total, pathCourse) => {
-      if (!pathCourse.course || !pathCourse.course.modules || !Array.isArray(pathCourse.course.modules)) {
-        return total;
-      }
-      return total + pathCourse.course.modules.length;
+    if (!learningPathData?.courses) return 0;
+
+    return learningPathData.courses.reduce((totalModules, pathCourse) => {
+      if (!pathCourse.course?.modules) return totalModules;
+      return totalModules + pathCourse.course.modules.length;
     }, 0);
   };
 
   useEffect(() => {
     const fetchLearningPathDetail = async (): Promise<void> => {
       if (!pathId) {
-        setError('Invalid learning path ID');
-        setLoading(false);
+        setErrorMessage('Invalid learning path ID');
+        setIsLoading(false);
         return;
       }
-      
+
       try {
         console.log('Fetching data for learning path with ID:', pathId);
-        const data = await learningPathService.getLearningPath(pathId);
-        console.log('Data received from API:', data);
-        
-        if (!data) {
-          setError('Learning path not found');
-          setLoading(false);
+        const responseData = await learningPathService.getLearningPath(pathId);
+        console.log('Data received from API:', responseData);
+
+        if (!responseData) {
+          setErrorMessage('Learning path not found');
+          setIsLoading(false);
           return;
         }
-        
-        setLearningPath(data);
+
+        setLearningPathData(responseData);
       } catch (err: any) {
         console.error('Error fetching learning path details:', err);
-        setError(err.response?.data?.message || 'Unable to load learning path information. Please try again later.');
+        setErrorMessage(err.response?.data?.message || 'Unable to load learning path information. Please try again later.');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchLearningPathDetail();
   }, [pathId]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0d1118] flex items-center justify-center">
         <Spin size="large" />
@@ -154,14 +150,14 @@ const LearningPathDetail: FC = () => {
     );
   }
 
-  if (error || !learningPath) {
+  if (errorMessage || !learningPathData) {
     return (
       <div className="min-h-screen bg-[#0d1118]">
         <Header />
         <div className="container mx-auto px-4 py-16">
-          <Empty 
-            description={<span className="text-gray-400">{error || 'Learning path not found'}</span>} 
-            image={Empty.PRESENTED_IMAGE_SIMPLE} 
+          <Empty
+            description={<span className="text-gray-400">{errorMessage || 'Learning path not found'}</span>}
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
           />
           <div className="mt-4 text-center">
             <Link to="/learning-paths" className="text-blue-500 hover:text-blue-400">
@@ -183,17 +179,17 @@ const LearningPathDetail: FC = () => {
             <ArrowLeftOutlined /> Back to learning paths
           </Link>
         </div>
-        
+
         {/* Learning Path Header */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row gap-6">
             {/* Thumbnail */}
             <div className="w-full md:w-1/3 lg:w-1/4">
               <div className="rounded-lg overflow-hidden bg-gray-800">
-                {learningPath.thumbnail ? (
-                  <img 
-                    src={learningPath.thumbnail} 
-                    alt={learningPath.title} 
+                {learningPathData.thumbnail ? (
+                  <img
+                    src={learningPathData.thumbnail}
+                    alt={learningPathData.title}
                     className="w-full h-auto object-cover"
                   />
                 ) : (
@@ -203,15 +199,15 @@ const LearningPathDetail: FC = () => {
                 )}
               </div>
             </div>
-            
+
             {/* Learning Path Info */}
             <div className="w-full md:w-2/3 lg:w-3/4">
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{learningPath.title}</h1>
-              
-              {learningPath.description && (
-                <p className="text-gray-300 mb-4">{learningPath.description}</p>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{learningPathData.title}</h1>
+
+              {learningPathData.description && (
+                <p className="text-gray-300 mb-4">{learningPathData.description}</p>
               )}
-              
+
               <div className="flex flex-wrap gap-4 mb-4">
                 <div className="flex items-center text-gray-300">
                   <ClockCircleOutlined className="mr-2" />
@@ -219,34 +215,34 @@ const LearningPathDetail: FC = () => {
                 </div>
                 <div className="flex items-center text-gray-300">
                   <BookOutlined className="mr-2" />
-                  <span>{learningPath.courses.length} courses</span>
+                  <span>{learningPathData.courses.length} courses</span>
                 </div>
                 <div className="flex items-center text-gray-300">
                   <PlayCircleOutlined className="mr-2" />
                   <span>{calculateTotalModules()} lessons</span>
                 </div>
               </div>
-              
+
               <div className="bg-gray-800 p-4 rounded-md border border-gray-700 mt-4">
                 <h3 className="text-white text-lg font-semibold mb-2">Author Information</h3>
                 <div className="flex items-center">
                   <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold mr-3">
-                    {learningPath.Instructor?.user ? (
-                      `${learningPath.Instructor.user.firstName.charAt(0)}${learningPath.Instructor.user.lastName.charAt(0)}`
+                    {learningPathData.Instructor?.user ? (
+                      `${learningPathData.Instructor.user.firstName.charAt(0)}${learningPathData.Instructor.user.lastName.charAt(0)}`
                     ) : ('?')}
                   </div>
                   <div>
                     <div className="text-white font-medium">
-                      {learningPath.Instructor?.user ? (
+                      {learningPathData.Instructor?.user ? (
                         <span>
-                          {learningPath.Instructor.user.firstName} {learningPath.Instructor.user.lastName}
+                          {learningPathData.Instructor.user.firstName} {learningPathData.Instructor.user.lastName}
                         </span>
                       ) : (
                         <span>No information available</span>
                       )}
                     </div>
-                    {learningPath.Instructor?.user?.email && (
-                      <div className="text-gray-400 text-sm">{learningPath.Instructor.user.email}</div>
+                    {learningPathData.Instructor?.user?.email && (
+                      <div className="text-gray-400 text-sm">{learningPathData.Instructor.user.email}</div>
                     )}
                   </div>
                 </div>
@@ -254,23 +250,23 @@ const LearningPathDetail: FC = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Learning Path Overview */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-white mb-4">Path Overview</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div className="bg-gray-800 p-4 rounded-md border border-gray-700">
               <h3 className="text-white text-lg font-semibold mb-2">Courses</h3>
-              <div className="text-3xl text-white font-bold mb-1">{learningPath.courses.length}</div>
+              <div className="text-3xl text-white font-bold mb-1">{learningPathData.courses.length}</div>
               <p className="text-gray-400 text-sm">Courses in this path</p>
             </div>
-            
+
             <div className="bg-gray-800 p-4 rounded-md border border-gray-700">
               <h3 className="text-white text-lg font-semibold mb-2">Lessons</h3>
               <div className="text-3xl text-white font-bold mb-1">{calculateTotalModules()}</div>
               <p className="text-gray-400 text-sm">Total lessons</p>
             </div>
-            
+
             <div className="bg-gray-800 p-4 rounded-md border border-gray-700">
               <h3 className="text-white text-lg font-semibold mb-2">Duration</h3>
               <div className="text-3xl text-white font-bold mb-1">{formatDuration(calculateTotalDuration())}</div>
@@ -278,20 +274,20 @@ const LearningPathDetail: FC = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Learning Path Content */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-white mb-4">Path Content</h2>
-          
-          {learningPath.courses.length === 0 ? (
-            <Empty 
-              description={<span className="text-gray-400">This learning path has no courses yet</span>} 
-              image={Empty.PRESENTED_IMAGE_SIMPLE} 
+
+          {learningPathData.courses.length === 0 ? (
+            <Empty
+              description={<span className="text-gray-400">This learning path has no courses yet</span>}
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
             />
           ) : (
             <div className="space-y-6">
-              {learningPath.courses.map((pathCourse) => (
-                <Card 
+              {learningPathData.courses.map((pathCourse) => (
+                <Card
                   key={pathCourse.id}
                   className="bg-gray-800 border-gray-700 hover:border-blue-500 transition-colors"
                   title={
@@ -329,20 +325,20 @@ const LearningPathDetail: FC = () => {
                         <span>No information available</span>
                       )}
                     </div>
-                    
+
                     {pathCourse.course.description && (
                       <p className="text-gray-300">{pathCourse.course.description}</p>
                     )}
                   </div>
-                  
-                  <Collapse 
+
+                  <Collapse
                     className="bg-gray-700 border-gray-600"
                     bordered={false}
                     defaultActiveKey={['modules']}
                     expandIconPosition="end"
                   >
-                    <Collapse.Panel 
-                      key="modules" 
+                    <Collapse.Panel
+                      key="modules"
                       header={
                         <div className="text-white">
                           <span className="font-semibold">Lessons</span>
@@ -352,9 +348,9 @@ const LearningPathDetail: FC = () => {
                       className="bg-gray-700 border-gray-600"
                     >
                       {pathCourse.course.modules.length === 0 ? (
-                        <Empty 
-                          description={<span className="text-gray-400">This course has no lessons yet</span>} 
-                          image={Empty.PRESENTED_IMAGE_SIMPLE} 
+                        <Empty
+                          description={<span className="text-gray-400">This course has no lessons yet</span>}
+                          image={Empty.PRESENTED_IMAGE_SIMPLE}
                         />
                       ) : (
                         <div className="space-y-4">
@@ -375,7 +371,7 @@ const LearningPathDetail: FC = () => {
                                     </div>
                                   )}
                                   {module.videoUrl && (
-                                    <Link 
+                                    <Link
                                       to={`/courses/${pathCourse.course.id}/modules/${module.id}`}
                                       className="text-blue-500 hover:text-blue-400 text-sm"
                                     >
@@ -398,10 +394,10 @@ const LearningPathDetail: FC = () => {
                       )}
                     </Collapse.Panel>
                   </Collapse>
-                  
+
                   <div className="mt-4 text-right">
-                    <Link 
-                      to={`/courses/${pathCourse.course.id}`} 
+                    <Link
+                      to={`/courses/${pathCourse.course.id}`}
                       className="text-blue-500 hover:text-blue-400"
                     >
                       View Course Details
@@ -412,19 +408,19 @@ const LearningPathDetail: FC = () => {
             </div>
           )}
         </div>
-        
+
         {/* Enroll in learning path */}
         <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 mb-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
               <h2 className="text-2xl font-bold text-white mb-2">Enroll in the Complete Learning Path</h2>
               <p className="text-gray-400">
-                Access all {learningPath.courses.length} courses and {calculateTotalModules()} lessons in this learning path.
+                Access all {learningPathData.courses.length} courses and {calculateTotalModules()} lessons in this learning path.
               </p>
             </div>
           </div>
         </div>
-        
+
         {/* Feedback */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-white mb-4">Student Feedback</h2>
