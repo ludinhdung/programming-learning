@@ -39,8 +39,8 @@ interface LearningPath {
 const LearningPathList: React.FC = () => {
   // Component state
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [editDrawerOpened, setEditDrawerOpened] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = useState<boolean>(false);
   const [selectedLearningPathId, setSelectedLearningPathId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalLearningPaths, setTotalLearningPaths] = useState<number>(0);
@@ -54,7 +54,7 @@ const LearningPathList: React.FC = () => {
   const fetchLearningPaths = async (): Promise<void> => {
     try {
       console.log('fetchLearningPaths - Calling API');
-      setLoading(true);
+      setIsLoading(true);
 
       // Get current user ID from localStorage
       const userData = localStorage.getItem('user');
@@ -112,7 +112,7 @@ const LearningPathList: React.FC = () => {
       // When error occurs, set learningPaths to empty array
       setLearningPaths([]);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -219,7 +219,7 @@ const LearningPathList: React.FC = () => {
     setSelectedLearningPathId(learningPathId);
     // Use setTimeout to avoid multiple renders
     setTimeout(() => {
-      setEditDrawerOpened(true);
+      setIsEditDrawerOpen(true);
     }, 50);
   };
 
@@ -229,7 +229,7 @@ const LearningPathList: React.FC = () => {
   const handleLearningPathUpdated = async (): Promise<void> => {
     console.log('handleLearningPathUpdated called');
     // Close drawer first
-    setEditDrawerOpened(false);
+    setIsEditDrawerOpen(false);
 
     // Show success notification
     notifications.show({
@@ -245,7 +245,7 @@ const LearningPathList: React.FC = () => {
     }, 300);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Card shadow="sm" padding="md" radius="md" withBorder>
         <Group justify="center" py={50}>
@@ -346,7 +346,7 @@ const LearningPathList: React.FC = () => {
             </Table>
 
             {/* Pagination */}
-            {!loading && learningPaths.length > 0 && (
+            {!isLoading && learningPaths.length > 0 && (
               <Center mt="xl">
                 <Pagination
                   value={currentPage}
@@ -357,7 +357,7 @@ const LearningPathList: React.FC = () => {
               </Center>
             )}
 
-            {!loading && learningPaths.length === 0 && (
+            {!isLoading && learningPaths.length === 0 && (
               <Text c="dimmed" ta="center" py="xl">
                 No learning path data found. Create a new one to get started.
               </Text>
@@ -367,10 +367,10 @@ const LearningPathList: React.FC = () => {
       </Card>
 
       <Drawer
-        opened={editDrawerOpened}
+        opened={isEditDrawerOpen}
         onClose={() => {
           console.log('Drawer onClose');
-          setEditDrawerOpened(false);
+          setIsEditDrawerOpen(false);
           // Wait for drawer to close completely before removing selectedLearningPathId
           setTimeout(() => setSelectedLearningPathId(null), 300);
         }}
@@ -385,14 +385,14 @@ const LearningPathList: React.FC = () => {
         keepMounted={false} // Don't keep component in DOM when closed
       >
         {/* Only render EditLearningPathDrawer when both selectedLearningPathId and drawer are open */}
-        {selectedLearningPathId && editDrawerOpened && (
+        {selectedLearningPathId && isEditDrawerOpen && (
           <EditLearningPathDrawer
             key={`edit-learning-path-${selectedLearningPathId}`}
             learningPathId={selectedLearningPathId}
             onSuccess={handleLearningPathUpdated}
             onCancel={() => {
               console.log('EditLearningPathDrawer onCancel');
-              setEditDrawerOpened(false);
+              setIsEditDrawerOpen(false);
               // Wait for drawer to close completely before removing selectedLearningPathId
               setTimeout(() => setSelectedLearningPathId(null), 300);
             }}
