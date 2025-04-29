@@ -1,4 +1,4 @@
-import { LearningPath, LearningPathCourse, Prisma, PrismaClient } from '@prisma/client';
+import { LearningPath, LearningPathCourse, Prisma, PrismaClient, Role } from '@prisma/client';
 import { withTransaction } from '../../../shared/utils/transaction.utils';
 import { CreateLearningPathDTO, LearningPathCourseOrderDTO, UpdateLearningPathDTO } from '../dto/LearningPathDTO';
 
@@ -272,12 +272,15 @@ export class LearningPathService {
     // Helper methods
     
     /**
-     * Verify instructor exists
+     * Verify instructor exists and check if it's an instructor lead
      */
     private async verifyInstructorExists(instructorId: string): Promise<void> {
         const instructor = await prisma.instructor.findUnique({
             where: {
                 userId: instructorId
+            },
+            include: {
+                user: true
             }
         });
         
@@ -337,6 +340,13 @@ export class LearningPathService {
         const learningPath = await prisma.learningPath.findUnique({
             where: {
                 id: learningPathId
+            },
+            include: {
+                Instructor: {
+                    include: {
+                        user: true
+                    }
+                }
             }
         });
         

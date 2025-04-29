@@ -74,6 +74,11 @@ const courseService = {
     return response.data;
   },
 
+  async getAllCoursesForLearningPath() {
+    const response = await apiClient.get(`/courses/learning-path/all`);
+    return response.data;
+  },
+
   async deleteCourse(instructorId: string, courseId: string) {
     const response = await apiClient.delete(`/instructors/${instructorId}/courses/${courseId}`);
     return response.data;

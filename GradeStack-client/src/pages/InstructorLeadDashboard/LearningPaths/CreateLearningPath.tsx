@@ -1,0 +1,487 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { 
+  TextInput, Textarea, Button, Title, NumberInput, Select, 
+  Group, Stack, Avatar, Text, Container, Paper, Box,
+  Image, rem, ActionIcon
+} from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { notifications } from '@mantine/notifications';
+import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
+import { 
+  IconArrowLeft, IconUpload, IconGripVertical, 
+  IconTrash, IconPhoto, IconX
+} from '@tabler/icons-react';
+import mediaService from '../../../services/mediaService';
+import courseService from '../../../services/courseService';
+import learningPathService from '../../../services/learningPathService';
+import { Role } from '../../../types/role';
+
+// Interface for Course
+interface Course {
+  id: string;
+  title: string;
+  thumbnail: string;
+  description: string;
+  duration?: number;
+}
+
+// Main component
+const CreateLearningPath: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string>('');
+  const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
+  const [selectedCourses, setSelectedCourses] = useState<Course[]>([]);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  // Initialize form with Mantine
+  const form = useForm({
+    initialValues: {
+      name: '',
+      description: '',
+      estimatedTime: 0,
+      thumbnail: '',
+    },
+    validate: {
+      name: (value) => (value.trim().length < 3 ? 'Name must be at least 3 characters' : null),
+      description: (value) => (value.trim().length < 10 ? 'Description must be at least 10 characters' : null),
+    },
+  });
+
+  useEffect(() => {
+    // Get course list when component mounts
+    const fetchCourses = async () => {
+      try {
+        const userData = localStorage.getItem('user');
+        if (!userData) {
+          notifications.show({
+            title: 'Error',
+            message: 'Please log in to use this feature',
+            color: 'red'
+          });
+          navigate('/instructor-lead/login');
+          return;
+        }
+
+        const user = JSON.parse(userData);
+        
+        // Check if user is an instructor lead
+        if (user.role !== Role.INSTRUCTOR_LEAD) {
+          notifications.show({
+            title: 'Access Denied',
+            message: 'Only Instructor Lead can create Learning Paths',
+            color: 'orange'
+          });
+          navigate('/instructor-lead');
+          return;
+        }
+        
+        // Get all courses in the system for learning path
+        const courses = await courseService.getAllCoursesForLearningPath();
+        setAvailableCourses(courses);
+        console.log('Loaded', courses.length, 'courses for learning path');
+      } catch (error: any) {
+        console.error('Error loading course list:', error);
+        notifications.show({
+          title: 'Error',
+          message: error.response?.data?.message || 'Unable to load course list',
+          color: 'red'
+        });
+      }
+    };
+
+    fetchCourses();
+  }, [navigate]);
+
+  // Handle image upload
+  const handleUpload = async (files: File[]) => {
+    if (files.length === 0) return;
+    
+    const file = files[0];
+    
+    // Check file size
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isLt2M) {
+      notifications.show({
+        title: 'Error',
+        message: 'Image must be smaller than 2MB!',
+        color: 'red'
+      });
+      return;
+    }
+
+    try {
+      setUploading(true);
+      setUploadError(null);
+      console.log('Starting image upload:', file.name);
+      
+      // Use mediaService to upload image
+      const result = await mediaService.uploadImage(file);
+      
+      if (!result) {
+        throw new Error('No image URL received from server');
+      }
+      
+      // Update image URL - ensure result is a string
+      const imageUrlResult = typeof result === 'string' ? result : 
+                            (result.url || result.imageUrl || 
+                             (typeof result === 'object' && Object.values(result)[0]));
+      
+      if (!imageUrlResult || typeof imageUrlResult !== 'string') {
+        throw new Error('Invalid image URL format');
+      }
+      
+      console.log('Image URL received:', imageUrlResult);
+      setImageUrl(imageUrlResult);
+      form.setFieldValue('thumbnail', imageUrlResult);
+      
+      notifications.show({
+        title: 'Success',
+        message: 'Image uploaded successfully',
+        color: 'green'
+      });
+    } catch (error: any) {
+      console.error('Error uploading image:', error);
+      setUploadError(error.message || 'Error uploading image');
+      notifications.show({
+        title: 'Error',
+        message: error.message || 'Error uploading image',
+        color: 'red'
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Handle course selection
+  const handleCourseSelect = (courseId: string | null) => {
+    if (!courseId) return;
+    
+    const course = availableCourses.find(c => c.id === courseId);
+    if (course && !selectedCourses.some(c => c.id === courseId)) {
+      setSelectedCourses([...selectedCourses, course]);
+    }
+  };
+
+  // Handle course removal
+  const handleRemoveCourse = (courseId: string) => {
+    setSelectedCourses(selectedCourses.filter(course => course.id !== courseId));
+  };
+
+  // Handle drag and drop to reorder courses
+  const onDragEnd = (result: any) => {
+    if (!result.destination) return;
+    
+    const items = Array.from(selectedCourses);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    
+    setSelectedCourses(items);
+  };
+
+  // Handle form submission
+  const onSubmit = async (values: typeof form.values) => {
+    try {
+      setLoading(true);
+      
+      if (selectedCourses.length === 0) {
+        notifications.show({
+          title: 'Error',
+          message: 'Please select at least one course for the learning path',
+          color: 'red'
+        });
+        return;
+      }
+      
+      if (!imageUrl) {
+        notifications.show({
+          title: 'Error',
+          message: 'Please upload a thumbnail image for the learning path',
+          color: 'red'
+        });
+        return;
+      }
+      
+      // Get user information
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        notifications.show({
+          title: 'Error',
+          message: 'Please log in to use this feature',
+          color: 'red'
+        });
+        navigate('/instructor-lead/login');
+        return;
+      }
+      
+      const user = JSON.parse(userData);
+      
+      // Determine instructorId from user data
+      let instructorId;
+      if (user.instructor && user.instructor.id) {
+        instructorId = user.instructor.id;
+      } else if (user.instructor && user.instructor.userId) {
+        instructorId = user.instructor.userId;
+      } else if (user.id) {
+        instructorId = user.id;
+      } else {
+        notifications.show({
+          title: 'Error',
+          message: 'Instructor ID not found',
+          color: 'red'
+        });
+        console.error('User data structure does not contain instructorId:', user);
+        return;
+      }
+      
+      console.log('InstructorId being used:', instructorId);
+      
+      // Prepare data to send to server
+      const courseIds = selectedCourses.map(course => course.id);
+      
+      const learningPathData = {
+        title: values.name.trim(),
+        description: values.description.trim(),
+        thumbnail: imageUrl,
+        estimatedCompletionTime: values.estimatedTime || 0,
+        courseIds: courseIds
+      };
+      
+      console.log('Learning path data to be sent:', learningPathData);
+      
+      // Call API to create learning path
+      await learningPathService.createLearningPath(instructorId, learningPathData);
+      
+      notifications.show({
+        title: 'Success',
+        message: 'Learning path created successfully',
+        color: 'green'
+      });
+      
+      // Navigate to learning path list
+      navigate('/instructor-lead/learning-paths');
+    } catch (error: any) {
+      console.error('Error creating learning path:', error);
+      notifications.show({
+        title: 'Error',
+        message: error.response?.data?.message || 'Unable to create learning path',
+        color: 'red'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Container size="md" py="md">
+      <Paper shadow="xs" p="md" withBorder>
+        <Group mb="md">
+          <Button 
+            variant="subtle" 
+            leftSection={<IconArrowLeft size={16} />}
+            onClick={() => navigate('/instructor-lead/learning-paths')}
+          >
+            Back
+          </Button>
+          <Title order={2} style={{ margin: 0 }}>Create New Learning Path</Title>
+        </Group>
+        
+        <form onSubmit={form.onSubmit(onSubmit)}>
+          <Stack>
+            <TextInput
+              label="Learning Path Name"
+              placeholder="Enter learning path name"
+              required
+              {...form.getInputProps('name')}
+            />
+            
+            <Textarea
+              label="Description"
+              placeholder="Enter detailed description about the learning path"
+              minRows={4}
+              {...form.getInputProps('description')}
+            />
+            
+            <NumberInput
+              label="Estimated Completion Time (hours)"
+              placeholder="Enter estimated time to complete the learning path (hours)"
+              min={0}
+              allowDecimal={false}
+              {...form.getInputProps('estimatedTime')}
+            />
+            
+            <Box>
+              <Text fw={500} mb="xs">Thumbnail Image</Text>
+              {imageUrl ? (
+                <Box mb="md">
+                  <Group mb="xs">
+                    <Text size="sm" c="dimmed">Uploaded image:</Text>
+                    <Button 
+                      variant="subtle" 
+                      color="red" 
+                      size="xs"
+                      leftSection={<IconX size={14} />}
+                      onClick={() => {
+                        setImageUrl('');
+                        form.setFieldValue('thumbnail', '');
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </Group>
+                  <Image
+                    src={imageUrl}
+                    alt="Thumbnail"
+                    height={200}
+                    fit="contain"
+                  />
+                </Box>
+              ) : (
+                <Dropzone
+                  onDrop={handleUpload}
+                  accept={IMAGE_MIME_TYPE}
+                  loading={uploading}
+                  maxSize={2 * 1024 * 1024} // 2MB
+                  mb="md"
+                >
+                  <Group justify="center" gap="xl" style={{ minHeight: 140, pointerEvents: 'none' }}>
+                    <Dropzone.Accept>
+                      <IconUpload
+                        style={{ width: rem(52), height: rem(52), color: 'var(--mantine-color-blue-6)' }}
+                        stroke={1.5}
+                      />
+                    </Dropzone.Accept>
+                    <Dropzone.Reject>
+                      <IconX
+                        style={{ width: rem(52), height: rem(52), color: 'var(--mantine-color-red-6)' }}
+                        stroke={1.5}
+                      />
+                    </Dropzone.Reject>
+                    <Dropzone.Idle>
+                      <IconPhoto
+                        style={{ width: rem(52), height: rem(52), color: 'var(--mantine-color-dimmed)' }}
+                        stroke={1.5}
+                      />
+                    </Dropzone.Idle>
+
+                    <div>
+                      <Text size="xl" inline>
+                        Drag images here or click to select files
+                      </Text>
+                      <Text size="sm" c="dimmed" inline mt={7}>
+                        Only JPG, PNG image files under 2MB are accepted
+                      </Text>
+                    </div>
+                  </Group>
+                </Dropzone>
+              )}
+              {uploadError && <Text c="red" size="sm">{uploadError}</Text>}
+            </Box>
+            
+            <Box>
+              <Text fw={500} mb="xs">Courses in Learning Path</Text>
+              <Select
+                label="Select courses to add to the learning path"
+                placeholder="Select course"
+                data={availableCourses
+                  .filter(course => !selectedCourses.some(sc => sc.id === course.id))
+                  .map(course => ({ value: course.id, label: course.title }))}
+                onChange={handleCourseSelect}
+                searchable
+                clearable
+                mb="md"
+              />
+              
+              <Text size="sm" mb="xs">Selected courses list (drag and drop to reorder):</Text>
+              
+              <DragDropContext onDragEnd={onDragEnd}>
+                <Droppable droppableId="courses">
+                  {(provided) => (
+                    <div
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                      style={{ 
+                        minHeight: '100px',
+                        border: '1px solid var(--mantine-color-gray-3)',
+                        borderRadius: 'var(--mantine-radius-sm)',
+                        padding: 'var(--mantine-spacing-xs)'
+                      }}
+                    >
+                      {selectedCourses.length === 0 ? (
+                        <Text c="dimmed" ta="center" py="md">
+                          No courses selected yet
+                        </Text>
+                      ) : (
+                        <Stack>
+                          {selectedCourses.map((course, index) => (
+                            <Draggable key={course.id} draggableId={course.id} index={index}>
+                              {(provided) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                >
+                                  <Paper p="xs" withBorder>
+                                    <Group  >
+                                      <Group>
+                                        <IconGripVertical 
+                                          size={18} 
+                                          style={{ color: 'var(--mantine-color-gray-5)' }}
+                                        />
+                                        <Avatar src={course.thumbnail} size="md" radius="sm" />
+                                        <div>
+                                          <Text fw={500}>{course.title}</Text>
+                                          <Text size="xs" c="dimmed" lineClamp={1}>
+                                            {course.description}
+                                          </Text>
+                                        </div>
+                                      </Group>
+                                      <ActionIcon 
+                                        color="red" 
+                                        onClick={() => handleRemoveCourse(course.id)}
+                                        variant="light"
+                                      >
+                                        <IconTrash size={16} />
+                                      </ActionIcon>
+                                    </Group>
+                                  </Paper>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                        </Stack>
+                      )}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+            </Box>
+
+            <Group mt="xl">
+              <Button 
+                variant="default" 
+                onClick={() => navigate('/instructor-lead/learning-paths')}
+                disabled={loading || uploading}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                loading={loading}
+                disabled={uploading || !imageUrl || selectedCourses.length === 0}
+              >
+                Create Learning Path
+              </Button>
+            </Group>
+          </Stack>
+        </form>
+      </Paper>
+    </Container>
+  );
+};
+
+export default CreateLearningPath;

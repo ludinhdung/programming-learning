@@ -1,12 +1,15 @@
 import React from 'react';
+import { Container } from '@mantine/core';
 import { Outlet } from 'react-router-dom';
-import InstructorManagementBoard from '../../../components/InstructorManagement/InstructorManagementBoard';
 
+/**
+ * Layout cho trang quản lý Learning Path của Instructor Lead
+ */
 const LearningPathLayout: React.FC = () => {
   return (
-    <InstructorManagementBoard>
+    <Container className='mt-10' size="xl" py="md">
       <Outlet />
-    </InstructorManagementBoard>
+    </Container>
   );
 };
 

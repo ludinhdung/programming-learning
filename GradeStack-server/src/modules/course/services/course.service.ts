@@ -806,5 +806,41 @@ export class CourseService extends CourseBaseService<
 
         return course;
     }
+
+    /**
+     * Lấy tất cả các khóa học trong hệ thống để sử dụng trong Learning Path
+     * @returns Danh sách tất cả các khóa học đã xuất bản
+     */
+    async getAllCoursesForLearningPath() {
+        return prisma.course.findMany({
+            where: {
+                isPublished: true
+            },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                instructor: {
+                    include: {
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                email: true,
+                            }
+                        }
+                    }
+                },
+                CourseTopic: {
+                    include: {
+                        topic: true
+                    }
+                },
+                _count: {
+                    select: {
+                        EnrolledCourse: true
+                    }
+                }
+            }
+        });
+    }
 }
 

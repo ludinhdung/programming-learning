@@ -1,0 +1,101 @@
+/* Theme styles cho dark mode và light mode */
+
+/* Light mode (mặc định) */
+.light-theme {
+  --bg-color: #f8f9fa;
+  --text-color: #212529;
+  --card-bg: #ffffff;
+  --border-color: #dee2e6;
+  --hover-color: #e9ecef;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode */
+.dark-theme {
+  --bg-color: #1a1b1e;
+  --text-color: #e9ecef;
+  --card-bg: #25262b;
+  --border-color: #373a40;
+  --hover-color: #2c2e33;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Áp dụng các biến CSS vào các phần tử */
+.dark-theme .mantine-AppShell-main {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.light-theme .mantine-AppShell-main {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.dark-theme .mantine-Paper-root {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.dark-theme .mantine-Card-root {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.dark-theme .mantine-AppShell-navbar {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.dark-theme .mantine-AppShell-header {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+/* Hiệu ứng hover cho các phần tử trong dark mode */
+.dark-theme .mantine-Button-root:hover {
+  background-color: var(--hover-color);
+}
+
+/* Đảm bảo text có độ tương phản tốt trong dark mode */
+.dark-theme .mantine-Text-root {
+  color: var(--text-color);
+}
+
+/* Điều chỉnh màu sắc cho các thành phần khác */
+.dark-theme .mantine-Divider-root {
+  border-color: var(--border-color);
+}
+
+.dark-theme .mantine-Input-input {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border-color: var(--border-color);
+}
+
+.dark-theme .mantine-Select-input {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border-color: var(--border-color);
+}
+
+/* Điều chỉnh màu sắc cho các icon */
+.dark-theme svg {
+  fill: var(--text-color);
+}
+
+/* Hiệu ứng shadow cho các card và paper */
+.dark-theme .mantine-Card-root,
+.dark-theme .mantine-Paper-root {
+  box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+/* Transition mượt mà khi chuyển đổi theme */
+.mantine-AppShell-root,
+.mantine-Card-root,
+.mantine-Paper-root,
+.mantine-Button-root,
+.mantine-Text-root,
+.mantine-Input-input,
+.mantine-Select-input {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}

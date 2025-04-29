@@ -1,0 +1,84 @@
+# GradeStack API - Test Instructor Lead và Topics
+# ===============================
+
+# Environment Variables
+@baseUrl = http://localhost:4000/api
+@instructorLeadEmail = test-instructor@example.com
+@instructorLeadPassword = password123
+
+# ===============================
+# ĐĂNG KÝ VÀ ĐĂNG NHẬP INSTRUCTOR LEAD
+# ===============================
+
+### Đăng ký Instructor Lead (không cần xác thực)
+POST {{baseUrl}}/instructor-lead/register-test
+Content-Type: application/json
+
+{
+  "userData": {
+    "email": "{{instructorLeadEmail}}",
+    "password": "{{instructorLeadPassword}}",
+    "firstName": "Test",
+    "lastName": "Instructor",
+    "username": "testinstructor"
+  },
+  "instructorData": {
+    "organization": "GradeStack Test",
+    "bio": "Tài khoản instructor lead để test",
+    "avatar": "https://ui-avatars.com/api/?name=Test+Instructor&background=random",
+    "socials": []
+  }
+}
+
+### Đăng nhập Instructor Lead
+POST {{baseUrl}}/instructor-lead/login
+Content-Type: application/json
+
+{
+  "email": "{{instructorLeadEmail}}",
+  "password": "{{instructorLeadPassword}}"
+}
+
+# Sau khi đăng nhập, sao chép token từ phản hồi và cập nhật biến @token bên dưới
+@token = 
+
+# ===============================
+# QUẢN LÝ TOPICS
+# ===============================
+
+### Tạo topic mới
+POST {{baseUrl}}/instructor-lead/topics?action=create
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Topic Test",
+  "description": "Đây là một topic test",
+  "thumbnail": "https://ui-avatars.com/api/?name=Topic+Test&background=random"
+}
+
+### Lấy danh sách tất cả topics
+GET {{baseUrl}}/instructor-lead/topics?action=list
+Authorization: Bearer {{token}}
+
+### Lấy thông tin topic theo ID
+# Thay :id bằng ID thực tế của topic
+GET {{baseUrl}}/instructor-lead/topics/:id?action=get
+Authorization: Bearer {{token}}
+
+### Cập nhật topic
+# Thay :id bằng ID thực tế của topic
+PUT {{baseUrl}}/instructor-lead/topics/:id?action=update
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Topic Test Đã Cập Nhật",
+  "description": "Mô tả đã được cập nhật",
+  "thumbnail": "https://ui-avatars.com/api/?name=Topic+Updated&background=random"
+}
+
+### Xóa topic
+# Thay :id bằng ID thực tế của topic
+DELETE {{baseUrl}}/instructor-lead/topics/:id?action=delete
+Authorization: Bearer {{token}}

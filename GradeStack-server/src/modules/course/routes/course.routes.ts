@@ -23,6 +23,9 @@ router.get('/courses/:courseId/full', courseController.getCourseFullRelation);
 router.put('/instructors/:id/courses/:courseId', courseController.updateCourse);
 router.delete('/instructors/:id/courses/:courseId', courseController.deleteCourse);
 
+// Route lấy tất cả các khóa học cho learning path
+router.get('/courses/learning-path/all', courseController.getAllCoursesForLearningPath);
+
 
 // Route upload video
 router.post('/upload/video', upload.single('video'), courseController.uploadVideo);

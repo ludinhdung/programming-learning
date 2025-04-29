@@ -37,6 +37,8 @@ const Header: React.FC = () => {
     { name: "Courses", href: "/courses" },
     { name: "Topics", href: "/topics" },
     { name: "Paths", href: "/learning-paths" },
+    { name: "Workshops", href: "/workshops" },
+    { name: "Instructors", href: "/instructors" },
   ];
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,6 +62,19 @@ const Header: React.FC = () => {
     if (href === "/" && currentPath === "/") return true;
     if (href !== "/" && currentPath.startsWith(href)) return true;
     return false;
+  };
+  
+  // Function để xác định màu sắc cho menu item
+  const getItemStyle = (href: string) => {
+    // Nếu là trang workshop, sử dụng màu xanh đặc biệt
+    if (href === "/workshops" && isActiveLink(href)) {
+      return "text-blue-500 after:absolute after:bottom-[-8px] after:left-0 after:right-0 after:h-[3px] after:bg-blue-500 after:rounded-full";
+    }
+    
+    // Các trang khác sử dụng style mặc định
+    return isActiveLink(href)
+      ? "text-gray-100 after:absolute after:bottom-[-8px] after:left-0 after:right-0 after:h-[3px] after:bg-blue-600 after:rounded-full"
+      : "text-gray-300 hover:text-blue-600 transition-colors duration-200";
   };
 
   const showModal = () => {
@@ -98,8 +113,9 @@ const Header: React.FC = () => {
   };
 
   const profileMenu = [
-    { name: "My Home", href: "/#" },
+    { name: "My Home", href: "/dashboard" },
     { name: "My Profile", href: "/profile" },
+    { name: "My Workshops", href: "/my-workshops" },
     { name: "Logout", onClick: handleLogout },
   ];
 
@@ -180,11 +196,7 @@ const Header: React.FC = () => {
                 <a
                   key={item.name}
                   href={item.href}
-                  className={`text-sm/6 font-semibold relative ${
-                    isActiveLink(item.href)
-                      ? "text-gray-100 after:absolute after:bottom-[-8px] after:left-0 after:right-0 after:h-[3px] after:bg-blue-600 after:rounded-full"
-                      : "text-gray-300 hover:text-blue-600 transition-colors duration-200"
-                  }`}
+                  className={`text-sm/6 font-semibold relative ${getItemStyle(item.href)}`}
                 >
                   {item.name}
                 </a>
@@ -254,9 +266,11 @@ const Header: React.FC = () => {
                       key={item.name}
                       href={item.href}
                       className={`-mx-3 block rounded-lg px-3 py-2 text-base font-semibold ${
-                        isActiveLink(item.href)
-                          ? "text-blue-600 bg-blue-950/50"
-                          : "text-gray-300 hover:bg-gray-800"
+                        item.href === "/workshops" && isActiveLink(item.href)
+                          ? "text-blue-500 bg-blue-950/50"
+                          : isActiveLink(item.href)
+                            ? "text-blue-600 bg-blue-950/50"
+                            : "text-gray-300 hover:bg-gray-800"
                       }`}
                     >
                       {item.name}
