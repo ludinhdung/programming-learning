@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { 
-  TextInput, Textarea, Button, Card, Title, NumberInput, Select, 
+import {
+  TextInput, Textarea, Button, Card, Title, NumberInput, Select,
   Group, Stack, Avatar, Loader, Text, Container, Paper, Box,
   Image, rem, ActionIcon
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
-import { 
-  IconArrowLeft, IconUpload, IconGripVertical, 
+import {
+  IconArrowLeft, IconUpload, IconGripVertical,
   IconTrash, IconPhoto, IconX, IconDeviceFloppy
 } from '@tabler/icons-react';
 import mediaService from '../../../services/mediaService';
@@ -60,10 +60,10 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
   onSuccess,
   onCancel
 }) => {
-  const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>('');
+  // Component state
+  const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string>('');
   const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
   const [selectedCourses, setSelectedCourses] = useState<Course[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -92,8 +92,8 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
     // Load learning path information and course list when component mounts
     const fetchData = async () => {
       try {
-        setInitialLoading(true);
-        
+        setIsLoading(true);
+
         if (!id) {
           notifications.show({
             title: 'Error',
@@ -117,7 +117,7 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
         }
 
         const user = JSON.parse(userData);
-        
+
         // Check if user is an instructor lead
         if (user.role !== Role.INSTRUCTOR_LEAD) {
           notifications.show({
@@ -128,7 +128,7 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
           navigate('/instructor-lead');
           return;
         }
-        
+
         // Determine instructorId from user data
         let instructorId;
         if (user.instructor && user.instructor.id) {
@@ -146,19 +146,19 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
           console.error('User data structure does not contain instructorId:', user);
           return;
         }
-        
+
         console.log('InstructorId being used:', instructorId);
         console.log('LearningPath ID being used:', id);
-        
+
         // Get all courses in the system for learning path
         const courses = await courseService.getAllCoursesForLearningPath();
         setAvailableCourses(courses);
         console.log('Loaded', courses.length, 'courses for learning path');
-        
+
         // Get detailed information about learning path
         const learningPath: LearningPath = await learningPathService.getInstructorLearningPath(instructorId, id);
         console.log('Learning path information:', learningPath);
-        
+
         if (learningPath) {
           // Update form with current information
           form.setValues({
@@ -167,21 +167,21 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
             estimatedTime: learningPath.estimatedCompletionTime || 0,
             thumbnail: learningPath.thumbnail || ''
           });
-          
+
           // Update image URL
-          setImageUrl(learningPath.thumbnail || '');
-          
+          setThumbnailUrl(learningPath.thumbnail || '');
+
           // Update selected courses list
           if (learningPath.courses && Array.isArray(learningPath.courses)) {
             const sortedCourses = [...learningPath.courses].sort((a, b) => a.order - b.order);
-            
+
             // Get detailed information for each course
             const selectedCoursesData = sortedCourses.map(item => item.course);
             setSelectedCourses(selectedCoursesData);
           }
         }
-        
-        setInitialLoading(false);
+
+        setIsLoading(false);
       } catch (error: any) {
         console.error('Error loading data:', error);
         notifications.show({
@@ -189,7 +189,7 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
           message: error.response?.data?.message || 'Unable to load learning path information',
           color: 'red'
         });
-        setInitialLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -210,14 +210,14 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
 
       const file = files[0];
       setFile(file);
-      setUploading(true);
+      setIsUploading(true);
       setUploadError(null);
 
       // Check file size (max 2MB)
       const maxSize = 2 * 1024 * 1024; // 2MB
       if (file.size > maxSize) {
         setUploadError('File size too large. Please select a file smaller than 2MB');
-        setUploading(false);
+        setIsUploading(false);
         return;
       }
 
@@ -225,7 +225,7 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
       if (!validTypes.includes(file.type)) {
         setUploadError('Only JPG or PNG image files are accepted');
-        setUploading(false);
+        setIsUploading(false);
         return;
       }
 
@@ -235,16 +235,16 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
 
       // Process returned result - ensure image URL is obtained
       // Result can be string or object depending on API response structure
-      const imageUrlResult = typeof result === 'string' ? result : 
-                           (result.url || result.imageUrl || 
-                           (typeof result === 'object' && Object.values(result)[0]));
-      
+      const imageUrlResult = typeof result === 'string' ? result :
+        (result.url || result.imageUrl ||
+          (typeof result === 'object' && Object.values(result)[0]));
+
       if (!imageUrlResult || typeof imageUrlResult !== 'string') {
         throw new Error('No image URL received from server');
       }
 
       // Update image URL
-      setImageUrl(imageUrlResult);
+      setThumbnailUrl(imageUrlResult);
       form.setFieldValue('thumbnail', imageUrlResult);
 
       notifications.show({
@@ -261,14 +261,14 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
         color: 'red'
       });
     } finally {
-      setUploading(false);
+      setIsUploading(false);
     }
   };
 
   // Handle course selection
   const handleCourseSelect = (courseId: string | null) => {
     if (!courseId) return;
-    
+
     const course = availableCourses.find(c => c.id === courseId);
     if (course && !selectedCourses.some(c => c.id === courseId)) {
       setSelectedCourses([...selectedCourses, course]);
@@ -283,19 +283,19 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
   // Handle drag and drop to reorder courses
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
-    
+
     const items = Array.from(selectedCourses);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-    
+
     setSelectedCourses(items);
   };
 
   // Handle form submission
   const onSubmit = async (values: typeof form.values) => {
     try {
-      setLoading(true);
-      
+      setIsLoading(true);
+
       if (!id) {
         notifications.show({
           title: 'Error',
@@ -304,7 +304,7 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
         });
         return;
       }
-      
+
       if (selectedCourses.length === 0) {
         notifications.show({
           title: 'Error',
@@ -313,8 +313,8 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
         });
         return;
       }
-      
-      if (!imageUrl) {
+
+      if (!thumbnailUrl) {
         notifications.show({
           title: 'Error',
           message: 'Please upload a thumbnail image for the learning path',
@@ -322,7 +322,7 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
         });
         return;
       }
-      
+
       // Get user information
       const userData = localStorage.getItem('user');
       if (!userData) {
@@ -333,9 +333,9 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
         });
         return;
       }
-      
+
       const user = JSON.parse(userData);
-      
+
       // Determine instructorId from user data
       let instructorId;
       if (user.instructor && user.instructor.id) {
@@ -353,33 +353,33 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
         console.error('User data structure does not contain instructorId:', user);
         return;
       }
-      
+
       console.log('InstructorId being used:', instructorId);
       console.log('LearningPath ID being used:', id);
-      
+
       // Prepare data to send to server
       const courseIds = selectedCourses.map(course => course.id);
-      
+
       // Create LearningPathUpdateData object according to defined interface
       const learningPathData = {
         title: values.name.trim(),
         description: values.description.trim(),
-        thumbnail: imageUrl,
+        thumbnail: thumbnailUrl,
         estimatedCompletionTime: values.estimatedTime || 0,
         courseIds: courseIds
       };
-      
+
       console.log('Learning path data to be sent:', learningPathData);
-      
+
       // Use service to update learning path
       await learningPathService.updateLearningPath(instructorId, id, learningPathData);
-      
+
       notifications.show({
         title: 'Success',
         message: 'Learning path updated successfully',
         color: 'green'
       });
-      
+
       // If in drawer and onSuccess callback exists, call it
       if (isDrawer && onSuccess) {
         onSuccess();
@@ -395,11 +395,11 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
         color: 'red'
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  if (initialLoading) {
+  if (isLoading) {
     return (
       <Container size="md" py="xl">
         <Card shadow="sm" p="lg" withBorder>
@@ -416,8 +416,8 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
     <Container size="md" py="md">
       <Paper shadow="xs" p="md" withBorder>
         <Group mb="md">
-          <Button 
-            variant="subtle" 
+          <Button
+            variant="subtle"
             leftSection={<IconArrowLeft size={16} />}
             onClick={() => navigate('/instructor-lead/learning-paths')}
           >
@@ -425,7 +425,7 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
           </Button>
           <Title order={2} style={{ margin: 0 }}>Edit Learning Path</Title>
         </Group>
-        
+
         <form onSubmit={form.onSubmit(onSubmit)}>
           <Stack>
             <TextInput
@@ -434,14 +434,14 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
               required
               {...form.getInputProps('name')}
             />
-            
+
             <Textarea
               label="Description"
               placeholder="Enter detailed description about the learning path"
               minRows={4}
               {...form.getInputProps('description')}
             />
-            
+
             <NumberInput
               label="Estimated Completion Time (hours)"
               placeholder="Enter estimated time to complete the learning path (hours)"
@@ -449,20 +449,20 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
               allowDecimal={false}
               {...form.getInputProps('estimatedTime')}
             />
-            
+
             <Box>
               <Text fw={500} mb="xs">Thumbnail Image</Text>
-              {imageUrl ? (
+              {thumbnailUrl ? (
                 <Box mb="md">
                   <Group mb="xs">
                     <Text size="sm" c="dimmed">Uploaded image:</Text>
-                    <Button 
-                      variant="subtle" 
-                      color="red" 
+                    <Button
+                      variant="subtle"
+                      color="red"
                       size="xs"
                       leftSection={<IconX size={14} />}
                       onClick={() => {
-                        setImageUrl('');
+                        setThumbnailUrl('');
                         form.setFieldValue('thumbnail', '');
                       }}
                     >
@@ -470,7 +470,7 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
                     </Button>
                   </Group>
                   <Image
-                    src={imageUrl}
+                    src={thumbnailUrl}
                     alt="Thumbnail"
                     height={200}
                     fit="contain"
@@ -480,7 +480,7 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
                 <Dropzone
                   onDrop={handleUpload}
                   accept={IMAGE_MIME_TYPE}
-                  loading={uploading}
+                  loading={isUploading}
                   maxSize={2 * 1024 * 1024} // 2MB
                   mb="md"
                 >
@@ -517,7 +517,7 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
               )}
               {uploadError && <Text c="red" size="sm">{uploadError}</Text>}
             </Box>
-            
+
             <Box>
               <Text fw={500} mb="xs">Courses in Learning Path</Text>
               <Select
@@ -531,16 +531,16 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
                 clearable
                 mb="md"
               />
-              
+
               <Text size="sm" mb="xs">Selected courses list (drag and drop to reorder):</Text>
-              
+
               <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="courses">
                   {(provided) => (
                     <div
                       {...provided.droppableProps}
                       ref={provided.innerRef}
-                      style={{ 
+                      style={{
                         minHeight: '100px',
                         border: '1px solid var(--mantine-color-gray-3)',
                         borderRadius: 'var(--mantine-radius-sm)',
@@ -564,8 +564,8 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
                                   <Paper p="xs" withBorder>
                                     <Group>
                                       <Group>
-                                        <IconGripVertical 
-                                          size={18} 
+                                        <IconGripVertical
+                                          size={18}
                                           style={{ color: 'var(--mantine-color-gray-5)' }}
                                         />
                                         <Avatar src={course.thumbnail} size="md" radius="sm" />
@@ -576,8 +576,8 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
                                           </Text>
                                         </div>
                                       </Group>
-                                      <ActionIcon 
-                                        color="red" 
+                                      <ActionIcon
+                                        color="red"
                                         onClick={() => handleRemoveCourse(course.id)}
                                         variant="light"
                                       >
@@ -621,9 +621,9 @@ const EditLearningPath: React.FC<EditLearningPathProps> = ({
                   Back
                 </Button>
               )}
-              <Button 
+              <Button
                 type="submit"
-                loading={loading}
+                loading={isLoading}
                 leftSection={<IconDeviceFloppy size={16} />}
               >
                 Save Changes
