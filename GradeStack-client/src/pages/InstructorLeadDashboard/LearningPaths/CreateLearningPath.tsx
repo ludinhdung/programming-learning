@@ -29,9 +29,10 @@ interface Course {
 
 // Main component
 const CreateLearningPath: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>('');
+  // Component state
+  const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string>('');
   const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
   const [selectedCourses, setSelectedCourses] = useState<Course[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -114,7 +115,7 @@ const CreateLearningPath: React.FC = () => {
     }
 
     try {
-      setUploading(true);
+      setIsUploading(true);
       setUploadError(null);
       console.log('Starting image upload:', file.name);
 
@@ -135,7 +136,7 @@ const CreateLearningPath: React.FC = () => {
       }
 
       console.log('Image URL received:', imageUrlResult);
-      setImageUrl(imageUrlResult);
+      setThumbnailUrl(imageUrlResult);
       form.setFieldValue('thumbnail', imageUrlResult);
 
       notifications.show({
@@ -152,7 +153,7 @@ const CreateLearningPath: React.FC = () => {
         color: 'red'
       });
     } finally {
-      setUploading(false);
+      setIsUploading(false);
     }
   };
 
@@ -185,7 +186,7 @@ const CreateLearningPath: React.FC = () => {
   // Handle form submission
   const onSubmit = async (values: typeof form.values) => {
     try {
-      setLoading(true);
+      setIsLoading(true);
 
       if (selectedCourses.length === 0) {
         notifications.show({
@@ -196,7 +197,7 @@ const CreateLearningPath: React.FC = () => {
         return;
       }
 
-      if (!imageUrl) {
+      if (!thumbnailUrl) {
         notifications.show({
           title: 'Error',
           message: 'Please upload a thumbnail image for the learning path',
@@ -245,7 +246,7 @@ const CreateLearningPath: React.FC = () => {
       const learningPathData = {
         title: values.name.trim(),
         description: values.description.trim(),
-        thumbnail: imageUrl,
+        thumbnail: thumbnailUrl,
         estimatedCompletionTime: values.estimatedTime || 0,
         courseIds: courseIds
       };
@@ -271,7 +272,7 @@ const CreateLearningPath: React.FC = () => {
         color: 'red'
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -316,7 +317,7 @@ const CreateLearningPath: React.FC = () => {
 
             <Box>
               <Text fw={500} mb="xs">Thumbnail Image</Text>
-              {imageUrl ? (
+              {thumbnailUrl ? (
                 <Box mb="md">
                   <Group mb="xs">
                     <Text size="sm" c="dimmed">Uploaded image:</Text>
@@ -326,7 +327,7 @@ const CreateLearningPath: React.FC = () => {
                       size="xs"
                       leftSection={<IconX size={14} />}
                       onClick={() => {
-                        setImageUrl('');
+                        setThumbnailUrl('');
                         form.setFieldValue('thumbnail', '');
                       }}
                     >
@@ -334,7 +335,7 @@ const CreateLearningPath: React.FC = () => {
                     </Button>
                   </Group>
                   <Image
-                    src={imageUrl}
+                    src={thumbnailUrl}
                     alt="Thumbnail"
                     height={200}
                     fit="contain"
@@ -344,7 +345,7 @@ const CreateLearningPath: React.FC = () => {
                 <Dropzone
                   onDrop={handleUpload}
                   accept={IMAGE_MIME_TYPE}
-                  loading={uploading}
+                  loading={isUploading}
                   maxSize={2 * 1024 * 1024} // 2MB
                   mb="md"
                 >
@@ -466,14 +467,14 @@ const CreateLearningPath: React.FC = () => {
               <Button
                 variant="default"
                 onClick={() => navigate('/instructor-lead/learning-paths')}
-                disabled={loading || uploading}
+                disabled={isLoading || isUploading}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                loading={loading}
-                disabled={uploading || !imageUrl || selectedCourses.length === 0}
+                loading={isLoading}
+                disabled={isUploading || !thumbnailUrl || selectedCourses.length === 0}
               >
                 Create Learning Path
               </Button>
