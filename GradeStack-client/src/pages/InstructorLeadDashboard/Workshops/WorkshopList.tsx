@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  Box, 
-  Button, 
-  Card, 
-  Group, 
-  Text, 
-  Title, 
-  Badge, 
-  ActionIcon, 
-  Menu, 
-  Loader, 
+import {
+  Box,
+  Button,
+  Card,
+  Group,
+  Text,
+  Title,
+  Badge,
+  ActionIcon,
+  Menu,
+  Loader,
   Center,
   Stack,
   Modal,
@@ -18,11 +18,11 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  IconPlus, 
-  IconEdit, 
-  IconTrash, 
-  IconDotsVertical, 
+import {
+  IconPlus,
+  IconEdit,
+  IconTrash,
+  IconDotsVertical,
   IconCalendarEvent,
   IconUsers,
   IconClock
@@ -31,18 +31,18 @@ import workshopService, { Workshop } from '../../../services/workshopService';
 // Format date function
 const formatDate = (dateString: string, format: string = 'dd/MM/yyyy'): string => {
   const date = new Date(dateString);
-  
+
   // Check if date is valid
   if (isNaN(date.getTime())) {
     return 'Invalid date';
   }
-  
+
   const day = date.getDate().toString().padStart(2, '0');
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const year = date.getFullYear();
   const hours = date.getHours().toString().padStart(2, '0');
   const minutes = date.getMinutes().toString().padStart(2, '0');
-  
+
   return format
     .replace('dd', day)
     .replace('MM', month)
@@ -129,11 +129,11 @@ const WorkshopList: React.FC = () => {
   const formatDuration = (minutes: number): string => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    
+
     if (hours > 0) {
       return `${hours} hour${hours > 1 ? 's' : ''} ${mins > 0 ? `${mins} minute${mins > 1 ? 's' : ''}` : ''}`;
     }
-    
+
     return `${mins} minute${mins > 1 ? 's' : ''}`;
   };
 
@@ -164,10 +164,9 @@ const WorkshopList: React.FC = () => {
   return (
     <Box>
       <Group justify="space-between" mb="md">
-        <Title order={3}>Workshop List</Title>
-        <Button 
-          leftSection={<IconPlus size={16} />} 
-          component={Link} 
+        <Button
+          leftSection={<IconPlus size={16} />}
+          component={Link}
           to="/instructor-lead/workshops/create"
         >
           Create New Workshop
@@ -183,9 +182,9 @@ const WorkshopList: React.FC = () => {
               <Text size="sm" c="dimmed" ta="center">
                 You haven't created any workshops yet. Create your first workshop to get started.
               </Text>
-              <Button 
-                leftSection={<IconPlus size={16} />} 
-                component={Link} 
+              <Button
+                leftSection={<IconPlus size={16} />}
+                component={Link}
                 to="/instructor-lead/workshops/create"
               >
                 Create New Workshop
@@ -206,21 +205,21 @@ const WorkshopList: React.FC = () => {
                     </ActionIcon>
                   </Menu.Target>
                   <Menu.Dropdown>
-                    <Menu.Item 
+                    <Menu.Item
                       leftSection={<IconEdit size={16} />}
                       onClick={() => navigate(`/instructor-lead/workshops/${workshop.id}/edit`)}
                     >
                       Edit
                     </Menu.Item>
-                    <Menu.Item 
+                    <Menu.Item
                       leftSection={<IconUsers size={16} />}
                       onClick={() => navigate(`/instructor-lead/workshops/${workshop.id}/attendees`)}
                     >
                       View Attendees
                     </Menu.Item>
                     <Menu.Divider />
-                    <Menu.Item 
-                      color="red" 
+                    <Menu.Item
+                      color="red"
                       leftSection={<IconTrash size={16} />}
                       onClick={() => openDeleteModal(workshop.id)}
                     >

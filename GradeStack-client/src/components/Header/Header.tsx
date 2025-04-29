@@ -38,7 +38,6 @@ const Header: React.FC = () => {
     { name: "Topics", href: "/topics" },
     { name: "Paths", href: "/learning-paths" },
     { name: "Workshops", href: "/workshops" },
-    { name: "Instructors", href: "/instructors" },
   ];
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,14 +62,14 @@ const Header: React.FC = () => {
     if (href !== "/" && currentPath.startsWith(href)) return true;
     return false;
   };
-  
+
   // Function để xác định màu sắc cho menu item
   const getItemStyle = (href: string) => {
     // Nếu là trang workshop, sử dụng màu xanh đặc biệt
     if (href === "/workshops" && isActiveLink(href)) {
       return "text-blue-500 after:absolute after:bottom-[-8px] after:left-0 after:right-0 after:h-[3px] after:bg-blue-500 after:rounded-full";
     }
-    
+
     // Các trang khác sử dụng style mặc định
     return isActiveLink(href)
       ? "text-gray-100 after:absolute after:bottom-[-8px] after:left-0 after:right-0 after:h-[3px] after:bg-blue-600 after:rounded-full"
@@ -265,13 +264,12 @@ const Header: React.FC = () => {
                     <a
                       key={item.name}
                       href={item.href}
-                      className={`-mx-3 block rounded-lg px-3 py-2 text-base font-semibold ${
-                        item.href === "/workshops" && isActiveLink(item.href)
+                      className={`-mx-3 block rounded-lg px-3 py-2 text-base font-semibold ${item.href === "/workshops" && isActiveLink(item.href)
                           ? "text-blue-500 bg-blue-950/50"
                           : isActiveLink(item.href)
                             ? "text-blue-600 bg-blue-950/50"
                             : "text-gray-300 hover:bg-gray-800"
-                      }`}
+                        }`}
                     >
                       {item.name}
                     </a>

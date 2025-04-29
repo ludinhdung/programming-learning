@@ -163,24 +163,14 @@ const Sidebar = () => {
   // Additional items only for INSTRUCTOR_LEAD
   const leadOnlyItems = [
     {
-      icon: MdFolder,
-      text: "Content Management",
-      href: "/instructor-management/content",
-    },
-    {
-      icon: MdCategory,
-      text: "Topics",
-      href: "/instructor/topics",
-    },
-    {
-      icon: MdTimeline,
-      text: "Learning Paths",
-      href: "/instructor/learning-paths",
-    },
-    {
       icon: MdAnalytics,
       text: "Course Verification",
       href: "/instructor-management/verify-courses",
+    },
+    {
+      icon: MdFolder,
+      text: "Content Management",
+      href: "/instructor-management/content",
     },
   ];
 

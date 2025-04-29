@@ -8,7 +8,7 @@ import { Box, Title } from '@mantine/core';
 const WorkshopLayout: React.FC = () => {
   return (
     <Box className='mt-10'>
-      <Title order={2} mb="md">Workshop Management</Title>
+      <Title order={2} mb="md" className='text-4xl font-bold text-white'>Workshop Management</Title>
       <Outlet />
     </Box>
   );

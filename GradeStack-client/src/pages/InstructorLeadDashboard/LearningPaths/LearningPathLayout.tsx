@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container } from '@mantine/core';
+import { Container, Title } from '@mantine/core';
 import { Outlet } from 'react-router-dom';
 
 /**
@@ -8,6 +8,7 @@ import { Outlet } from 'react-router-dom';
 const LearningPathLayout: React.FC = () => {
   return (
     <Container className='mt-10' size="xl" py="md">
+      <Title order={2} className='text-4xl font-bold text-white mb-4'>Learning Path Management</Title>
       <Outlet />
     </Container>
   );

@@ -12,9 +12,9 @@ const TopicLayout: React.FC = () => {
   return (
     <Container className='mt-10' size="xl">
       <Group justify="space-between" mb={20}>
-        <Title order={2}>Manage Topics</Title>
-        <Button 
-          leftSection={<AiOutlinePlus size={16} />} 
+        <Title order={2} className='text-4xl font-bold text-white'>Manage Topics</Title>
+        <Button
+          leftSection={<AiOutlinePlus size={16} />}
           onClick={() => navigate('/instructor-lead/topics/create')}
         >
           Create New Topic

@@ -70,8 +70,6 @@ import { TransactionList } from "./components/InstructorManagement/Contents/Tran
 import { CourseVerificationList as InstructorCourseVerificationList } from "./components/InstructorManagement/Contents/CourseVerification";
 import CourseVerificationDetail from "./components/InstructorManagement/Contents/CourseVerification/CourseVerificationDetail";
 // Import CourseVerification cho Instructor Lead Dashboard
-import { CourseVerificationList } from "./pages/InstructorLeadDashboard/CourseVerification";
-import { CourseVerificationDetail as LeadCourseVerificationDetail } from "./pages/InstructorLeadDashboard/CourseVerification";
 import AdminOverview from "./pages/AdminDashboard/components/Overview";
 import AdminTransactions from "./pages/AdminDashboard/components/Transactions";
 import AdminSupporterManagement from "./pages/AdminDashboard/components/SupporterManagement";
@@ -200,8 +198,6 @@ const App: React.FC = () => {
               </Route>
 
               {/* Quản lý xác minh khóa học - Chỉ Instructor Lead mới có quyền xác minh */}
-              <Route path="verify-courses" element={<CourseVerificationList />} />
-              <Route path="verify-courses/:courseId" element={<LeadCourseVerificationDetail />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

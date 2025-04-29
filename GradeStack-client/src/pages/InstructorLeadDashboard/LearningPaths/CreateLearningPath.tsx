@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { 
-  TextInput, Textarea, Button, Title, NumberInput, Select, 
+import {
+  TextInput, Textarea, Button, Title, NumberInput, Select,
   Group, Stack, Avatar, Text, Container, Paper, Box,
   Image, rem, ActionIcon
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
-import { 
-  IconArrowLeft, IconUpload, IconGripVertical, 
+import {
+  IconArrowLeft, IconUpload, IconGripVertical,
   IconTrash, IconPhoto, IconX
 } from '@tabler/icons-react';
 import mediaService from '../../../services/mediaService';
@@ -67,7 +67,7 @@ const CreateLearningPath: React.FC = () => {
         }
 
         const user = JSON.parse(userData);
-        
+
         // Check if user is an instructor lead
         if (user.role !== Role.INSTRUCTOR_LEAD) {
           notifications.show({
@@ -78,7 +78,7 @@ const CreateLearningPath: React.FC = () => {
           navigate('/instructor-lead');
           return;
         }
-        
+
         // Get all courses in the system for learning path
         const courses = await courseService.getAllCoursesForLearningPath();
         setAvailableCourses(courses);
@@ -99,9 +99,9 @@ const CreateLearningPath: React.FC = () => {
   // Handle image upload
   const handleUpload = async (files: File[]) => {
     if (files.length === 0) return;
-    
+
     const file = files[0];
-    
+
     // Check file size
     const isLt2M = file.size / 1024 / 1024 < 2;
     if (!isLt2M) {
@@ -117,27 +117,27 @@ const CreateLearningPath: React.FC = () => {
       setUploading(true);
       setUploadError(null);
       console.log('Starting image upload:', file.name);
-      
+
       // Use mediaService to upload image
       const result = await mediaService.uploadImage(file);
-      
+
       if (!result) {
         throw new Error('No image URL received from server');
       }
-      
+
       // Update image URL - ensure result is a string
-      const imageUrlResult = typeof result === 'string' ? result : 
-                            (result.url || result.imageUrl || 
-                             (typeof result === 'object' && Object.values(result)[0]));
-      
+      const imageUrlResult = typeof result === 'string' ? result :
+        (result.url || result.imageUrl ||
+          (typeof result === 'object' && Object.values(result)[0]));
+
       if (!imageUrlResult || typeof imageUrlResult !== 'string') {
         throw new Error('Invalid image URL format');
       }
-      
+
       console.log('Image URL received:', imageUrlResult);
       setImageUrl(imageUrlResult);
       form.setFieldValue('thumbnail', imageUrlResult);
-      
+
       notifications.show({
         title: 'Success',
         message: 'Image uploaded successfully',
@@ -159,7 +159,7 @@ const CreateLearningPath: React.FC = () => {
   // Handle course selection
   const handleCourseSelect = (courseId: string | null) => {
     if (!courseId) return;
-    
+
     const course = availableCourses.find(c => c.id === courseId);
     if (course && !selectedCourses.some(c => c.id === courseId)) {
       setSelectedCourses([...selectedCourses, course]);
@@ -174,11 +174,11 @@ const CreateLearningPath: React.FC = () => {
   // Handle drag and drop to reorder courses
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
-    
+
     const items = Array.from(selectedCourses);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-    
+
     setSelectedCourses(items);
   };
 
@@ -186,7 +186,7 @@ const CreateLearningPath: React.FC = () => {
   const onSubmit = async (values: typeof form.values) => {
     try {
       setLoading(true);
-      
+
       if (selectedCourses.length === 0) {
         notifications.show({
           title: 'Error',
@@ -195,7 +195,7 @@ const CreateLearningPath: React.FC = () => {
         });
         return;
       }
-      
+
       if (!imageUrl) {
         notifications.show({
           title: 'Error',
@@ -204,7 +204,7 @@ const CreateLearningPath: React.FC = () => {
         });
         return;
       }
-      
+
       // Get user information
       const userData = localStorage.getItem('user');
       if (!userData) {
@@ -216,9 +216,9 @@ const CreateLearningPath: React.FC = () => {
         navigate('/instructor-lead/login');
         return;
       }
-      
+
       const user = JSON.parse(userData);
-      
+
       // Determine instructorId from user data
       let instructorId;
       if (user.instructor && user.instructor.id) {
@@ -236,12 +236,12 @@ const CreateLearningPath: React.FC = () => {
         console.error('User data structure does not contain instructorId:', user);
         return;
       }
-      
+
       console.log('InstructorId being used:', instructorId);
-      
+
       // Prepare data to send to server
       const courseIds = selectedCourses.map(course => course.id);
-      
+
       const learningPathData = {
         title: values.name.trim(),
         description: values.description.trim(),
@@ -249,18 +249,18 @@ const CreateLearningPath: React.FC = () => {
         estimatedCompletionTime: values.estimatedTime || 0,
         courseIds: courseIds
       };
-      
+
       console.log('Learning path data to be sent:', learningPathData);
-      
+
       // Call API to create learning path
       await learningPathService.createLearningPath(instructorId, learningPathData);
-      
+
       notifications.show({
         title: 'Success',
         message: 'Learning path created successfully',
         color: 'green'
       });
-      
+
       // Navigate to learning path list
       navigate('/instructor-lead/learning-paths');
     } catch (error: any) {
@@ -279,8 +279,9 @@ const CreateLearningPath: React.FC = () => {
     <Container size="md" py="md">
       <Paper shadow="xs" p="md" withBorder>
         <Group mb="md">
-          <Button 
-            variant="subtle" 
+
+          <Button
+            variant="subtle"
             leftSection={<IconArrowLeft size={16} />}
             onClick={() => navigate('/instructor-lead/learning-paths')}
           >
@@ -288,7 +289,7 @@ const CreateLearningPath: React.FC = () => {
           </Button>
           <Title order={2} style={{ margin: 0 }}>Create New Learning Path</Title>
         </Group>
-        
+
         <form onSubmit={form.onSubmit(onSubmit)}>
           <Stack>
             <TextInput
@@ -297,14 +298,14 @@ const CreateLearningPath: React.FC = () => {
               required
               {...form.getInputProps('name')}
             />
-            
+
             <Textarea
               label="Description"
               placeholder="Enter detailed description about the learning path"
               minRows={4}
               {...form.getInputProps('description')}
             />
-            
+
             <NumberInput
               label="Estimated Completion Time (hours)"
               placeholder="Enter estimated time to complete the learning path (hours)"
@@ -312,16 +313,16 @@ const CreateLearningPath: React.FC = () => {
               allowDecimal={false}
               {...form.getInputProps('estimatedTime')}
             />
-            
+
             <Box>
               <Text fw={500} mb="xs">Thumbnail Image</Text>
               {imageUrl ? (
                 <Box mb="md">
                   <Group mb="xs">
                     <Text size="sm" c="dimmed">Uploaded image:</Text>
-                    <Button 
-                      variant="subtle" 
-                      color="red" 
+                    <Button
+                      variant="subtle"
+                      color="red"
                       size="xs"
                       leftSection={<IconX size={14} />}
                       onClick={() => {
@@ -380,7 +381,7 @@ const CreateLearningPath: React.FC = () => {
               )}
               {uploadError && <Text c="red" size="sm">{uploadError}</Text>}
             </Box>
-            
+
             <Box>
               <Text fw={500} mb="xs">Courses in Learning Path</Text>
               <Select
@@ -394,16 +395,16 @@ const CreateLearningPath: React.FC = () => {
                 clearable
                 mb="md"
               />
-              
+
               <Text size="sm" mb="xs">Selected courses list (drag and drop to reorder):</Text>
-              
+
               <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="courses">
                   {(provided) => (
                     <div
                       {...provided.droppableProps}
                       ref={provided.innerRef}
-                      style={{ 
+                      style={{
                         minHeight: '100px',
                         border: '1px solid var(--mantine-color-gray-3)',
                         borderRadius: 'var(--mantine-radius-sm)',
@@ -427,8 +428,8 @@ const CreateLearningPath: React.FC = () => {
                                   <Paper p="xs" withBorder>
                                     <Group  >
                                       <Group>
-                                        <IconGripVertical 
-                                          size={18} 
+                                        <IconGripVertical
+                                          size={18}
                                           style={{ color: 'var(--mantine-color-gray-5)' }}
                                         />
                                         <Avatar src={course.thumbnail} size="md" radius="sm" />
@@ -439,8 +440,8 @@ const CreateLearningPath: React.FC = () => {
                                           </Text>
                                         </div>
                                       </Group>
-                                      <ActionIcon 
-                                        color="red" 
+                                      <ActionIcon
+                                        color="red"
                                         onClick={() => handleRemoveCourse(course.id)}
                                         variant="light"
                                       >
@@ -462,15 +463,15 @@ const CreateLearningPath: React.FC = () => {
             </Box>
 
             <Group mt="xl">
-              <Button 
-                variant="default" 
+              <Button
+                variant="default"
                 onClick={() => navigate('/instructor-lead/learning-paths')}
                 disabled={loading || uploading}
               >
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 loading={loading}
                 disabled={uploading || !imageUrl || selectedCourses.length === 0}
               >

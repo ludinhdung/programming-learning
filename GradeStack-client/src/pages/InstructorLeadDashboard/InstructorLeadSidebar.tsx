@@ -1,6 +1,6 @@
 // InstructorLeadSidebar.tsx
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { IconType } from "react-icons";
 import {
   RiDashboardLine,
@@ -8,13 +8,12 @@ import {
   RiCalendarEventLine,
   RiCheckboxCircleLine,
   RiLogoutBoxLine,
+  RiArrowLeftLine,
 } from "react-icons/ri";
 import { BiCategoryAlt } from "react-icons/bi";
 import apiClient from "../../services/apiClient";
 import { message } from "antd";
 import { Role } from "../../types/role";
-import { useNavigate } from "react-router-dom";
-import { RiArrowLeftLine } from "react-icons/ri";
 
 interface InstructorLeadData {
   id: string;
@@ -53,6 +52,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, text, href }) => {
 const InstructorLeadSidebar = () => {
   const [instructorLead, setInstructorLead] = useState<InstructorLeadData | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchInstructorLeadData = async () => {
@@ -100,6 +100,10 @@ const InstructorLeadSidebar = () => {
     fetchInstructorLeadData();
   }, []);
 
+  const handleGoBack = () => {
+    navigate("/instructor-management");
+  };
+
   const navItems = [
     { icon: BiCategoryAlt, text: "Manage Topics", href: "/instructor-lead/topics" },
     { icon: RiBookmarkLine, text: "Manage Learning Paths", href: "/instructor-lead/learning-paths" },
@@ -114,6 +118,14 @@ const InstructorLeadSidebar = () => {
   return (
     <nav className="flex flex-col relative w-64 h-screen bg-zinc-900 text-white transition-all duration-300">
       <div className="p-4 border-b border-zinc-700">
+        <button
+          onClick={handleGoBack}
+          className="flex items-center mb-4 text-gray-300 hover:text-white transition-colors"
+        >
+          <RiArrowLeftLine className="w-5 h-5 mr-2" />
+          <span>Go Back</span>
+        </button>
+
         <div className="flex items-center space-x-3">
           {loading ? (
             <div className="w-16 h-16 rounded-full bg-slate-700 animate-pulse"></div>

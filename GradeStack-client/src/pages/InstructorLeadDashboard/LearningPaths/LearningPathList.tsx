@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Group, Text, Image, Card, ActionIcon, Loader, Badge, Box, Drawer, ScrollArea, Button, Pagination, Center } from '@mantine/core';
+import { Table, Group, Text, Image, Card, ActionIcon, Loader, Badge, Box, Drawer, ScrollArea, Button, Pagination, Center, Title } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { IconEdit, IconTrash, IconPlus } from '@tabler/icons-react';
 import { modals } from '@mantine/modals';
@@ -55,7 +55,7 @@ const LearningPathList: React.FC = () => {
     try {
       console.log('fetchLearningPaths - Calling API');
       setLoading(true);
-      
+
       // Get current user ID from localStorage
       const userData = localStorage.getItem('user');
       if (!userData) {
@@ -66,9 +66,9 @@ const LearningPathList: React.FC = () => {
         });
         return;
       }
-      
+
       const user = JSON.parse(userData);
-      
+
       // Check user data structure
       let instructorId;
       if (user.instructor && user.instructor.id) {
@@ -86,19 +86,19 @@ const LearningPathList: React.FC = () => {
         console.error('User data structure does not contain instructorId:', user);
         return;
       }
-      
+
       console.log('InstructorId used to fetch learning paths:', instructorId);
-      
+
       // Use service to fetch learning path list
       const learningPathsData = await learningPathService.getLearningPaths(instructorId);
       console.log('Learning path list result:', learningPathsData);
-      
+
       // Process returned data
       const paths = Array.isArray(learningPathsData) ? learningPathsData : [];
       const total = paths.length;
-      
+
       console.log('Processed learning paths data:', { paths, total });
-      
+
       // Update state
       setLearningPaths(paths);
       setTotalLearningPaths(total);
@@ -123,7 +123,7 @@ const LearningPathList: React.FC = () => {
       const user = JSON.parse(userData);
       setIsInstructorLead(user.role === Role.INSTRUCTOR_LEAD);
     }
-    
+
     fetchLearningPaths();
   }, [currentPage]); // Add currentPage to dependencies to fetch again when page changes
 
@@ -134,7 +134,7 @@ const LearningPathList: React.FC = () => {
     // Check if learning path has courses
     const learningPath = learningPaths.find(lp => lp.id === learningPathId);
     const courseCount = learningPath?.courses?.length || 0;
-    
+
     if (courseCount > 0) {
       notifications.show({
         title: 'Cannot Delete',
@@ -143,7 +143,7 @@ const LearningPathList: React.FC = () => {
       });
       return;
     }
-    
+
     modals.openConfirmModal({
       title: 'Confirm Delete Learning Path',
       children: (
@@ -156,7 +156,7 @@ const LearningPathList: React.FC = () => {
       onConfirm: async () => {
         try {
           console.log('Deleting learning path with ID:', learningPathId);
-          
+
           // Get user information
           const userData = localStorage.getItem('user');
           if (!userData) {
@@ -167,9 +167,9 @@ const LearningPathList: React.FC = () => {
             });
             return;
           }
-          
+
           const user = JSON.parse(userData);
-          
+
           // Determine instructorId from user data
           let instructorId;
           if (user.instructor && user.instructor.id) {
@@ -187,13 +187,13 @@ const LearningPathList: React.FC = () => {
             console.error('User data structure does not contain instructorId:', user);
             return;
           }
-          
+
           // Use service to delete learning path
           await learningPathService.deleteLearningPath(instructorId, learningPathId);
-          
+
           // Update state
           setLearningPaths(learningPaths.filter(path => path.id !== learningPathId));
-          
+
           notifications.show({
             title: 'Success',
             message: 'Learning path deleted successfully',
@@ -210,7 +210,7 @@ const LearningPathList: React.FC = () => {
       },
     });
   };
-  
+
   /**
    * Handle opening edit learning path drawer
    */
@@ -222,7 +222,7 @@ const LearningPathList: React.FC = () => {
       setEditDrawerOpened(true);
     }, 50);
   };
-  
+
   /**
    * Handle after successful learning path update
    */
@@ -230,14 +230,14 @@ const LearningPathList: React.FC = () => {
     console.log('handleLearningPathUpdated called');
     // Close drawer first
     setEditDrawerOpened(false);
-    
+
     // Show success notification
     notifications.show({
       title: 'Success',
       message: 'Learning path updated successfully',
       color: 'green'
     });
-    
+
     // Wait for drawer to close completely, then reset selectedLearningPathId and fetch list again
     setTimeout(async () => {
       setSelectedLearningPathId(null);
@@ -249,6 +249,7 @@ const LearningPathList: React.FC = () => {
     return (
       <Card shadow="sm" padding="md" radius="md" withBorder>
         <Group justify="center" py={50}>
+          <Title order={2} className='text-4xl font-bold text-white'>Manage Topics</Title>
           <Loader size="md" />
           <Text size="sm">Loading learning path list...</Text>
         </Group>
@@ -271,7 +272,7 @@ const LearningPathList: React.FC = () => {
             </Button>
           )}
         </Group>
-        
+
         {learningPaths.length === 0 ? (
           <Text ta="center" py={30} c="dimmed">No learning paths found. Please create a new learning path!</Text>
         ) : (
@@ -321,17 +322,17 @@ const LearningPathList: React.FC = () => {
                     </Table.Td>
                     <Table.Td>
                       <Group gap="xs" justify="center">
-                        <ActionIcon 
-                          variant="light" 
-                          color="blue" 
+                        <ActionIcon
+                          variant="light"
+                          color="blue"
                           onClick={() => handleEditLearningPath(learningPath.id)}
                           aria-label="Edit"
                         >
                           <IconEdit size={16} stroke={1.5} />
                         </ActionIcon>
-                        <ActionIcon 
-                          variant="light" 
-                          color="red" 
+                        <ActionIcon
+                          variant="light"
+                          color="red"
                           onClick={() => handleDeleteLearningPath(learningPath.id)}
                           aria-label="Delete"
                         >
@@ -343,19 +344,19 @@ const LearningPathList: React.FC = () => {
                 ))}
               </Table.Tbody>
             </Table>
-            
+
             {/* Pagination */}
             {!loading && learningPaths.length > 0 && (
               <Center mt="xl">
-                <Pagination 
-                  value={currentPage} 
-                  onChange={setCurrentPage} 
-                  total={Math.ceil(totalLearningPaths / itemsPerPage)} 
+                <Pagination
+                  value={currentPage}
+                  onChange={setCurrentPage}
+                  total={Math.ceil(totalLearningPaths / itemsPerPage)}
                   withEdges
                 />
               </Center>
             )}
-            
+
             {!loading && learningPaths.length === 0 && (
               <Text c="dimmed" ta="center" py="xl">
                 No learning path data found. Create a new one to get started.
@@ -364,7 +365,7 @@ const LearningPathList: React.FC = () => {
           </Box>
         )}
       </Card>
-      
+
       <Drawer
         opened={editDrawerOpened}
         onClose={() => {
@@ -385,16 +386,16 @@ const LearningPathList: React.FC = () => {
       >
         {/* Only render EditLearningPathDrawer when both selectedLearningPathId and drawer are open */}
         {selectedLearningPathId && editDrawerOpened && (
-          <EditLearningPathDrawer 
-            key={`edit-learning-path-${selectedLearningPathId}`} 
-            learningPathId={selectedLearningPathId} 
-            onSuccess={handleLearningPathUpdated} 
+          <EditLearningPathDrawer
+            key={`edit-learning-path-${selectedLearningPathId}`}
+            learningPathId={selectedLearningPathId}
+            onSuccess={handleLearningPathUpdated}
             onCancel={() => {
               console.log('EditLearningPathDrawer onCancel');
               setEditDrawerOpened(false);
               // Wait for drawer to close completely before removing selectedLearningPathId
               setTimeout(() => setSelectedLearningPathId(null), 300);
-            }} 
+            }}
           />
         )}
       </Drawer>
@@ -415,25 +416,25 @@ const EditLearningPathDrawer: React.FC<EditLearningPathDrawerProps> = ({ learnin
   console.log('Render EditLearningPathDrawer with learningPathId:', learningPathId);
   // Use state to control EditLearningPath rendering
   const [isReady, setIsReady] = useState<boolean>(false);
-  
+
   // Use useEffect to log when component mounts/unmounts
   React.useEffect(() => {
     console.log('EditLearningPathDrawer mounted with learningPathId:', learningPathId);
     let mounted = true;
-    
+
     // Set a short timeout to ensure drawer is displayed before rendering EditLearningPath
     // Don't call API here to avoid multiple API calls
     const timer = setTimeout(() => {
       if (mounted) setIsReady(true);
     }, 300);
-    
+
     return () => {
       console.log('EditLearningPathDrawer unmounted');
       mounted = false;
       clearTimeout(timer);
     };
   }, [learningPathId]);
-  
+
   // Show loading while preparing
   if (!isReady) {
     return (
@@ -445,14 +446,14 @@ const EditLearningPathDrawer: React.FC<EditLearningPathDrawerProps> = ({ learnin
       </Card>
     );
   }
-  
+
   // Only render EditLearningPath when ready
   return (
-    <EditLearningPath 
-      learningPathId={learningPathId} 
-      isDrawer={true} 
-      onSuccess={onSuccess} 
-      onCancel={onCancel} 
+    <EditLearningPath
+      learningPathId={learningPathId}
+      isDrawer={true}
+      onSuccess={onSuccess}
+      onCancel={onCancel}
     />
   );
 };
