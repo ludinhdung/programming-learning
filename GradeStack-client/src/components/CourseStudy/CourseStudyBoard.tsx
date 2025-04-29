@@ -89,15 +89,19 @@ export enum SupportedLanguage {
   C = "C",
   JAVA = "JAVA",
 }
+/**
+ * Interface for Final Test Lesson
+ * Defines the structure of a final test lesson in a course
+ */
 export interface FinalTestLesson {
-  estimatedDuration?: number;
-  passingScore?: number;
+  estimatedDuration?: number; // Estimated duration in minutes
+  passingScore?: number; // Minimum score required to pass (percentage)
   questions: {
-    content: string;
-    order: number;
+    content: string; // Question text
+    order: number; // Question order in the test
     answers: {
-      content: string;
-      isCorrect: boolean;
+      content: string; // Answer text
+      isCorrect: boolean; // Whether this is the correct answer
     }[];
   }[];
 }
@@ -610,8 +614,8 @@ const CourseStudyBoard: React.FC = () => {
 
       <div
         className={`${isSidebarVisible
-            ? "ml-[20%] w-4/5 duration-500 transition-all"
-            : "w-full duration-200 transition-transform"
+          ? "ml-[20%] w-4/5 duration-500 transition-all"
+          : "w-full duration-200 transition-transform"
           } min-h-[calc(100vh-64px)] bg-[#0d0d0e]  `}
       >
         <div className="p-4">
