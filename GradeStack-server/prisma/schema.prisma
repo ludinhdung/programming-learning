@@ -367,6 +367,9 @@ model Workshop {
   description String
   scheduledAt DateTime
   duration    Int // Thời gian workshop (phút)
+  meetUrl     String? // URL Google Meet
+  thumbnail   String? // Hình ảnh thumbnail
+  autoGenerateMeet Boolean @default(true) // Tự động tạo Google Meet URL
 
   instructor   Instructor @relation(fields: [instructorId], references: [userId])
   instructorId String
@@ -387,6 +390,7 @@ model Attendance {
   workshopId String
 
   attendedAt DateTime @default(now())
+  notified   Boolean @default(false) // Đã gửi email thông báo chưa
 
   @@unique([userId, workshopId])
 }

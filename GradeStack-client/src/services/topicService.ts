@@ -4,6 +4,7 @@ export interface TopicCreateData {
   name: string;
   description: string;
   thumbnail: string;
+  instructorUserId?: string;
 }
 
 export interface TopicUpdateData {
@@ -22,6 +23,16 @@ export interface Topic {
   _count?: {
     courses: number;
   };
+  // Trường instructor từ API là Instructor (viết hoa)
+  Instructor?: {
+    userId: string;
+    user: {
+      firstName: string;
+      lastName: string;
+      email: string;
+    }
+  };
+  // Giữ lại trường instructor (viết thường) cho khả năng tương thích ngược
   instructor?: {
     userId: string;
     user: {

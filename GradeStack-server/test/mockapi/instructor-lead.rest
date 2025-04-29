@@ -1,0 +1,193 @@
+# GradeStack API - Instructor Lead Endpoints
+# ===============================
+
+# Environment Variables
+@baseUrl = http://localhost:4000/api
+@token =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0MTQ2NTk1YS1mYWJlLTRjMWMtYTdlNS02MmFhY2RmOWEyNmUiLCJyb2xlIjoiSU5TVFJVQ1RPUl9MRUFEIiwiaWF0IjoxNzQ1NzQ1NjMxLCJleHAiOjE3NDU4MzIwMzF9._OsXxmweifCMJ8hupa1t3AXjxU4cmQB_ma9j9n-Fn1Y
+
+# ===============================
+# INSTRUCTOR LEAD MANAGEMENT
+# ===============================
+
+### Tạo mới Instructor Lead
+# Tạo tài khoản instructor lead với email phuduongthanh24112002@gmail.com và username phudk123
+POST {{baseUrl}}/instructor-lead
+Content-Type: application/json
+
+{
+  "userData": {
+    "email": "phuduongthanh2411200222@gmail.com",
+    "password": "phudk123",
+    "firstName": "Phú",
+    "lastName": "Dương Thanh",
+    "username": "phudk123"
+  },
+  "instructorData": {
+    "organization": "GradeStack",
+    "bio": "Instructor Lead tại GradeStack",
+    "avatar": "https://ui-avatars.com/api/?name=Phú+Dương+Thanh&background=random",
+    "socials": []
+  }
+}
+
+### Lấy thông tin Instructor Lead theo ID
+GET {{baseUrl}}/instructor-lead/:id
+Authorization: Bearer {{token}}
+
+### Cập nhật thông tin Instructor Lead
+PUT {{baseUrl}}/instructor-lead/:id
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "Phú",
+  "lastName": "Dương Thanh",
+  "organization": "GradeStack Academy",
+  "bio": "Instructor Lead tại GradeStack Academy",
+  "avatar": "https://ui-avatars.com/api/?name=Phú+Dương+Thanh&background=random",
+  "socials": ["https://facebook.com/phudk123"]
+}
+
+### Lấy danh sách tất cả Instructor
+GET {{baseUrl}}/instructor-lead/instructors
+Authorization: Bearer {{token}}
+
+# ===============================
+# TOPIC MANAGEMENT
+# ===============================
+
+### Tạo mới Topic
+POST {{baseUrl}}/instructor-lead/topics?action=create
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "JavaScript Cơ bản",
+  "description": "Khóa học JavaScript cơ bản cho người mới bắt đầu",
+  "thumbnail": "https://example.com/javascript.jpg"
+}
+
+### Cập nhật Topic
+PUT {{baseUrl}}/instructor-lead/topics/:id?action=update
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "JavaScript Nâng cao",
+  "description": "Khóa học JavaScript nâng cao cho người đã có kiến thức cơ bản"
+}
+
+### Xóa Topic
+DELETE {{baseUrl}}/instructor-lead/topics/:id?action=delete
+Authorization: Bearer {{token}}
+
+### Lấy Topic theo ID
+GET {{baseUrl}}/instructor-lead/topics/:id?action=get
+Authorization: Bearer {{token}}
+
+### Lấy tất cả Topics
+GET {{baseUrl}}/instructor-lead/topics?action=list
+Authorization: Bearer {{token}}
+
+# ===============================
+# LEARNING PATH MANAGEMENT
+# ===============================
+
+### Tạo mới Learning Path
+POST {{baseUrl}}/instructor-lead/learning-paths?action=create
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Lộ trình học Web Development",
+  "description": "Lộ trình học Web Development từ cơ bản đến nâng cao",
+  "thumbnail": "https://example.com/web-dev.jpg",
+  "courses": [
+    {
+      "courseId": "course-id-1",
+      "order": 1
+    },
+    {
+      "courseId": "course-id-2",
+      "order": 2
+    }
+  ]
+}
+
+### Cập nhật Learning Path
+PUT {{baseUrl}}/instructor-lead/learning-paths/:id?action=update
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Lộ trình học Web Development 2023",
+  "description": "Lộ trình học Web Development từ cơ bản đến nâng cao cập nhật 2023"
+}
+
+### Xóa Learning Path
+DELETE {{baseUrl}}/instructor-lead/learning-paths/:id?action=delete
+Authorization: Bearer {{token}}
+
+### Lấy Learning Path theo ID
+GET {{baseUrl}}/instructor-lead/learning-paths/:id?action=get
+Authorization: Bearer {{token}}
+
+### Lấy tất cả Learning Paths
+GET {{baseUrl}}/instructor-lead/learning-paths?action=list
+Authorization: Bearer {{token}}
+
+# ===============================
+# WORKSHOP MANAGEMENT
+# ===============================
+
+### Tạo mới Workshop
+POST {{baseUrl}}/instructor-lead/workshops?action=create
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Workshop JavaScript",
+  "description": "Workshop JavaScript cơ bản",
+  "scheduledAt": "2025-05-15T10:00:00Z",
+  "duration": 120,
+  "instructorId": "instructor-id"
+}
+
+### Cập nhật Workshop
+PUT {{baseUrl}}/instructor-lead/workshops/:id?action=update
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Workshop JavaScript Nâng cao",
+  "description": "Workshop JavaScript nâng cao cho người đã có kiến thức cơ bản"
+}
+
+### Xóa Workshop
+DELETE {{baseUrl}}/instructor-lead/workshops/:id?action=delete
+Authorization: Bearer {{token}}
+
+### Lấy Workshop theo ID
+GET {{baseUrl}}/instructor-lead/workshops/:id?action=get
+Authorization: Bearer {{token}}
+
+### Lấy tất cả Workshops
+GET {{baseUrl}}/instructor-lead/workshops?action=list
+Authorization: Bearer {{token}}
+
+# ===============================
+# COURSE APPROVAL
+# ===============================
+
+### Phê duyệt khóa học
+PATCH {{baseUrl}}/instructor-lead/courses/:courseId/approve
+Authorization: Bearer {{token}}
+
+### Từ chối khóa học
+PATCH {{baseUrl}}/instructor-lead/courses/:courseId/reject
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "reason": "Nội dung khóa học chưa đầy đủ"
+}

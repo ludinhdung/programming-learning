@@ -71,7 +71,7 @@ const LearningPathDetail: FC = () => {
   const [learningPath, setLearningPath] = useState<LearningPath | null>(null);
   const [error, setError] = useState<string | null>(null);
   
-  // Format thời gian từ giây sang định dạng hh:mm:ss
+  // Format time from seconds to hh:mm:ss format
   const formatDuration = (seconds: number | null): string => {
     if (!seconds) return '00:00';
     
@@ -86,12 +86,12 @@ const LearningPathDetail: FC = () => {
     return `${formattedHours}${formattedMinutes}:${formattedSeconds}`;
   };
   
-  // Tính tổng thời gian của một khóa học
+  // Calculate total duration of a course
   const calculateCourseDuration = (modules: Module[]): number => {
     return modules.reduce((total, module) => total + (module.videoDuration || 0), 0);
   };
   
-  // Tính tổng thời gian của toàn bộ learning path
+  // Calculate total duration of the entire learning path
   const calculateTotalDuration = (): number => {
     if (!learningPath || !learningPath.courses || !Array.isArray(learningPath.courses)) return 0;
     
@@ -103,7 +103,7 @@ const LearningPathDetail: FC = () => {
     }, 0);
   };
   
-  // Tính tổng số module trong learning path
+  // Calculate total number of modules in the learning path
   const calculateTotalModules = (): number => {
     if (!learningPath || !learningPath.courses || !Array.isArray(learningPath.courses)) return 0;
     
@@ -118,26 +118,26 @@ const LearningPathDetail: FC = () => {
   useEffect(() => {
     const fetchLearningPathDetail = async (): Promise<void> => {
       if (!pathId) {
-        setError('ID của learning path không hợp lệ');
+        setError('Invalid learning path ID');
         setLoading(false);
         return;
       }
       
       try {
-        console.log('Đang lấy dữ liệu cho learning path với ID:', pathId);
+        console.log('Fetching data for learning path with ID:', pathId);
         const data = await learningPathService.getLearningPath(pathId);
-        console.log('Dữ liệu nhận được từ API:', data);
+        console.log('Data received from API:', data);
         
         if (!data) {
-          setError('Không tìm thấy learning path');
+          setError('Learning path not found');
           setLoading(false);
           return;
         }
         
         setLearningPath(data);
       } catch (err: any) {
-        console.error('Lỗi khi lấy thông tin learning path:', err);
-        setError(err.response?.data?.message || 'Không thể tải thông tin learning path. Vui lòng thử lại sau.');
+        console.error('Error fetching learning path details:', err);
+        setError(err.response?.data?.message || 'Unable to load learning path information. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -160,12 +160,12 @@ const LearningPathDetail: FC = () => {
         <Header />
         <div className="container mx-auto px-4 py-16">
           <Empty 
-            description={<span className="text-gray-400">{error || 'Không tìm thấy learning path'}</span>} 
+            description={<span className="text-gray-400">{error || 'Learning path not found'}</span>} 
             image={Empty.PRESENTED_IMAGE_SIMPLE} 
           />
           <div className="mt-4 text-center">
             <Link to="/learning-paths" className="text-blue-500 hover:text-blue-400">
-              <ArrowLeftOutlined /> Quay lại danh sách learning path
+              <ArrowLeftOutlined /> Back to learning paths
             </Link>
           </div>
         </div>
@@ -180,7 +180,7 @@ const LearningPathDetail: FC = () => {
         {/* Breadcrumb */}
         <div className="mb-4">
           <Link to="/learning-paths" className="text-blue-500 hover:text-blue-400">
-            <ArrowLeftOutlined /> Quay lại danh sách learning path
+            <ArrowLeftOutlined /> Back to learning paths
           </Link>
         </div>
         
@@ -219,16 +219,16 @@ const LearningPathDetail: FC = () => {
                 </div>
                 <div className="flex items-center text-gray-300">
                   <BookOutlined className="mr-2" />
-                  <span>{learningPath.courses.length} khóa học</span>
+                  <span>{learningPath.courses.length} courses</span>
                 </div>
                 <div className="flex items-center text-gray-300">
                   <PlayCircleOutlined className="mr-2" />
-                  <span>{calculateTotalModules()} bài học</span>
+                  <span>{calculateTotalModules()} lessons</span>
                 </div>
               </div>
               
               <div className="bg-gray-800 p-4 rounded-md border border-gray-700 mt-4">
-                <h3 className="text-white text-lg font-semibold mb-2">Thông tin tác giả</h3>
+                <h3 className="text-white text-lg font-semibold mb-2">Author Information</h3>
                 <div className="flex items-center">
                   <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold mr-3">
                     {learningPath.Instructor?.user ? (
@@ -242,7 +242,7 @@ const LearningPathDetail: FC = () => {
                           {learningPath.Instructor.user.firstName} {learningPath.Instructor.user.lastName}
                         </span>
                       ) : (
-                        <span>Không có thông tin</span>
+                        <span>No information available</span>
                       )}
                     </div>
                     {learningPath.Instructor?.user?.email && (
@@ -257,35 +257,35 @@ const LearningPathDetail: FC = () => {
         
         {/* Learning Path Overview */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-white mb-4">Tổng quan lộ trình</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Path Overview</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div className="bg-gray-800 p-4 rounded-md border border-gray-700">
-              <h3 className="text-white text-lg font-semibold mb-2">Khóa học</h3>
+              <h3 className="text-white text-lg font-semibold mb-2">Courses</h3>
               <div className="text-3xl text-white font-bold mb-1">{learningPath.courses.length}</div>
-              <p className="text-gray-400 text-sm">Khóa học trong lộ trình</p>
+              <p className="text-gray-400 text-sm">Courses in this path</p>
             </div>
             
             <div className="bg-gray-800 p-4 rounded-md border border-gray-700">
-              <h3 className="text-white text-lg font-semibold mb-2">Bài học</h3>
+              <h3 className="text-white text-lg font-semibold mb-2">Lessons</h3>
               <div className="text-3xl text-white font-bold mb-1">{calculateTotalModules()}</div>
-              <p className="text-gray-400 text-sm">Tổng số bài học</p>
+              <p className="text-gray-400 text-sm">Total lessons</p>
             </div>
             
             <div className="bg-gray-800 p-4 rounded-md border border-gray-700">
-              <h3 className="text-white text-lg font-semibold mb-2">Thời lượng</h3>
+              <h3 className="text-white text-lg font-semibold mb-2">Duration</h3>
               <div className="text-3xl text-white font-bold mb-1">{formatDuration(calculateTotalDuration())}</div>
-              <p className="text-gray-400 text-sm">Tổng thời gian học</p>
+              <p className="text-gray-400 text-sm">Total learning time</p>
             </div>
           </div>
         </div>
         
         {/* Learning Path Content */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-white mb-4">Nội dung lộ trình</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Path Content</h2>
           
           {learningPath.courses.length === 0 ? (
             <Empty 
-              description={<span className="text-gray-400">Lộ trình này chưa có khóa học nào</span>} 
+              description={<span className="text-gray-400">This learning path has no courses yet</span>} 
               image={Empty.PRESENTED_IMAGE_SIMPLE} 
             />
           ) : (
@@ -297,13 +297,13 @@ const LearningPathDetail: FC = () => {
                   title={
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
                       <div className="mb-2 sm:mb-0">
-                        <Tag color="blue">Khóa học {pathCourse.order + 1}</Tag>
+                        <Tag color="blue">Course {pathCourse.order + 1}</Tag>
                         <span className="text-white ml-2 font-bold">{pathCourse.course.title}</span>
                       </div>
                       <div className="flex items-center text-gray-400">
                         <div className="mr-4">
                           <BookOutlined className="mr-2" />
-                          <span>{pathCourse.course.modules.length} bài học</span>
+                          <span>{pathCourse.course.modules.length} lessons</span>
                         </div>
                         <div>
                           <ClockCircleOutlined className="mr-2" />
@@ -315,23 +315,18 @@ const LearningPathDetail: FC = () => {
                   headStyle={{ backgroundColor: '#1f2937', borderBottom: '1px solid #374151' }}
                   bodyStyle={{ backgroundColor: '#1f2937' }}
                   extra={
-                    <Link 
-                      to={`/courses/${pathCourse.course.id}`} 
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md text-sm transition-colors"
-                    >
-                      Đăng ký khóa học
-                    </Link>
+                    <></>
                   }
                 >
                   <div className="mb-4">
                     <div className="text-gray-300 mb-2">
-                      <span className="font-semibold">Giảng viên:</span>{' '}
+                      <span className="font-semibold">Instructor:</span>{' '}
                       {pathCourse.course.instructor?.user ? (
                         <span>
                           {pathCourse.course.instructor.user.firstName} {pathCourse.course.instructor.user.lastName}
                         </span>
                       ) : (
-                        <span>Không có thông tin</span>
+                        <span>No information available</span>
                       )}
                     </div>
                     
@@ -350,15 +345,15 @@ const LearningPathDetail: FC = () => {
                       key="modules" 
                       header={
                         <div className="text-white">
-                          <span className="font-semibold">Các bài học</span>
-                          <span className="ml-2 text-gray-400">({pathCourse.course.modules.length} bài)</span>
+                          <span className="font-semibold">Lessons</span>
+                          <span className="ml-2 text-gray-400">({pathCourse.course.modules.length} lessons)</span>
                         </div>
                       }
                       className="bg-gray-700 border-gray-600"
                     >
                       {pathCourse.course.modules.length === 0 ? (
                         <Empty 
-                          description={<span className="text-gray-400">Khóa học này chưa có bài học nào</span>} 
+                          description={<span className="text-gray-400">This course has no lessons yet</span>} 
                           image={Empty.PRESENTED_IMAGE_SIMPLE} 
                         />
                       ) : (
@@ -384,7 +379,7 @@ const LearningPathDetail: FC = () => {
                                       to={`/courses/${pathCourse.course.id}/modules/${module.id}`}
                                       className="text-blue-500 hover:text-blue-400 text-sm"
                                     >
-                                      Xem bài học
+                                      View Lesson
                                     </Link>
                                   )}
                                 </div>
@@ -409,7 +404,7 @@ const LearningPathDetail: FC = () => {
                       to={`/courses/${pathCourse.course.id}`} 
                       className="text-blue-500 hover:text-blue-400"
                     >
-                      Xem chi tiết khóa học
+                      View Course Details
                     </Link>
                   </div>
                 </Card>
@@ -418,31 +413,25 @@ const LearningPathDetail: FC = () => {
           )}
         </div>
         
-        {/* Đăng ký lộ trình */}
+        {/* Enroll in learning path */}
         <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 mb-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
-              <h2 className="text-2xl font-bold text-white mb-2">Đăng ký toàn bộ lộ trình học</h2>
+              <h2 className="text-2xl font-bold text-white mb-2">Enroll in the Complete Learning Path</h2>
               <p className="text-gray-400">
-                Tiếp cận toàn bộ {learningPath.courses.length} khóa học và {calculateTotalModules()} bài học trong lộ trình này.
+                Access all {learningPath.courses.length} courses and {calculateTotalModules()} lessons in this learning path.
               </p>
             </div>
-            <Link 
-              to={`/learning-paths/${learningPath.id}/enroll`} 
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md font-medium transition-colors"
-            >
-              Đăng ký ngay
-            </Link>
           </div>
         </div>
         
-        {/* Đánh giá */}
+        {/* Feedback */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-white mb-4">Đánh giá từ học viên</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Student Feedback</h2>
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">
-            <p className="text-gray-400 mb-4">Chưa có đánh giá nào cho lộ trình học này.</p>
+            <p className="text-gray-400 mb-4">No feedback yet for this learning path.</p>
             <button className="text-blue-500 hover:text-blue-400">
-              Viết đánh giá đầu tiên
+              Write the first review
             </button>
           </div>
         </div>

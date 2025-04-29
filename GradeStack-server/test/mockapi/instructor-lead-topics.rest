@@ -1,0 +1,85 @@
+# GradeStack API - Instructor Lead và Topics
+# ===============================
+
+# Environment Variables
+@baseUrl = http://localhost:4000/api
+@instructorLeadEmail = instructor-lead-test@example.com
+@instructorLeadPassword = password123
+
+# ===============================
+# INSTRUCTOR LEAD CREATION & LOGIN
+# ===============================
+
+### Tạo mới Instructor Lead
+POST {{baseUrl}}/instructor-lead
+Content-Type: application/json
+
+{
+  "userData": {
+    "email": "{{instructorLeadEmail}}",
+    "password": "{{instructorLeadPassword}}",
+    "firstName": "Instructor",
+    "lastName": "Lead Test",
+    "username": "instructorlead"
+  },
+  "instructorData": {
+    "organization": "GradeStack",
+    "bio": "Instructor Lead Test Account",
+    "avatar": "https://ui-avatars.com/api/?name=Instructor+Lead&background=random",
+    "socials": []
+  }
+}
+
+### Đăng nhập Instructor Lead
+# Lưu token từ phản hồi vào biến @token
+POST {{baseUrl}}/instructor-lead/login
+Content-Type: application/json
+
+{
+  "email": "{{instructorLeadEmail}}",
+  "password": "{{instructorLeadPassword}}"
+}
+
+# Sau khi đăng nhập, sao chép token từ phản hồi và cập nhật biến @token bên dưới
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# ===============================
+# TOPIC MANAGEMENT
+# ===============================
+
+### Lấy danh sách tất cả topics
+GET {{baseUrl}}/instructor-lead/topics?action=list
+Authorization: Bearer {{token}}
+
+### Tạo topic mới
+POST {{baseUrl}}/instructor-lead/topics?action=create
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Topic Test",
+  "description": "Đây là một topic test",
+  "thumbnail": "https://ui-avatars.com/api/?name=Topic+Test&background=random"
+}
+
+### Lấy thông tin topic theo ID
+# Thay :id bằng ID thực tế của topic
+GET {{baseUrl}}/instructor-lead/topics/:id?action=get
+Authorization: Bearer {{token}}
+
+### Cập nhật topic
+# Thay :id bằng ID thực tế của topic
+PUT {{baseUrl}}/instructor-lead/topics/:id?action=update
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Topic Test Updated",
+  "description": "Mô tả đã được cập nhật",
+  "thumbnail": "https://ui-avatars.com/api/?name=Topic+Updated&background=random"
+}
+
+### Xóa topic
+# Thay :id bằng ID thực tế của topic
+DELETE {{baseUrl}}/instructor-lead/topics/:id?action=delete
+Authorization: Bearer {{token}}

@@ -1,6 +1,6 @@
 import { FC, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Spin, Empty, Divider  } from 'antd';
+import { Spin, Empty, Divider } from 'antd';
 import Header from '../../components/Header/Header';
 import learningPathService from '../../services/learningPathService';
 
@@ -50,7 +50,7 @@ const LearningPaths: FC = () => {
         <Header />
         <div className="container mx-auto px-4 py-16">
           <Empty 
-            description={<span className="text-gray-400">Không tìm thấy learning path nào</span>} 
+            description={<span className="text-gray-400">No learning paths found</span>} 
             image={Empty.PRESENTED_IMAGE_SIMPLE} 
           />
         </div>
@@ -89,13 +89,13 @@ const LearningPaths: FC = () => {
                   {/* Content */}
                   <div className='p-5'>
                     <h3 className="text-xl font-bold text-white mb-3">{path.title}</h3>
-                    <p className="text-gray-400 text-sm mb-4">{path.description || 'Không có mô tả'}</p>
+                    <p className="text-gray-400 text-sm mb-4">{path.description || 'No description available'}</p>
                     
-                    {/* Thông tin thêm */}
+                    {/* Additional information */}
                     <div className='flex justify-between text-gray-400 text-sm mb-2'>
-                      <span>{path.courses.length} khóa học</span>
+                      <span>{path.courses.length} courses</span>
                       {path.estimatedCompletionTime && (
-                        <span>{path.estimatedCompletionTime} giờ</span>
+                        <span>{path.estimatedCompletionTime} hours</span>
                       )}
                     </div>
                   </div>
@@ -103,7 +103,7 @@ const LearningPaths: FC = () => {
                 
                 <div className='py-4 px-6 bg-gray-700 mt-auto'>
                   <Link to={`/learning-paths/${path.id}`} className="text-white">
-                    <span className="text-blue-500">Xem chi tiết →</span>
+                    <span className="text-blue-500">View details →</span>
                   </Link>
                 </div>
               </div>
@@ -144,4 +144,4 @@ const LearningPaths: FC = () => {
   );
 };
 
-export default LearningPaths; 
+export default LearningPaths;

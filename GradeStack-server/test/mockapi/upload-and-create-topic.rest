@@ -1,0 +1,93 @@
+# GradeStack API - Upload ảnh và tạo Topic
+# ===============================
+
+# Environment Variables
+@baseUrl = http://localhost:4000/api
+@instructorLeadEmail = test-instructor@example.com
+@instructorLeadPassword = password123
+
+# ===============================
+# ĐĂNG KÝ VÀ ĐĂNG NHẬP INSTRUCTOR LEAD
+# ===============================
+
+### Đăng ký Instructor Lead (không cần xác thực)
+POST {{baseUrl}}/instructor-lead/register-test
+Content-Type: application/json
+
+{
+  "userData": {
+    "email": "{{instructorLeadEmail}}",
+    "password": "{{instructorLeadPassword}}",
+    "firstName": "Test",
+    "lastName": "Instructor",
+    "username": "testinstructor"
+  },
+  "instructorData": {
+    "organization": "GradeStack Test",
+    "bio": "Tài khoản instructor lead để test",
+    "avatar": "https://ui-avatars.com/api/?name=Test+Instructor&background=random",
+    "socials": []
+  }
+}
+
+### Đăng nhập Instructor Lead
+POST {{baseUrl}}/instructor-lead/login
+Content-Type: application/json
+
+{
+  "email": "{{instructorLeadEmail}}",
+  "password": "{{instructorLeadPassword}}"
+}
+
+# Sau khi đăng nhập, sao chép token từ phản hồi và cập nhật biến @token bên dưới
+@token = 
+
+# ===============================
+# UPLOAD ẢNH VÀ TẠO TOPIC
+# ===============================
+
+### Upload ảnh cho topic
+# Lưu ý: Khi sử dụng REST Client, bạn cần sử dụng đường dẫn tuyệt đối đến file ảnh
+# Ví dụ: < C:\path\to\your\image.jpg
+# Thay thế đường dẫn bên dưới bằng đường dẫn thực tế đến file ảnh của bạn
+POST {{baseUrl}}/images/upload?folder=topics
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="example.jpg"
+Content-Type: image/jpeg
+
+< C:\path\to\your\image.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+# Sau khi upload ảnh, sao chép URL ảnh từ phản hồi và cập nhật biến @imageUrl bên dưới
+@imageUrl = 
+
+### Tạo topic mới với ảnh đã upload
+POST {{baseUrl}}/instructor-lead/topics?action=create
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Topic Test với Ảnh",
+  "description": "Đây là một topic test với ảnh đã upload",
+  "thumbnail": "{{imageUrl}}"
+}
+
+### Lấy danh sách tất cả topics
+GET {{baseUrl}}/instructor-lead/topics?action=list
+Authorization: Bearer {{token}}
+
+# ===============================
+# HƯỚNG DẪN SỬ DỤNG
+# ===============================
+# 1. Đăng ký Instructor Lead bằng cách gửi request đầu tiên
+# 2. Đăng nhập và sao chép token từ phản hồi vào biến @token
+# 3. Upload ảnh bằng request upload ảnh (thay đường dẫn file ảnh thực tế)
+# 4. Sao chép URL ảnh từ phản hồi vào biến @imageUrl
+# 5. Tạo topic mới với ảnh đã upload
+# 6. Kiểm tra danh sách topics để xác nhận topic đã được tạo
+
+# Lưu ý: Trong ứng dụng thực tế, việc upload ảnh sẽ được thực hiện thông qua form HTML
+# với input type="file" và xử lý bằng JavaScript để gửi request và nhận phản hồi.

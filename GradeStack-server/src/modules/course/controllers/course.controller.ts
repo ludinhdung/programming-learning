@@ -241,6 +241,18 @@ export class CourseController {
     };
     
     /**
+     * Get all courses for learning path
+     */
+    public getAllCoursesForLearningPath = async (_req: Request, res: Response): Promise<void> => {
+        try {
+            const courses = await this.courseService.getAllCoursesForLearningPath();
+            res.status(200).json(courses);
+        } catch (error: any) {
+            this.handleError(res, error);
+        }
+    };
+    
+    /**
      * Update a video lesson
      */
     public updateVideoLesson = async (req: Request, res: Response): Promise<void> => {

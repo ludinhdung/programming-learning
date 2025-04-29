@@ -9,6 +9,7 @@ import {
   MdCategory,
   MdTimeline,
   MdPerson,
+  MdFolder,
 } from "react-icons/md";
 import { instructorService } from "../../services/api";
 import { message } from "antd";
@@ -162,19 +163,14 @@ const Sidebar = () => {
   // Additional items only for INSTRUCTOR_LEAD
   const leadOnlyItems = [
     {
-      icon: MdCategory,
-      text: "Topics",
-      href: "/instructor/topics",
-    },
-    {
-      icon: MdTimeline,
-      text: "Learning Paths",
-      href: "/instructor/learning-paths",
-    },
-    {
       icon: MdAnalytics,
       text: "Course Verification",
       href: "/instructor-management/verify-courses",
+    },
+    {
+      icon: MdFolder,
+      text: "Content Management",
+      href: "/instructor-management/content",
     },
   ];
 
