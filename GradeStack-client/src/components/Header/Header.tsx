@@ -37,7 +37,6 @@ const Header: React.FC = () => {
     { name: "Courses", href: "/courses" },
     { name: "Topics", href: "/topics" },
     { name: "Paths", href: "/learning-paths" },
-    { name: "Instructors", href: "/instructors" },
   ];
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
