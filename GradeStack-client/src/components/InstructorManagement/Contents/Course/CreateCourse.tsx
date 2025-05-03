@@ -1,9 +1,14 @@
-
-import React, { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Stepper, Button, Group } from "@mantine/core";
-import { Breadcrumb, Collapse, CollapseProps, message, Popover } from "antd";
+import {
+  Breadcrumb,
+  Collapse,
+  CollapseProps,
+  message,
+  Popover,
+  Upload,
+} from "antd";
 import {
   Label,
   Listbox,
@@ -14,7 +19,6 @@ import {
 import { ChevronUpDownIcon } from "@heroicons/react/16/solid";
 import { CheckIcon } from "@heroicons/react/20/solid";
 
-import { Upload } from "antd";
 import type { GetProp, UploadFile, UploadProps } from "antd";
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
@@ -71,7 +75,7 @@ interface CourseInformationProps {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onUploadThumbnail: () => Promise<void>;
+  onUploadThumbnail: (file?: File) => Promise<void>;
   isUploading: boolean;
 }
 
@@ -178,8 +182,9 @@ const CourseTopic: React.FC<CourseTopicProps> = ({
                           className="size-5 shrink-0 rounded-full"
                         />
                         <span
-                          className={`ml-3 block truncate ${isSelected ? "font-semibold" : "font-normal"
-                            }`}
+                          className={`ml-3 block truncate ${
+                            isSelected ? "font-semibold" : "font-normal"
+                          }`}
                         >
                           {topic.name}
                         </span>
@@ -213,6 +218,16 @@ const CourseInformation: React.FC<CourseInformationProps> = ({
   onUploadThumbnail,
   isUploading,
 }) => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploaded, setIsUploaded] = useState(false);
+
+  // Khởi tạo isUploaded dựa vào thumbnail hiện có
+  useEffect(() => {
+    if (courseInfo.thumbnail) {
+      setIsUploaded(true);
+    }
+  }, []);
+
   const formatCurrency = (value: string) => {
     // Bỏ hết ký tự không phải số
     const number = value.replace(/\D/g, "");
@@ -234,6 +249,10 @@ const CourseInformation: React.FC<CourseInformationProps> = ({
     onInputChange(syntheticEvent);
   };
 
+  const handleUploadSuccess = () => {
+    setIsUploaded(true);
+  };
+
   const content = (
     <div className="p-2">
       <p className="text-sm text-gray-700">Platform Fee Information:</p>
@@ -247,7 +266,7 @@ const CourseInformation: React.FC<CourseInformationProps> = ({
   return (
     <div className="flex justify-center items-center">
       <form>
-        <div className="space-y-4">
+        <div className="space-y-4 w-[350px]">
           <div className="sm:col-span-3">
             <label
               htmlFor="course-title"
@@ -295,24 +314,81 @@ const CourseInformation: React.FC<CourseInformationProps> = ({
             >
               Course Thumbnail
             </label>
-            <div className="mt-2 flex items-center gap-1">
-              <input
-                id="course-thumbnail"
+            <div className="mt-2">
+              <Upload
                 name="thumbnail"
-                type="file"
-                accept="image/*"
-                required
-                onChange={onFileChange}
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-              />
-              <button
-                type="button"
-                onClick={onUploadThumbnail}
-                disabled={isUploading}
-                className="bg-blue-500 p-1 rounded text-white font-semibold text-sm disabled:bg-gray-400"
+                listType="picture"
+                maxCount={1}
+                showUploadList={{ showPreviewIcon: true, showRemoveIcon: true }}
+                defaultFileList={
+                  courseInfo.thumbnail
+                    ? [
+                        {
+                          uid: "-1",
+                          name: "thumbnail.png",
+                          status: "done",
+                          url: courseInfo.thumbnail,
+                        },
+                      ]
+                    : []
+                }
+                beforeUpload={(file) => {
+                  // Store the selected file in state
+                  setSelectedFile(file);
+                  setIsUploaded(false);
+
+                  // Create a fake input event
+                  const fakeInput = document.createElement("input");
+                  fakeInput.type = "file";
+
+                  // Create a fake file list
+                  Object.defineProperty(fakeInput, "files", {
+                    value: [file],
+                  });
+
+                  // Create and dispatch the event
+                  const event = new Event("change", { bubbles: true });
+                  fakeInput.dispatchEvent(event);
+
+                  // Call the handler with our fake element
+                  onFileChange({
+                    target: fakeInput,
+                  } as unknown as React.ChangeEvent<HTMLInputElement>);
+
+                  // Return false to prevent Upload from automatically uploading
+                  return false;
+                }}
+                onRemove={() => {
+                  setSelectedFile(null);
+                  setIsUploaded(false);
+
+                  // Khi xóa file, cập nhật lại courseInfo.thumbnail thành chuỗi rỗng
+                  const syntheticEvent = {
+                    target: {
+                      name: "thumbnail",
+                      value: "",
+                    },
+                  } as React.ChangeEvent<HTMLInputElement>;
+                  onInputChange(syntheticEvent);
+                }}
               >
-                {isUploading ? "Uploading..." : "Upload"}
-              </button>
+                {!isUploaded && (
+                  <Button
+                    className="bg-indigo-600 hover:bg-indigo-700"
+                    loading={isUploading}
+                    onClick={(e) => {
+                      if (selectedFile) {
+                        e.stopPropagation();
+                        onUploadThumbnail(selectedFile).then(() => {
+                          handleUploadSuccess();
+                        });
+                      }
+                    }}
+                  >
+                    {selectedFile ? "Upload Thumbnail" : "Select Thumbnail"}
+                  </Button>
+                )}
+              </Upload>
             </div>
           </div>
           <div className="mt-2">
@@ -1640,10 +1716,11 @@ const CourseReview: React.FC<CourseReviewProps> = ({
                             {question.answers.map((answer, ansIndex) => (
                               <div key={ansIndex} className="flex items-center">
                                 <div
-                                  className={`w-4 h-4 rounded-full mr-2 ${answer.isCorrect
+                                  className={`w-4 h-4 rounded-full mr-2 ${
+                                    answer.isCorrect
                                       ? "bg-green-500"
                                       : "bg-gray-200"
-                                    }`}
+                                  }`}
                                 />
                                 <p className="text-gray-700">
                                   {answer.content}
@@ -1801,15 +1878,10 @@ const CreateCourse: React.FC = () => {
     }
   };
 
-  const handleUploadThumbnail = async () => {
-    const fileInput = document.getElementById(
-      "course-thumbnail"
-    ) as HTMLInputElement;
-    const file = fileInput.files?.[0];
-
+  const handleUploadThumbnail = async (file?: File) => {
     if (!file) {
       message.error("Please select an image first");
-      return;
+      return Promise.reject("No file selected");
     }
 
     try {
@@ -1825,9 +1897,11 @@ const CreateCourse: React.FC = () => {
       }));
 
       message.success("Thumbnail uploaded successfully");
+      return Promise.resolve();
     } catch (error) {
       console.error("Error uploading thumbnail:", error);
       message.error("Failed to upload thumbnail");
+      return Promise.reject(error);
     } finally {
       setThumbnailUploading(false);
     }
@@ -1893,36 +1967,36 @@ const CreateCourse: React.FC = () => {
               // Cho VIDEO lesson
               ...(lesson.lessonType === "VIDEO" &&
                 lesson.content?.video && {
-                videoUrl: lesson.content.video.url || "",
-                thumbnailUrl: null,
-                videoDuration: lesson.content.video.duration || 0,
-              }),
+                  videoUrl: lesson.content.video.url || "",
+                  thumbnailUrl: null,
+                  videoDuration: lesson.content.video.duration || 0,
+                }),
 
               // Cho CODING lesson
               ...(lesson.lessonType === "CODING" &&
                 lesson.content?.coding && {
-                language: lesson.content.coding.language,
-                exerciseContent: lesson.content.coding.problem,
-                solution: lesson.content.coding.solution,
-                hint: lesson.content.coding.hint,
-                codeSnippet: lesson.content.coding.codeSnippet,
-              }),
+                  language: lesson.content.coding.language,
+                  exerciseContent: lesson.content.coding.problem,
+                  solution: lesson.content.coding.solution,
+                  hint: lesson.content.coding.hint,
+                  codeSnippet: lesson.content.coding.codeSnippet,
+                }),
 
               // Cho FINAL_TEST lesson
               ...(lesson.lessonType === "FINAL_TEST" &&
                 lesson.content.finalTest && {
-                estimatedDuration: lesson.content.finalTest.estimatedDuration,
-                questions: lesson.content.finalTest.questions.map(
-                  (q, qIndex) => ({
-                    content: q.content,
-                    order: qIndex + 1,
-                    answers: q.answers.map((answer) => ({
-                      content: answer.content,
-                      isCorrect: answer.isCorrect,
-                    })),
-                  })
-                ),
-              }),
+                  estimatedDuration: lesson.content.finalTest.estimatedDuration,
+                  questions: lesson.content.finalTest.questions.map(
+                    (q, qIndex) => ({
+                      content: q.content,
+                      order: qIndex + 1,
+                      answers: q.answers.map((answer) => ({
+                        content: answer.content,
+                        isCorrect: answer.isCorrect,
+                      })),
+                    })
+                  ),
+                }),
             };
           }),
         };
@@ -2001,7 +2075,10 @@ const CreateCourse: React.FC = () => {
       setError(null);
 
       const userData = JSON.parse(localStorage.getItem("user") || "{}");
-      if (!userData.id || userData.role !== "INSTRUCTOR" && userData.role !== "INSTRUCTOR_LEAD") {
+      if (
+        !userData.id ||
+        (userData.role !== "INSTRUCTOR" && userData.role !== "INSTRUCTOR_LEAD")
+      ) {
         throw new Error(
           "You must be logged in as an instructor or instructor lead to create a course"
         );
