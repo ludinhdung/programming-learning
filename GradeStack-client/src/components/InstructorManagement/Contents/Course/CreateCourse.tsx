@@ -318,6 +318,7 @@ const CourseInformation: React.FC<CourseInformationProps> = ({
               <Upload
                 name="thumbnail"
                 listType="picture"
+                accept="image/*"
                 maxCount={1}
                 showUploadList={{ showPreviewIcon: true, showRemoveIcon: true }}
                 defaultFileList={
@@ -2129,36 +2130,155 @@ const CreateCourse: React.FC = () => {
       }
     }
 
-    // if (active === 2) {
-    //   // Kiểm tra số lượng module
-    //   if (modules.length < 3) {
-    //     message.error("You need at least 3 modules");
-    //     return;
-    //   }
+    if (active === 2) {
+      if (modules.length === 0) {
+        message.error("You need to create at least one module");
+        return;
+      }
 
-    //   // Đếm tổng số lesson và kiểm tra final test
-    //   let totalLessons = 0;
-    //   let hasFinalTest = false;
+      // Kiểm tra từng module
+      for (let moduleIndex = 0; moduleIndex < modules.length; moduleIndex++) {
+        const module = modules[moduleIndex];
 
-    //   modules.forEach((module) => {
-    //     totalLessons += module.lessons.length;
-    //     module.lessons.forEach((lesson) => {
-    //       if (lesson.lessonType === "FINAL_TEST") {
-    //         hasFinalTest = true;
-    //       }
-    //     });
-    //   });
+        // Kiểm tra module title
+        if (!module.title.trim()) {
+          message.error(`Module ${moduleIndex + 1} needs a title`);
+          return;
+        }
+        if (!module.description.trim()) {
+          message.error(`Module ${moduleIndex + 1} needs a description`);
+          return;
+        }
 
-    //   if (totalLessons < 4) {
-    //     message.error("You need at least 4 lessons in total");
-    //     return;
-    //   }
+        // Kiểm tra nếu module không có lesson nào
+        if (module.lessons.length === 0) {
+          message.error(`Module "${module.title}" needs at least one lesson`);
+          return;
+        }
 
-    //   if (!hasFinalTest) {
-    //     message.error("You need at least 1 final test");
-    //     return;
-    //   }
-    // }
+        // Kiểm tra từng lesson trong module
+        for (
+          let lessonIndex = 0;
+          lessonIndex < module.lessons.length;
+          lessonIndex++
+        ) {
+          const lesson = module.lessons[lessonIndex];
+
+          // Kiểm tra lesson title
+          if (!lesson.title.trim()) {
+            message.error(
+              `Lesson ${lessonIndex + 1} in module "${
+                module.title
+              }" needs a title`
+            );
+            return;
+          }
+          if (!lesson.description.trim()) {
+            message.error(
+              `Lesson ${lessonIndex + 1} in module "${
+                module.title
+              }" needs a description`
+            );
+            return;
+          }
+
+          // Kiểm tra lesson description
+          if (!lesson.description.trim()) {
+            message.error(
+              `Lesson "${lesson.title}" in module "${module.title}" needs a description`
+            );
+            return;
+          }
+
+          // Kiểm tra lesson type
+          if (!lesson.lessonType) {
+            message.error(
+              `Lesson "${lesson.title}" in module "${module.title}" needs to select content type`
+            );
+            return;
+          }
+
+          // Kiểm tra nội dung theo từng loại lesson
+          if (lesson.lessonType === "VIDEO") {
+            if (!lesson.content.video?.url) {
+              message.error(
+                `Video lesson "${lesson.title}" in module "${module.title}" needs to upload video`
+              );
+              return;
+            }
+          } else if (lesson.lessonType === "CODING") {
+            if (
+              !lesson.content.coding?.problem ||
+              !lesson.content.coding?.solution
+            ) {
+              message.error(
+                `Coding lesson "${lesson.title}" in module "${module.title}" needs to have a problem and solution`
+              );
+              return;
+            }
+          } else if (lesson.lessonType === "FINAL_TEST") {
+            if (
+              !lesson.content.finalTest?.questions ||
+              lesson.content.finalTest.questions.length === 0
+            ) {
+              message.error(
+                `Final test "${lesson.title}" in module "${module.title}" needs at least one question`
+              );
+              return;
+            }
+
+            // Kiểm tra từng câu hỏi có đủ nội dung và câu trả lời không
+            for (
+              let qIndex = 0;
+              qIndex < lesson.content.finalTest.questions.length;
+              qIndex++
+            ) {
+              const question = lesson.content.finalTest.questions[qIndex];
+
+              if (!question.content.trim()) {
+                message.error(
+                  `Question ${qIndex + 1} in final test "${
+                    lesson.title
+                  }" needs content`
+                );
+                return;
+              }
+
+              if (!question.answers || question.answers.length < 2) {
+                message.error(
+                  `Question ${qIndex + 1} in final test "${
+                    lesson.title
+                  }" needs at least 2 answers`
+                );
+                return;
+              }
+
+              // Kiểm tra từng câu trả lời có nội dung không
+              for (let aIndex = 0; aIndex < question.answers.length; aIndex++) {
+                if (!question.answers[aIndex].content.trim()) {
+                  message.error(
+                    `Answer ${aIndex + 1} of question ${
+                      qIndex + 1
+                    } in final test "${lesson.title}" needs content`
+                  );
+                  return;
+                }
+              }
+
+              // Kiểm tra có đáp án đúng không
+              if (!question.answers.some((answer) => answer.isCorrect)) {
+                message.error(
+                  `Question ${qIndex + 1} in final test "${
+                    lesson.title
+                  }" needs at least one correct answer`
+                );
+                return;
+              }
+            }
+          }
+        }
+      }
+    }
 
     if (active === 3) {
       handleCreateCourse();
