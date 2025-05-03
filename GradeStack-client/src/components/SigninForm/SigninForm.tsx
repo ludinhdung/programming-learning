@@ -77,11 +77,32 @@ const SigninForm: React.FC<SigninFormProps> = ({
     } catch (error: unknown) {
       if (error && typeof error === "object" && "response" in error) {
         const axiosError = error as {
-          response?: { data?: { message?: string } };
+          response?: {
+            data?: { message?: string; statusCode?: number };
+            status?: number;
+          };
         };
-        message.error(axiosError.response?.data?.message || "Login failed");
+
+        const errorMessage = axiosError.response?.data?.message;
+        const statusCode =
+          axiosError.response?.status || axiosError.response?.data?.statusCode;
+
+        if (statusCode === 403) {
+          message.error("Your account has been blocked. Please contact support for assistance.", 3);
+        } else if (statusCode === 401) {
+          message.error("Invalid email or password. Please try again.", 2);
+        } else if (errorMessage) {
+          // Nếu có thông báo lỗi từ server, hiển thị nó
+          message.error(errorMessage, 2);
+        } else {
+          message.error("Unable to login. Please try again later.", 2);
+        }
       } else {
-        message.error("Login failed");
+        // Lỗi không phải từ response API
+        message.error(
+          "Connection error. Please check your internet connection and try again.",
+          2
+        );
       }
     } finally {
       setLoading(false);
