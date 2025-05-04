@@ -70,6 +70,13 @@ router.delete(
   verifyUserOwnership,
   userController.removeBookmark.bind(userController)
 );
+router.get(
+  "/:userId/bookmarks/:courseId/status",
+  // authenticate,
+  // authorize(Role.LEARNER),
+  // verifyUserOwnership,
+  userController.checkBookmarkStatus.bind(userController)
+);
 
 // Password reset routes - using arrow functions
 router.post("/forgot-password", (req, res, next) => {

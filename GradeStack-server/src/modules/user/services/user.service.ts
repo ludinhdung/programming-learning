@@ -316,4 +316,26 @@ export class UserService {
 
     return { success: true, message: "Password reset successfully" };
   }
+
+  async checkBookmarkStatus(userId: string, courseId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true }, // Select only what's needed
+    });
+
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+
+    const bookmark = await prisma.bookmark.findUnique({
+      where: {
+        learnerId_courseId: {
+          learnerId: userId,
+          courseId: courseId,
+        },
+      },
+    });
+
+    return bookmark !== null;
+  }
 }

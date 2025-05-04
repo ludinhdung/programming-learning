@@ -83,6 +83,15 @@ export class UserController {
         }
     }
 
+    async checkBookmarkStatus(req: Request, res: Response, next: NextFunction) {
+        try {
+            const isBookmarked = await this.userService.checkBookmarkStatus(req.params.userId, req.params.courseId);
+            res.json({ success: true, isBookmarked });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async removeBookmark(req: Request, res: Response, next: NextFunction) {
         try {
             await this.userService.removeBookmark(req.params.id, req.params.courseId);
@@ -98,15 +107,15 @@ export class UserController {
             // If not, adjust where userId comes from (e.g., req.params.id if it's an admin changing another user's password)
             const userId = (req as any).user?.id; // Adjust this based on your auth setup
             if (!userId) {
-                 res.status(401).json({ success: false, message: 'Unauthorized' });
-                 return; // Exit after sending response
+                res.status(401).json({ success: false, message: 'Unauthorized' });
+                return; // Exit after sending response
             }
 
             const { oldPassword, newPassword } = req.body;
 
             if (!oldPassword || !newPassword) {
-                 res.status(400).json({ success: false, message: 'Old password and new password are required' });
-                 return; // Exit after sending response
+                res.status(400).json({ success: false, message: 'Old password and new password are required' });
+                return; // Exit after sending response
             }
 
             const result = await this.userService.changePassword(userId, oldPassword, newPassword);
@@ -137,7 +146,7 @@ export class UserController {
         }
     }
 
-    async verifyResetCode(req: Request, res: Response, next: NextFunction) { 
+    async verifyResetCode(req: Request, res: Response, next: NextFunction) {
         try {
             const { email, code } = req.body;
 
