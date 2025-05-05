@@ -420,6 +420,10 @@ export const learnerService = {
     const respone = await api.get("/supporter/instructors");
     return respone.data;
   },
+  async getAllTopics() {
+    const respone = await api.get("/topics");
+    return respone.data;
+  },
   async getCourses() {
     const respone = await api.get("/courses/");
     return respone.data;

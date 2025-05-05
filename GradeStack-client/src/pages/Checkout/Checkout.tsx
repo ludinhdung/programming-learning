@@ -110,7 +110,7 @@ export const Checkout: React.FC = () => {
       <div className="container mx-auto px-12 py-8">
         {/* Back Button */}
         <Button
-          type="default"
+          type="none"
           className="bg-[#29324a] mb-4 uppercase text-[#fff] text-xs font-medium rounded-none hover:border-[#1b55ac] hover:bg-[#1c2e48]"
           onClick={() => navigate(`/courses/${course.id}`)}
         >
@@ -189,7 +189,7 @@ export const Checkout: React.FC = () => {
                     className="rounded-none bg-[#1c2936] border-none text-white hover:bg-[#243447] p-2"
                   />
                   <Button
-                    type="default"
+                    type="none"
                     className="bg-[#1b55ac] p-4 text-[#fff] text-xs font-medium rounded-none hover:border-[#1b55ac] hover:bg-[#1c2e48]"
                   >
                     Apply
@@ -210,7 +210,7 @@ export const Checkout: React.FC = () => {
               </div>
 
               <Button
-                type="default"
+                type="none"
                 size="large"
                 block
                 loading={processingPayment}

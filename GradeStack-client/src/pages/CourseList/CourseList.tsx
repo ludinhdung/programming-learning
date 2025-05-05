@@ -496,7 +496,7 @@ const CourseList = () => {
             </p>
             {hasFilters && (
               <Button
-                type="text"
+                type="none"
                 onClick={handleResetSearch}
                 className="bg-[#29324a] text-[#fff] text-xs font-medium rounded-none hover:border-[#1b55ac] hover:bg-[#1c2e48]"
               >

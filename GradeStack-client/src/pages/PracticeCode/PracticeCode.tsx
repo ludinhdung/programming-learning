@@ -1064,7 +1064,7 @@ const PracticeCode: React.FC<PracticeCodeProps> = ({ lessonId, onMarkComplete })
     ? exercise.lesson.title
     : "Coding Exercise";
 
-  const buttonType: ButtonType = "default";
+  const buttonType: ButtonType = "none";
 
   return (
     <div className="min-h-screen bg-[#0a1321] font-bold">
