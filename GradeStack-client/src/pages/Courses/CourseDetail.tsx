@@ -138,6 +138,9 @@ const CourseDetail: React.FC = () => {
   // Total duration of Course
   const [totalDuration, setTotalDuration] = useState<number>(0);
 
+  // New state for bookmark status
+  const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
+
   const checkAuth = () => {
     const userData = localStorage.getItem("user");
     return !!userData;
@@ -153,13 +156,29 @@ const CourseDetail: React.FC = () => {
     window.location.href = `/checkout/${courseId}`;
   };
 
-  const handleBookmarkClick = () => {
+  const handleBookmarkClick = async () => {
     if (!checkAuth()) {
       setLastAttemptedAction("bookmark");
       setShowLoginModal(true);
       return;
     }
-    // Add your bookmark logic here
+    try {
+      const userData = localStorage.getItem("user");
+      if (!userData || !courseId) return;
+      const user = JSON.parse(userData);
+
+      if (isBookmarked) {
+        // Remove bookmark
+        await userService.removeBookmark(user.id, courseId);
+        setIsBookmarked(false);
+      } else {
+        // Add bookmark
+        await userService.addBookmark(user.id, courseId);
+        setIsBookmarked(true);
+      }
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+    }
   };
 
   const handleLoginSuccess = () => {
@@ -314,6 +333,23 @@ const CourseDetail: React.FC = () => {
     };
 
     checkEnrollmentStatus();
+  }, [courseId]);
+
+  // New useEffect to check bookmark status on load
+  useEffect(() => {
+    const checkBookmark = async () => {
+      try {
+        const userData = localStorage.getItem("user");
+        if (!userData || !courseId) return;
+        const user = JSON.parse(userData);
+        const bookmarked = await userService.checkBookmarkStatus(user.id, courseId);
+        setIsBookmarked(bookmarked);
+      } catch (error) {
+        console.error("Error checking bookmark status:", error);
+      }
+    };
+
+    checkBookmark();
   }, [courseId]);
 
   const fetchCompletedLessons = async () => {
@@ -561,7 +597,7 @@ const CourseDetail: React.FC = () => {
                     className="flex items-center space-x-2 py-5 px-4"
                     onClick={handleBookmarkClick}
                   >
-                    <svg
+                        <svg
                       width="15"
                       height="15"
                       viewBox="0 0 15 15"
@@ -620,7 +656,7 @@ const CourseDetail: React.FC = () => {
                         className="fill-current"
                       ></rect>
                     </svg>
-                    <span>Add to Bookmark</span>
+                    <span>{isBookmarked ? "Added to Bookmark" : "Add to Bookmark"}</span>
                   </StyledButton>
                 </div>
                 <div className="flex flex-wrap items-center mt-4">

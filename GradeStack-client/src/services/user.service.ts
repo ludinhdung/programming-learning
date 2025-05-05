@@ -135,7 +135,7 @@ const userService = {
 
     async addBookmark(userId: string, courseId: string): Promise<{ success: boolean; message: string }> {
         try {
-            const response = await api.post(`/users/${userId}/bookmarks`, { courseId });
+            const response = await api.post(`/users/${userId}/bookmarks/${courseId}`);
             return response.data;
         } catch (error) {
             console.error(`Error adding bookmark for course ${courseId}:`, error);
