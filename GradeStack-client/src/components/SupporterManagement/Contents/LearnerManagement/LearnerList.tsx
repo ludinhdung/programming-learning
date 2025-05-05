@@ -1,6 +1,6 @@
 // src/components/SupporterManagement/Contents/LearnerManagement/LearnerList.tsx
 import React, { useEffect, useState } from "react";
-import { Table, Switch, Button, Popconfirm, message, Input } from "antd";
+import { Table, Switch, Button, Popconfirm, message, Input, Badge } from "antd";
 import { Link } from "react-router-dom";
 import { DeleteOutlined, WarningOutlined } from "@ant-design/icons";
 import { supporterService } from "../../../../services/api";
@@ -16,7 +16,6 @@ interface User {
   warningCount: number;
   isBlocked: boolean;
 }
-
 
 const LearnerList: React.FC = () => {
   const [learners, setLearners] = useState<User[]>([]);
@@ -175,13 +174,26 @@ const LearnerList: React.FC = () => {
         <Column
           title="Comment"
           key="comment"
-          render={(_, record: User) => (
-            <div className="-ml-2">
-              <Link to={`comment/${record.id}`} className="bg-red-300">
-                <Button className="">View Comments</Button>
-              </Link>
-            </div>
-          )}
+          render={(_, record: User) => {
+            const inappropriateCount =
+              localStorage.getItem(`inappropriateComments_${record.id}`) || "0";
+            const count = parseInt(inappropriateCount, 10);
+
+            return (
+              <div className="-ml-2">
+                <Link
+                  to={`comment/${record.id}`}
+                  className="relative inline-block"
+                >
+                  <Badge count={count} color="red">
+
+                  <Button className="">View Comments</Button>
+                  </Badge>
+  
+                </Link>
+              </div>
+            );
+          }}
         ></Column>
       </Table>
 
@@ -189,7 +201,7 @@ const LearnerList: React.FC = () => {
         title={
           <div className="text-center font-semibold text-lg">
             Send warning message to{" "}
-            <span className="text-2xl text-blue-600">
+            <span className="text-lg text-blue-600">
               {
                 learners.find((learner) => learner.id === selectedLearnerId)
                   ?.firstName
