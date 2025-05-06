@@ -92,7 +92,17 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchForm }) => {
             <Form.Item
               name="email"
               label={<span className="text-gray-400">Email address</span>}
-              rules={[{ required: true, message: "Please input your email!" }]}
+              rules={[
+                { required: true, message: "Please input your email!" },
+                {
+                  type: "email",
+                  message: "Please enter a valid email address!",
+                },
+                {
+                  pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|vn)$/,
+                  message: "Please enter a valid email!",
+                },
+              ]}
             >
               <input
                 type="email"
