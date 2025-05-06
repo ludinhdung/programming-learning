@@ -41,7 +41,7 @@ const CourseCard: FC<{
   avatar?: string;
   progress?: number;
   thumbnail?: string;
-  id: string
+  id: string;
 }> = ({ title, instructorName, progress, thumbnail, avatar, id }) => {
   return (
     <div className="flex mb-6 bg-[#13151f] overflow-hidden">
@@ -54,7 +54,7 @@ const CourseCard: FC<{
       </div>
       <div className="flex flex-col justify-between p-4 flex-grow">
         <div>
-          <Link to={`/course-study/${id}`}>
+          <Link to={`/courses/${id}`}>
             <h3 className="text-xl font-bold text-white mb-1">{title}</h3>
           </Link>
           {instructorName && (
@@ -356,11 +356,12 @@ const UserDashboard: FC = () => {
           {!loadingBookmarks &&
             bookmarks.map((bookmark) => (
               <CourseCard
-                key={bookmark.id}
+                key={bookmark.course.id}
                 title={bookmark.course.title}
                 instructorName={getInstructorName(bookmark.course)}
                 avatar={bookmark.course.instructor?.avatar}
                 thumbnail={bookmark.course.thumbnail}
+                id={bookmark.course.id}
               />
             ))}
         </div>

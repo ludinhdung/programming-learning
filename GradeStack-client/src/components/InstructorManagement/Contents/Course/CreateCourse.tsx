@@ -549,6 +549,35 @@ const CourseStructure: React.FC<CourseStructureProps> = ({
     lessonIndex: number,
     type: LessonType
   ) => {
+    // Kiểm tra xem đã tồn tại FINAL_TEST lesson nào trong toàn bộ modules chưa
+    if (type === "FINAL_TEST") {
+      let finalTestExists = false;
+
+      // Kiểm tra tất cả các modules
+      for (const module of modules) {
+        for (const lesson of module.lessons) {
+          if (
+            lesson.lessonType === "FINAL_TEST" &&
+            !(
+              moduleIndex === modules.indexOf(module) &&
+              lessonIndex === module.lessons.indexOf(lesson)
+            )
+          ) {
+            finalTestExists = true;
+            break;
+          }
+        }
+        if (finalTestExists) break;
+      }
+
+      if (finalTestExists) {
+        message.error(
+          "Course can only have one Final Test. Please remove the existing one first."
+        );
+        return;
+      }
+    }
+
     const newModules = [...modules];
     newModules[moduleIndex].lessons[lessonIndex].lessonType = type;
     newModules[moduleIndex].lessons[lessonIndex].content = {
@@ -1001,6 +1030,9 @@ const CourseStructure: React.FC<CourseStructureProps> = ({
                               >
                                 Final Test
                               </span>
+                              <div className="mt-1 text-xs text-red-500 text-center">
+                                (Only one per course)
+                              </div>
                             </button>
                           </div>
                         </div>
@@ -1248,22 +1280,34 @@ const CourseStructure: React.FC<CourseStructureProps> = ({
                           </label>
                           <input
                             type="number"
+                            min="1"
+                            step="1"
+                            onKeyPress={(e) => {
+                              // Chỉ cho phép nhập số
+                              if (!/[0-9]/.test(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
                             value={
                               lesson.content.finalTest?.estimatedDuration || ""
                             }
                             onChange={(e) => {
-                              const newModules = [...modules];
-                              newModules[moduleIndex].lessons[
-                                lessonIndex
-                              ].content = {
-                                finalTest: {
-                                  ...(lesson.content.finalTest || {
-                                    questions: [],
-                                  }),
-                                  estimatedDuration: parseInt(e.target.value),
-                                },
-                              };
-                              setModules(newModules);
+                              const value = parseInt(e.target.value);
+                              // Chỉ cập nhật nếu là số nguyên dương
+                              if (value > 0) {
+                                const newModules = [...modules];
+                                newModules[moduleIndex].lessons[
+                                  lessonIndex
+                                ].content = {
+                                  finalTest: {
+                                    ...(lesson.content.finalTest || {
+                                      questions: [],
+                                    }),
+                                    estimatedDuration: value,
+                                  },
+                                };
+                                setModules(newModules);
+                              }
                             }}
                             className="w-32 p-2 bg-gray-50 border border-gray-300 rounded-md"
                           />
@@ -2137,6 +2181,8 @@ const CreateCourse: React.FC = () => {
       }
 
       // Kiểm tra từng module
+      let finalTestCount = 0;
+
       for (let moduleIndex = 0; moduleIndex < modules.length; moduleIndex++) {
         const module = modules[moduleIndex];
 
@@ -2163,6 +2209,11 @@ const CreateCourse: React.FC = () => {
           lessonIndex++
         ) {
           const lesson = module.lessons[lessonIndex];
+
+          // Đếm số lượng Final Test
+          if (lesson.lessonType === "FINAL_TEST") {
+            finalTestCount++;
+          }
 
           // Kiểm tra lesson title
           if (!lesson.title.trim()) {
@@ -2277,6 +2328,12 @@ const CreateCourse: React.FC = () => {
             }
           }
         }
+      }
+
+      // Kiểm tra số lượng Final Test
+      if (finalTestCount > 1) {
+        message.error("A course can only have one Final Test lesson");
+        return;
       }
     }
 

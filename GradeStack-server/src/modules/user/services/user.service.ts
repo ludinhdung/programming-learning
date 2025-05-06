@@ -139,6 +139,7 @@ export class UserService {
       select: {
         course: {
           select: {
+            id: true,
             title: true,
             thumbnail: true,
             instructor: {
