@@ -1248,22 +1248,34 @@ const CourseStructure: React.FC<CourseStructureProps> = ({
                           </label>
                           <input
                             type="number"
+                            min="1"
+                            step="1"
+                            onKeyPress={(e) => {
+                              // Chỉ cho phép nhập số
+                              if (!/[0-9]/.test(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
                             value={
                               lesson.content.finalTest?.estimatedDuration || ""
                             }
                             onChange={(e) => {
-                              const newModules = [...modules];
-                              newModules[moduleIndex].lessons[
-                                lessonIndex
-                              ].content = {
-                                finalTest: {
-                                  ...(lesson.content.finalTest || {
-                                    questions: [],
-                                  }),
-                                  estimatedDuration: parseInt(e.target.value),
-                                },
-                              };
-                              setModules(newModules);
+                              const value = parseInt(e.target.value);
+                              // Chỉ cập nhật nếu là số nguyên dương
+                              if (value > 0) {
+                                const newModules = [...modules];
+                                newModules[moduleIndex].lessons[
+                                  lessonIndex
+                                ].content = {
+                                  finalTest: {
+                                    ...(lesson.content.finalTest || {
+                                      questions: [],
+                                    }),
+                                    estimatedDuration: value,
+                                  },
+                                };
+                                setModules(newModules);
+                              }
                             }}
                             className="w-32 p-2 bg-gray-50 border border-gray-300 rounded-md"
                           />
