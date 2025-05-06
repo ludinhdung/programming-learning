@@ -38,6 +38,11 @@ interface Instructor {
   Wallet: {
     balance: string;
   };
+  Course: {
+    id: string;
+    title: string;
+    thumbnail: string;
+  }[];
 }
 
 interface Feedback {
@@ -57,11 +62,16 @@ interface Feedback {
     lastName: string;
   };
 }
+interface Topic {
+  id: string;
+  name: string;
+  thumbnail: string;
+  description: string;
+}
 
 const handleAnimationComplete = () => {
   console.log("Animation completed!");
 };
-
 
 const topicsMockup = [
   {
@@ -280,12 +290,23 @@ const Home: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+  const [topics, setTopics] = useState<Topic[]>([]);
 
   useEffect(() => {
+    const fetchTopics = async () => {
+      try {
+        const response = await learnerService.getAllTopics();
+        console.log("topics", response);
+        setTopics(response);
+      } catch (error) {
+        console.error("Error fetching topics:", error);
+      }
+    };
+
     const fetchCourses = async () => {
       try {
         const response = await learnerService.getCourses();
-        
+
         setCourses(response.data);
       } catch (error) {
         console.error("Error fetching courses:", error);
@@ -300,7 +321,7 @@ const Home: React.FC = () => {
         console.error("Error fetching instructors:", error);
       }
     };
-    
+
     const fetchFeedbacks = async () => {
       try {
         const response = await feedbackService.getAllFeedback();
@@ -314,6 +335,7 @@ const Home: React.FC = () => {
     fetchCourses();
     fetchInstructors();
     fetchFeedbacks();
+    fetchTopics();
   }, []);
 
   return (
@@ -419,32 +441,36 @@ const Home: React.FC = () => {
       <div className="w-full h-fit bg-[#0d1118]">
         <div className="-mt-20">
           <div className="grid auto-cols-max grid-flow-col gap-4 overflow-auto hide-scrollbar z-10 relative scrolling-container">
-            {instructors.map((instructor, index) => (
-              <a
-                key={index}
-                className="block"
-                href={`/instructor/${instructor.userId}`}
-              >
-                <figure className="relative group overflow-hidden h-full flex rounded-lg">
-                  <img
-                    loading="lazy"
-                    className="transition-all duration-300 w-full h-full"
-                    src={instructor.avatar}
-                    alt={`Photo of ${instructor.user.firstName} ${instructor.user.lastName}`}
-                  />
-                  <figcaption className="absolute bottom-0 w-full py-6 bg-black/40">
-                    <div className="flex flex-col font-semibold text-center">
-                      <span className="text-2xl text-gray-100">
-                        {instructor.user.firstName} {instructor.user.lastName}
-                      </span>
-                      <span className="text-gray-300 text-sm mt-1">
-                        {instructor.organization} • {instructor.user.role}
-                      </span>
-                    </div>
-                  </figcaption>
-                </figure>
-              </a>
-            ))}
+            {instructors.map(
+              (instructor, index) =>
+                instructor.Course.length > 0 && (
+                  <a
+                    key={index}
+                    className="block"
+                    href={`/instructor/${instructor.userId}`}
+                  >
+                    <figure className="relative group overflow-hidden h-full flex rounded-lg">
+                      <img
+                        loading="lazy"
+                        className="transition-all duration-300 w-full h-full"
+                        src={instructor.avatar}
+                        alt={`Photo of ${instructor.user.firstName} ${instructor.user.lastName}`}
+                      />
+                      <figcaption className="absolute bottom-0 w-full py-6 bg-black/40">
+                        <div className="flex flex-col font-semibold text-center">
+                          <span className="text-2xl text-gray-100">
+                            {instructor.user.firstName}{" "}
+                            {instructor.user.lastName}
+                          </span>
+                          <span className="text-gray-300 text-sm mt-1">
+                            {instructor.organization} • {instructor.user.role}
+                          </span>
+                        </div>
+                      </figcaption>
+                    </figure>
+                  </a>
+                )
+            )}
           </div>
         </div>
       </div>
@@ -460,7 +486,13 @@ const Home: React.FC = () => {
             }}
           >
             {feedbacks.length > 0 ? (
-              [...feedbacks, ...feedbacks, ...feedbacks, ...feedbacks, ...feedbacks].map((feedback, index) => (
+              [
+                ...feedbacks,
+                ...feedbacks,
+                ...feedbacks,
+                ...feedbacks,
+                ...feedbacks,
+              ].map((feedback, index) => (
                 <div
                   key={index}
                   className="bg-gray-800 bg-opacity-50 shadow-lg rounded-lg p-6 flex-shrink-0 w-72 max-h-[220px] transition-transform"
@@ -548,7 +580,7 @@ const Home: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       <div className="relative bg-[#0d1118] w-full">
         <div className="px-32">
           <div className="flex text-4xl justify-center items-center uppercase font-extrabold pt-40">
@@ -594,22 +626,24 @@ const Home: React.FC = () => {
           </div>
         </div>
         <div>
-          <div className="grid auto-cols-max grid-flow-col grid-rows-3 gap-4 pl-10 overflow-auto hide-scrollbar scrolling-container overflow-y-auto">
-            {topicsMockup.map((topic) => (
-              <div
+          <div
+            className={`grid auto-cols-max grid-flow-col gap-4 pl-10 overflow-auto hide-scrollbar scrolling-container overflow-y-auto ${
+              topics.length <= 10 ? "grid-rows-1" : "grid-rows-2"
+            }`}
+          >
+            {topics.map((topic) => (
+              <a
                 key={topic.id}
-                className="flex justify-center items-center bg-slate-800 w-40 px-2 py-2"
+                href={`/topics`}
+                className="flex justify-center items-center bg-slate-800 w-40 px-2 py-3"
               >
                 <div className="flex justify-center items-center space-x-2">
-                  <img
-                    src={`https://laracasts.com${topic.thumbnail}`}
-                    className="w-15 h-15"
-                  ></img>
+                  <img src={topic.thumbnail} className="w-10 h-10"></img>
                   <span className="text-xs font-semibold text-white">
                     {topic.name}
                   </span>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         </div>

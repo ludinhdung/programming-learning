@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -42,12 +42,12 @@ export class CommentService {
               },
             },
             orderBy: {
-              createdAt: 'asc',
+              createdAt: "asc",
             },
           },
         },
         orderBy: {
-          createdAt: 'desc',
+          createdAt: "desc",
         },
       });
 
@@ -101,11 +101,11 @@ export class CommentService {
       });
 
       if (!existingComment) {
-        throw new Error('Comment not found');
+        throw new Error("Comment not found");
       }
 
       if (existingComment.userId !== userId) {
-        throw new Error('Unauthorized');
+        throw new Error("Unauthorized");
       }
 
       // Update the comment
@@ -136,23 +136,23 @@ export class CommentService {
       const existingComment = await prisma.comment.findUnique({
         where: { id: commentId },
         include: {
-          replies: true
-        }
+          replies: true,
+        },
       });
 
       if (!existingComment) {
-        throw new Error('Comment not found');
+        throw new Error("Comment not found");
       }
 
       if (existingComment.userId !== userId) {
-        throw new Error('Unauthorized');
+        throw new Error("Unauthorized");
       }
 
       if (existingComment.replies.length > 0) {
         await prisma.comment.deleteMany({
           where: {
-            parentCommentId: commentId
-          }
+            parentCommentId: commentId,
+          },
         });
       }
 
@@ -184,11 +184,49 @@ export class CommentService {
           },
         },
         orderBy: {
-          createdAt: 'asc',
+          createdAt: "asc",
         },
       });
 
       return replies;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Get all comments by learner ID
+  async getCommentsByLearner(learnerId: string) {
+    try {
+      const comments = await prisma.comment.findMany({
+        where: {
+          userId: learnerId,
+        },
+        include: {
+          lesson: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+          _count: {
+            select: {
+              replies: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      return comments;
     } catch (error) {
       throw error;
     }

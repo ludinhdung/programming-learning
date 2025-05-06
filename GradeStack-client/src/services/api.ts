@@ -41,7 +41,7 @@ export const supporterService = {
     const respone = await api.get(`/supporter/${supporterId}`);
     return respone.data;
   },
-  
+
   async getAllInstructor() {
     const respone = await api.get("/supporter/instructors");
     return respone.data;
@@ -93,6 +93,11 @@ export const supporterService = {
 
   async deleteLearner(learnerId: string) {
     const respone = await api.delete(`/supporter/delete/learner/${learnerId}`);
+    return respone.data;
+  },
+
+  async getCommentsByLearnerId(learnerId: string) {
+    const respone = await api.get(`/comments/learner/${learnerId}`);
     return respone.data;
   },
 };
@@ -410,7 +415,9 @@ export const instructorService = {
   },
 
   async getCertificateByLearnerAndCourse(learnerId: string, courseId: string) {
-    const response = await api.get(`/learners/${learnerId}/courses/${courseId}/certificate`);
+    const response = await api.get(
+      `/learners/${learnerId}/courses/${courseId}/certificate`
+    );
     return response.data;
   },
 };
@@ -418,6 +425,10 @@ export const instructorService = {
 export const learnerService = {
   async getAllInstructor() {
     const respone = await api.get("/supporter/instructors");
+    return respone.data;
+  },
+  async getAllTopics() {
+    const respone = await api.get("/topics");
     return respone.data;
   },
   async getCourses() {
@@ -499,15 +510,20 @@ export const userService = {
     return response.data;
   },
   async verifyResetCode(email: string, code: string) {
-    const response = await api.post("/users/verify-reset-code", { email, code });
+    const response = await api.post("/users/verify-reset-code", {
+      email,
+      code,
+    });
     return response.data;
   },
   async resetPassword(email: string, code: string, newPassword: string) {
-    const response = await api.post("/users/reset-password", { email, code, newPassword });
+    const response = await api.post("/users/reset-password", {
+      email,
+      code,
+      newPassword,
+    });
     return response.data;
   },
-  
-  
 };
 
 export const courseVerificationService = {
@@ -649,7 +665,10 @@ export const adminService = {
     return response.data;
   },
   async updateSupporterStatus(supporterId: string, isBlocked: boolean) {
-    const response = await api.patch(`/admin/supporters/${supporterId}/status`, { isBlocked });
+    const response = await api.patch(
+      `/admin/supporters/${supporterId}/status`,
+      { isBlocked }
+    );
     return response.data;
   },
   async createSupporter(supporterData: {

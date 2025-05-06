@@ -24,6 +24,13 @@ export class SupporterService {
             balance: true,
           },
         },
+        Course: {
+          select: {
+            id: true,
+            title: true,
+            thumbnail: true,
+          },
+        },
       },
     });
     return instructors;
