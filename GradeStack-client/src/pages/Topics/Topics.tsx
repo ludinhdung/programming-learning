@@ -108,70 +108,44 @@ const Topics: FC = () => {
     const fetchTopics = async () => {
       try {
         setLoading(true);
-        // Call API to get topics list with courses
         const data = await topicService.getTopicsWithCourses();
-        console.log('API Response:', data);
-        // Extract data from response - handle both 'value' wrapper and direct array
         const apiData = data.value || data;
-        
-        // Print detailed data for debugging
-        console.log('API Response (processed):', apiData);
-        
-        if (Array.isArray(apiData)) {
-          console.log('Number of topics:', apiData.length);
-          if (apiData.length > 0) {
-            console.log('First topic structure:', JSON.stringify(apiData[0], null, 2));
-          }
-        }
-        
-        // Update data processing to match new API structure
+
         const processedTopics = Array.isArray(apiData) 
-          ? apiData.map((topic: ApiTopic) => {
-              console.log(`Processing topic: ${topic.name}, courses:`, topic.courses);
-                            return {
-                id: topic.id || '', // Ensure always has value
-                name: topic.name || 'Unnamed Topic', // Default value if null
-                description: topic.description || 'No description', // Default value if null
-                thumbnail: topic.thumbnail || '', // Default value if null
-                instructor: topic.Instructor ? {
-                  userId: topic.Instructor.userId,
-                  user: {
-                    firstName: topic.Instructor.user.firstName,
-                    lastName: topic.Instructor.user.lastName,
-                    email: topic.Instructor.user.email
-                  }
-                } : undefined,
-                courses: Array.isArray(topic.courses) 
-                  ? topic.courses
-                    .filter(relation => relation && relation.course) // Filter out invalid relations first
-                    .map(relation => {
-                      // Create course object with null safety checks
-                      // Already filtered so relation and relation.course exist
-                      return {
-                        id: relation.course.id || '',
-                        title: relation.course.title || 'Unnamed Course',
-                        description: relation.course.description || 'No description',
-                        thumbnail: relation.course.thumbnail || '',
-                        instructor: relation.course.instructor ? {
-                          userId: relation.course.instructor.userId || '',
-                          user: relation.course.instructor.user ? {
-                            firstName: relation.course.instructor.user.firstName || '',
-                            lastName: relation.course.instructor.user.lastName || '',
-                            email: relation.course.instructor.user.email || ''
-                          } : {
-                            firstName: '',
-                            lastName: '',
-                            email: ''
-                          }
-                        } : undefined
-                      };
-                    })
-                  : []
-              };
-            })
+          ? apiData.map((topic: ApiTopic) => ({
+              id: topic.id || '',
+              name: topic.name || 'Unnamed Topic',
+              description: topic.description || 'No description',
+              thumbnail: topic.thumbnail || '',
+              instructor: topic.Instructor ? {
+                userId: topic.Instructor.userId,
+                user: {
+                  firstName: topic.Instructor.user.firstName,
+                  lastName: topic.Instructor.user.lastName,
+                  email: topic.Instructor.user.email
+                }
+              } : undefined,
+              courses: Array.isArray(topic.courses) 
+                ? topic.courses
+                  .filter(relation => relation && relation.course) // Filter out invalid relations first
+                  .map(relation => ({
+                    id: relation.course.id || '',
+                    title: relation.course.title || 'Unnamed Course',
+                    description: relation.course.description || 'No description',
+                    thumbnail: relation.course.thumbnail || '',
+                    instructor: relation.course.instructor ? {
+                      userId: relation.course.instructor.userId || '',
+                      user: {
+                        firstName: relation.course.instructor.user?.firstName || '',
+                        lastName: relation.course.instructor.user?.lastName || '',
+                        email: relation.course.instructor.user?.email || ''
+                      }
+                    } : undefined
+                  }))
+                : []
+            }))
           : [];
           
-        console.log('Processed data:', processedTopics);
         setTopics(processedTopics);
       } catch (err) {
         console.error('Error fetching topics list:', err);
@@ -189,15 +163,13 @@ const Topics: FC = () => {
       <Header />
       
       <div className="container mx-[25px] px-4 py-8 ">
-        {/* Topics Header */}
         <div className="mb-12">
           <div className="flex text-3xl justify-start uppercase font-extrabold">
             <span className="text-blue-600 mr-2">//</span>
-            <span className="text-white">TOPICS</span>
+            <span className="text-white">Explore By Topic</span>
           </div>
           <p className="text-sm mt-4 relative z-10 text-white text-wrap text-left wrap-break-word w-1/3">
-          Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, 
-          when an unknown printer took a galley of type and scrambled it to make a type specimen book.
+            All GradeStack series are categorized into various topics. This should provide you with an alternate way to decide what to learn next, whether it be a particular framework, language, or tool.
           </p>
         </div>
         {loading ? (
@@ -209,11 +181,9 @@ const Topics: FC = () => {
             {error}
           </div>
         ) : (
-          /* Topics Grid - Structure based on template */
           <div>
-            {/* Display topics list horizontally */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mb-12">
-              {topics.map((topic, index) => {
+              {topics.filter(topic => topic.courses.length > 0).map((topic, index) => { // Filter topics with no courses
                 const topicColor = topicColors[index % topicColors.length];
                 const isSelected = selectedTopicId === topic.id;
                 return (
@@ -223,8 +193,7 @@ const Topics: FC = () => {
                     className={`cursor-pointer transform ${isSelected ? 'scale-[1.02] ring-2 ring-blue-500' : 'hover:scale-[1.02]'} transition-all duration-300`}
                   >
                     <div className="bg-slate-800 rounded-lg border-none hover:bg-slate-700/80 overflow-hidden">
-                      {/* Topic Thumbnail */}
-                      <div 
+                      <div
                         className="w-full h-32 bg-cover bg-center"
                         style={{ 
                           backgroundImage: topic.thumbnail ? `url(${topic.thumbnail})` : 'none',
@@ -240,7 +209,6 @@ const Topics: FC = () => {
                         )}
                       </div>
                       
-                      {/* Topic Info */}
                       <div className="p-4">
                         <h3 className="text-lg font-semibold text-white mb-1">
                           {topic.name}
@@ -256,10 +224,8 @@ const Topics: FC = () => {
               })}
             </div>
             
-            {/* Display courses when a topic is selected */}
             {selectedTopicId && (
               <div>
-                {/* Courses section title */}
                 <div className="mb-10">
                   <div className="flex text-3xl justify-start uppercase font-extrabold">
                     <span className="text-blue-600 mr-2">//</span>
@@ -267,12 +233,10 @@ const Topics: FC = () => {
                   </div>
                 </div>
                 
-                {/* Courses list - Similar to template */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
                   {topics.find(t => t.id === selectedTopicId)?.courses.map((course) => (
                     <Link to={`/courses/${course.id}`} key={course.id} className="block">
                       <div className="bg-slate-800 rounded-lg overflow-hidden hover:shadow-md transition-all duration-300 hover:translate-y-[-2px]">
-                        {/* Course Thumbnail */}
                         <div className="relative w-full h-[140px] overflow-hidden">
                           <img 
                             src={course.thumbnail || "https://via.placeholder.com/200x140/1e293b/ffffff?text=No+Image"} 
@@ -285,7 +249,6 @@ const Topics: FC = () => {
                           />
                         </div>
                         
-                        {/* Course Info */}
                         <div className="p-4">
                           <h3 className="text-lg font-semibold text-white mb-1 line-clamp-1">
                             {course.title || 'Unnamed Course'}
@@ -308,4 +271,4 @@ const Topics: FC = () => {
   );
 };
 
-export default Topics; 
+export default Topics;
