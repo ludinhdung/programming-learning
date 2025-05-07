@@ -59,13 +59,13 @@ const Overview = () => {
     const fetchStatistics = async () => {
       const userData = localStorage.getItem('user');
       const instructorId = userData ? JSON.parse(userData).id : null;
-
+  
       if (!instructorId) {
         setError('Instructor ID not found');
         setLoading(false);
         return;
       }
-
+  
       try {
         setLoading(true);
         const response = await instructorService.getAllCoursesStatistics(instructorId, dateRange);
@@ -78,9 +78,9 @@ const Overview = () => {
         setLoading(false);
       }
     };
-
+  
     fetchStatistics();
-  }, [dateRange]);
+  }, [dateRange]);;
 
   // Prepare data for charts
   const enrollmentData = {
@@ -117,7 +117,7 @@ const Overview = () => {
     labels: ['5 Stars', '4 Stars', '3 Stars', '2 Stars', '1 Star'],
     datasets: [
       {
-        data: [30, 25, 20, 15, 10], // Replace with actual rating distribution data
+        data: statistics?.ratingsDistribution || [], // Replace mock data with fetched data
         backgroundColor: [
           'rgba(34, 197, 94, 0.8)',
           'rgba(59, 130, 246, 0.8)',

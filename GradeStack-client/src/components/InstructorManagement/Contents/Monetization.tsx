@@ -66,10 +66,6 @@ const Monetization = () => {
       setBankInfo(response.data);
     } catch (error) {
       console.error("Error fetching bank info", error);
-      // Don't show error message if bank info doesn't exist
-      if ((error as ApiError).response?.data?.message !== "Không tìm thấy thông tin ngân hàng") {
-        message.error("Failed to fetch bank information");
-      }
     }
   };
 
